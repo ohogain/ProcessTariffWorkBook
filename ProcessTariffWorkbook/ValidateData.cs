@@ -1042,7 +1042,7 @@ namespace ProcessTariffWorkbook
       try
       {
         var query =
-          (from DataRecord db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+          (from DataRecord db in StaticVariable.CustomerDetailsDataRecord
            group db by db.StdBand into newgroup
            where newgroup.Count() > 1
            orderby newgroup.Key
@@ -1134,7 +1134,7 @@ namespace ProcessTariffWorkbook
       const int timeSchemeName = 0;
 
       var query =
-        (from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from drm in StaticVariable.CustomerDetailsDataRecord
          select drm.CustomerTimeScheme).Distinct();
      
       foreach (string token in query)
@@ -1167,7 +1167,7 @@ namespace ProcessTariffWorkbook
       List<string> tmpList = new List<string>();
 
       var result =
-        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from db in StaticVariable.CustomerDetailsDataRecord
         orderby db.StdPrefixName
         select new { db.StdPrefixName, db.CustomerPrefixName };
 
@@ -1247,7 +1247,7 @@ namespace ProcessTariffWorkbook
       delete above
       */
       var result =
-        (from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from db in StaticVariable.CustomerDetailsDataRecord
          where (!db.CustomerGroupBand.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase) || !db.CustomerGroupBandDescription.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase))
            && (db.CustomerUsingGroupBands.ToUpper().Equals("TRUE"))       
         select new
@@ -1329,7 +1329,7 @@ namespace ProcessTariffWorkbook
       List<string> bandsInUse = new List<string>();
       bool found = false;
 
-      foreach (DataRecord d in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord)
+      foreach (DataRecord d in StaticVariable.CustomerDetailsDataRecord)
       {        
         bandsInUse.Add(d.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? d.CustomerGroupBand : d.StdBand);       
       }
@@ -1399,7 +1399,7 @@ namespace ProcessTariffWorkbook
         sourceDestinationBands.Add(arr[bandColumn]);
       }
       var bandQuery =
-        (from bnd in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from bnd in StaticVariable.CustomerDetailsDataRecord
          select new {bnd.StdBand, bnd.CustomerGroupBand}).Distinct();
 
       foreach (var band in bandQuery)
@@ -1428,7 +1428,7 @@ namespace ProcessTariffWorkbook
       string[] chargingTypes = { Constants.Duration, Constants.Capped, Constants.Pulse };
       bool found = false;
       var queryChargingTypes =
-      (from ct in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+      (from ct in StaticVariable.CustomerDetailsDataRecord
        select ct.ChargingType).Distinct();
 
       foreach (var type in queryChargingTypes)

@@ -181,7 +181,7 @@ namespace ProcessTariffWorkbook
       dependentCountriresDict.Add("VA", "Vatican City\tIT"); //CustomerDetailsDataRecord
 
       var getBandsOnlyQuery =
-        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from drm in StaticVariable.CustomerDetailsDataRecord
         select drm.StdBand;
 
       foreach (string dd in dependentCountriresDict.Keys)
@@ -202,7 +202,7 @@ namespace ProcessTariffWorkbook
         string parentCode = dependantCountryAry[1];
 
         var intQuery =
-          from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+          from drm in StaticVariable.CustomerDetailsDataRecord
           where drm.StdBand.ToUpper().Equals(parentCode.ToUpper())
           select drm;
 
@@ -246,7 +246,7 @@ namespace ProcessTariffWorkbook
       CreateStdIntBandsDataRecord();
       //from regexmatched get all int destinations into tmp list
       var intQuery =
-        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from drm in StaticVariable.CustomerDetailsDataRecord
         where drm.CustomerTableName.ToUpper().Equals(StaticVariable.InternationalTableSpelling.ToUpper())
         select new { drm.StdPrefixName, drm.StdBand, drm.CustomerPrefixName };
 
@@ -283,7 +283,7 @@ namespace ProcessTariffWorkbook
         {
           string tmpCustBand = custband.Substring(0, custband.Length - 1);
           var mobileQuery =
-            from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+            from drm in StaticVariable.CustomerDetailsDataRecord
             where tmpCustBand.ToUpper().Equals(drm.StdBand.ToUpper())
             select drm;
           foreach (var dr in mobileQuery)
@@ -340,7 +340,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable()");
 
       var query =
-        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from drm in StaticVariable.CustomerDetailsDataRecord
         join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.StandardPrefixName.ToUpper()
         where !drm.CustomerTableName.ToUpper().Equals(pn.TableName.ToUpper())
         select new { pn.TableName, pn.StandardPrefixName, drm.CustomerTableName, drm.CustomerPrefixName };
@@ -366,7 +366,7 @@ namespace ProcessTariffWorkbook
       List<string> stdNames = new List<string>();
 
       var queryCustomerDetails =
-        (from dr in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from dr in StaticVariable.CustomerDetailsDataRecord
          select new { dr.StdPrefixName, dr.CustomerPrefixName }).Distinct();
 
       foreach (var variable in queryCustomerDetails)
@@ -437,7 +437,7 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()-- started");
       StaticVariable.ConsoleOutput.Add(Environment.NewLine + "ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()");
       var allDetails =
-        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from db in StaticVariable.CustomerDetailsDataRecord
         select db;
       try
       {
@@ -477,7 +477,7 @@ namespace ProcessTariffWorkbook
       try
       {
         var durationQuery =
-        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from groups in StaticVariable.CustomerDetailsDataRecord
          where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("DURATION")
          select new
          {
@@ -517,7 +517,7 @@ namespace ProcessTariffWorkbook
       try
       {
         var cappedQuery =
-        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from groups in StaticVariable.CustomerDetailsDataRecord
          where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("CAPPED")
          select groups).Distinct();
         foreach (var cq in cappedQuery)
@@ -539,7 +539,7 @@ namespace ProcessTariffWorkbook
       try
       {
         var pulseQuery =
-        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        (from groups in StaticVariable.CustomerDetailsDataRecord
          where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("PULSE")
          select groups).Distinct();
         foreach (var pq in pulseQuery)
@@ -564,7 +564,7 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ValidateData".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
       List<string> matches = new List<string>();
       var query =
-        from peakAndMinCost in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        from peakAndMinCost in StaticVariable.CustomerDetailsDataRecord
         where peakAndMinCost.CustomerFourthSubseqRate.Equals(peakAndMinCost.CustomerMinCharge)
         select new { peakAndMinCost.StdPrefixName, peakAndMinCost.CustomerFourthSubseqRate, peakAndMinCost.CustomerMinCharge, peakAndMinCost.CustomerPrefixName };
 

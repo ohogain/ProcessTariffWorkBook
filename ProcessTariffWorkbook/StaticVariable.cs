@@ -57,9 +57,7 @@ namespace ProcessTariffWorkbook
     public static List<string> CombinedRegex = new List<string>();
     public static List<string> InputXlsxFileDetails = new List<string>();
     public static List<StandardInternationalBandsDataRecord> StandardInternationalBands = new List<StandardInternationalBandsDataRecord>();    
-    public static List<PrefixNumbersDataRecord> PrefixNumbersRecord = new List<PrefixNumbersDataRecord>();
-    // static List<DataRecord> PreRegExDataRecord = new List<DataRecord>();
-    //public static List<DataRecord> DestinationsMatchedByRegExDataRecord = new List<DataRecord>();
+    public static List<PrefixNumbersDataRecord> PrefixNumbersRecord = new List<PrefixNumbersDataRecord>();    
     public static List<DataRecord> CustomerDetailsDataRecord = new List<DataRecord>();
   }
 }
