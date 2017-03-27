@@ -50,7 +50,7 @@ namespace ProcessTariffWorkbook
     List<string> categoryMatrix = new List<string>();      
 
     var categoryMatrixQuery =
-      from dr in StaticVariable.DestinationsMatchedByRegExDataRecord
+      from dr in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
       select new
       {
         dr.StdBand,
@@ -179,7 +179,7 @@ namespace ProcessTariffWorkbook
       yAxis++;
       #region Duration
       var durationQuery =
-        from dq in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from dq in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where dq.ChargingType.ToUpper().Equals("DURATION")
         select dq;
       if (durationQuery.Any())
@@ -249,7 +249,7 @@ namespace ProcessTariffWorkbook
       #endregion
       #region Capped 
       var cappedQuery =
-        from dq in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from dq in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where dq.ChargingType.ToUpper().Equals("CAPPED")
         select dq;
       if (cappedQuery.Any())
@@ -304,7 +304,7 @@ namespace ProcessTariffWorkbook
       const string wholeIntervalChargingNotUsedInPulse = "NO";
       const string intervalLengthsNotUsedInPulse = "60";
       var pulseQuery =
-        from dq in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from dq in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where dq.ChargingType.ToUpper().Equals("PULSE")
         select dq;
       if (pulseQuery.Any())
@@ -464,7 +464,7 @@ namespace ProcessTariffWorkbook
         workbook.Worksheets[sheetName].Cells[yAxis, xAxis].Value = listLine[xAxis];
       }
       yAxis++;
-      foreach (DataRecord drm in StaticVariable.DestinationsMatchedByRegExDataRecord)
+      foreach (DataRecord drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord)
       {
         pBBand = drm.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? drm.CustomerGroupBand : drm.StdBand;
         pBDestination = drm.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? drm.CustomerPrefixName : drm.StdPrefixName;
@@ -927,7 +927,7 @@ namespace ProcessTariffWorkbook
       List<string> prefixesMatched = new List<string>();
 
       var query =
-        from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.StandardPrefixName.ToUpper()
         select new { pn.TableName, pn.StandardPrefixName, pn.PrefixNumber, drm.CustomerPrefixName, drm.CustomerUsingCustomerNames };
 
@@ -962,7 +962,7 @@ namespace ProcessTariffWorkbook
       string previousBand = string.Empty;           
 
       var queryDuration =
-        from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where db.ChargingType.ToUpper().Equals("DURATION") 
         orderby db.CustomerUsingGroupBands, db.CustomerGroupBand, db.StdPrefixName
         select db;      
@@ -990,7 +990,7 @@ namespace ProcessTariffWorkbook
       string name = string.Empty;
 
       var queryCapped =
-        from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where db.ChargingType.ToUpper().Equals("CAPPED")
         orderby db.CustomerGroupBand
         select db;
@@ -1017,7 +1017,7 @@ namespace ProcessTariffWorkbook
       string name = string.Empty;
 
       var queryPulse =
-        from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where db.ChargingType.ToUpper().Equals("PULSE")
         select db;
 
@@ -1055,7 +1055,7 @@ namespace ProcessTariffWorkbook
       foreach (var item in uniqueBands)
       {
         var query =
-          from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+          from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
           where db.CustomerGroupBand.ToUpper().Equals(item.ToUpper()) || db.StdBand.ToUpper().Equals(item.ToUpper()) && db.ChargingType.ToUpper().Equals(duration)
           select db;
 
@@ -1093,7 +1093,7 @@ namespace ProcessTariffWorkbook
       foreach (var item in uniqueBands)
       {
         var query =
-          from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+          from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
           where db.CustomerGroupBand.ToUpper().Equals(item.ToUpper()) || db.StdBand.ToUpper().Equals(item.ToUpper()) && db.ChargingType.ToUpper().Equals(capped)
           select db;
 
@@ -1131,7 +1131,7 @@ namespace ProcessTariffWorkbook
       foreach (var item in uniqueBands)
       {
         var query =
-          from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+          from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
           where db.CustomerGroupBand.ToUpper().Equals(item.ToUpper()) || db.StdBand.ToUpper().Equals(item.ToUpper()) && db.ChargingType.ToUpper().Equals(pulse)
           select db;
 

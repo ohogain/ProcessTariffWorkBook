@@ -18,8 +18,9 @@ namespace ProcessTariffWorkbook
     {
       ReadXlsxFileIntoList();
       MergeDefaultPricesListWithInputFileList();
-      AddToPreRegExDataRecordList(StaticVariable.InputXlsxFileDetails);
+      AddToCustomerDetailsDataRecordList(StaticVariable.InputXlsxFileDetails);
       ValidateData.PreRegExDataRecordValidate();
+      StaticVariable.CustomerDetailsDataRecord.Clear();
       MatchInputXlsxFileWithRegExAndAddToDestinationsMatchedByRegExDataRecord();
       ValidateData.PostRegExDataRecordValidate();
     }
@@ -126,7 +127,7 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList()-- finished");
     }
-    private static void AddToPreRegExDataRecordList(List<string> lst)
+    private static void AddToCustomerDetailsDataRecordList(List<string> lst)
     {
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList()-- started");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList()");
@@ -134,8 +135,9 @@ namespace ProcessTariffWorkbook
       foreach (string token in lst)
       {
         try
-        {          
-          StaticVariable.PreRegExDataRecord.Add(new DataRecord(undefinedStandardInfo + token));
+        {                    
+          StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(undefinedStandardInfo + token));
+          
         }
         catch (Exception e)
         {
@@ -151,14 +153,11 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList()-- started");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList()");            
-      string destinationName = string.Empty;    
-      List<string> tmpList = new List<string>();
-      string[] aryLine;
+      string destinationName = string.Empty;
+      var tmpList = new List<string>();
       int destination = 0;
-      int count = 100;
-      bool found = false;
-      Regex regExCountry;
-      System.Timers.Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
+      int UniqueBandCounter = 100;
+      Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
       string regExAlphanumeric = @"[0-9|a-z|A-Z]"; //@"\w|\s"
       string regExExtraSpaces = "\x0020{2,}";
       string regExNull = "\x0000";
@@ -171,9 +170,10 @@ namespace ProcessTariffWorkbook
 
       foreach (string tok in StaticVariable.InputXlsxFileDetails)
       {
-        found = false;
-        if (!tok.ToUpper().Contains("PREFIX") || !tok.StartsWith(";"))
+        var found = false;
+        if (!tok.ToUpper().Contains("NAME") || !tok.StartsWith(";"))
         {
+          string[] aryLine;
           try
           {
             aryLine = tok.Split('\t');
@@ -198,7 +198,7 @@ namespace ProcessTariffWorkbook
 
             try
             {
-              regExCountry = new Regex(regExPattern, RegexOptions.IgnoreCase);
+              var regExCountry = new Regex(regExPattern, RegexOptions.IgnoreCase);
               if (regExCountry.IsMatch(destinationName))
               {
                 newTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
@@ -206,7 +206,7 @@ namespace ProcessTariffWorkbook
                 newTimer.Enabled = true;
                 found = true;
 
-                StaticVariable.DestinationsMatchedByRegExDataRecord.Add(new DataRecord(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok));
+                StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok));
                 // for debugging
                 //StaticVariable.Errors.Add("ParseInputFile::RegExMatchInputList()  -- Debugging only");
                 //StaticVariable.Errors.Add(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok);
@@ -224,8 +224,8 @@ namespace ProcessTariffWorkbook
         }
         if (!found)
         {
-          tmpList.Add("^" + destinationName.Replace(" ", ".").TrimEnd(' ') + "\tU" + count + "\t" + destinationName + "\t" + destinationName.PadRight(20, ' ').Substring(0, 20));
-          count++;
+          tmpList.Add("^" + destinationName.Replace(" ", ".").TrimEnd(' ') + "\tU" + UniqueBandCounter + "\t" + destinationName + "\t" + destinationName.PadRight(20, ' ').Substring(0, 20));
+          UniqueBandCounter++;
         }
       }
       if (tmpList.Count > 0)
@@ -247,12 +247,8 @@ namespace ProcessTariffWorkbook
       Console.Write(".");
     }
     private static bool DiscardHeaderLine(string line)
-    {
-      //Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "DiscardHeaderLine()-- started");
-      //StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "DiscardHeaderLine()");                
-      //Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "DiscardHeaderLine()-- finished");
+    {      
       return line.ToUpper().StartsWith("DESTINATION") || line.ToUpper().Contains("NAME") && line.ToUpper().Contains("TABLE") && line.ToUpper().Contains("USING");      
     }
   }
 }
-//!line.ToUpper().Contains("NAME") && !line.ToUpper().Contains("TABLE") && !line.ToUpper().Contains("USING") ||

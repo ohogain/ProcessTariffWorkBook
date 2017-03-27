@@ -178,10 +178,10 @@ namespace ProcessTariffWorkbook
       dependentCountriresDict.Add("CC", "Cocos Island\tAU");
       dependentCountriresDict.Add("XK", "Kosovo\tRS");
       dependentCountriresDict.Add("XKM", "Kosovo Mobile\tRSM");
-      dependentCountriresDict.Add("VA", "Vatican City\tIT");
+      dependentCountriresDict.Add("VA", "Vatican City\tIT"); //CustomerDetailsDataRecord
 
       var getBandsOnlyQuery =
-        from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         select drm.StdBand;
 
       foreach (string dd in dependentCountriresDict.Keys)
@@ -202,7 +202,7 @@ namespace ProcessTariffWorkbook
         string parentCode = dependantCountryAry[1];
 
         var intQuery =
-          from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+          from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
           where drm.StdBand.ToUpper().Equals(parentCode.ToUpper())
           select drm;
 
@@ -246,7 +246,7 @@ namespace ProcessTariffWorkbook
       CreateStdIntBandsDataRecord();
       //from regexmatched get all int destinations into tmp list
       var intQuery =
-        from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         where drm.CustomerTableName.ToUpper().Equals(StaticVariable.InternationalTableSpelling.ToUpper())
         select new { drm.StdPrefixName, drm.StdBand, drm.CustomerPrefixName };
 
@@ -283,7 +283,7 @@ namespace ProcessTariffWorkbook
         {
           string tmpCustBand = custband.Substring(0, custband.Length - 1);
           var mobileQuery =
-            from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+            from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
             where tmpCustBand.ToUpper().Equals(drm.StdBand.ToUpper())
             select drm;
           foreach (var dr in mobileQuery)
@@ -340,7 +340,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable()");
 
       var query =
-        from drm in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from drm in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.StandardPrefixName.ToUpper()
         where !drm.CustomerTableName.ToUpper().Equals(pn.TableName.ToUpper())
         select new { pn.TableName, pn.StandardPrefixName, drm.CustomerTableName, drm.CustomerPrefixName };
@@ -366,7 +366,7 @@ namespace ProcessTariffWorkbook
       List<string> stdNames = new List<string>();
 
       var queryCustomerDetails =
-        (from dr in StaticVariable.DestinationsMatchedByRegExDataRecord
+        (from dr in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
          select new { dr.StdPrefixName, dr.CustomerPrefixName }).Distinct();
 
       foreach (var variable in queryCustomerDetails)
@@ -437,7 +437,7 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()-- started");
       StaticVariable.ConsoleOutput.Add(Environment.NewLine + "ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()");
       var allDetails =
-        from db in StaticVariable.DestinationsMatchedByRegExDataRecord
+        from db in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
         select db;
       try
       {
@@ -467,6 +467,125 @@ namespace ProcessTariffWorkbook
         StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()-- finished");
+    }
+    public static void WriteOutGroupBandsToErrorLog()
+    {
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "WriteOutGroupBands() -- started");
+      StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:WriteOutGroupBands()");
+      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "group bands used........." + Environment.NewLine);
+
+      try
+      {
+        var durationQuery =
+        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("DURATION")
+         select new
+         {
+           groups.ChargingType,
+           groups.CustomerGroupBand,
+           groups.CustomerGroupBandDescription,
+           groups.CustomerMinCharge,
+           groups.CustomerConnectionCost,
+           groups.CustomerFirstInitialRate,
+           groups.CustomerFirstSubseqRate,
+           groups.CustomerSecondInitialRate,
+           groups.CustomerSecondSubseqRate,
+           groups.CustomerThirdInitialRate,
+           groups.CustomerThirdSubseqRate,
+           groups.CustomerFourthInitialRate,
+           groups.CustomerFourthSubseqRate
+         }).Distinct();
+
+        foreach (var dg in durationQuery)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + dg.ChargingType);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + dg.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + dg.CustomerGroupBandDescription);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + dg.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + dg.CustomerConnectionCost);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Cheap_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cheap_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Standard_1:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Standard_2:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Economy_1:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Economy_2:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Peak_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Peak_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
+          StaticVariable.Errors.Add("\n");
+        }
+      }
+      catch (Exception e)
+      {
+        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
+        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - duration");
+        StaticVariable.Errors.Add(e.Message);
+      }
+      try
+      {
+        var cappedQuery =
+        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("CAPPED")
+         select groups).Distinct();
+        foreach (var cq in cappedQuery)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + cq.ChargingType);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + cq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + cq.CustomerGroupBandDescription);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + cq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + cq.CustomerConnectionCost);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Standard:".PadRight(15, '.') + '\x0020' + cq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cap Price:".PadRight(20, '.') + '\x0020' + cq.CustomerFirstSubseqRate);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Cap Time:".PadRight(15, '.') + '\x0020' + cq.CustomerSecondInitialRate.PadRight(10, '\x0020'));
+          StaticVariable.Errors.Add("\n");
+        }
+      }
+      catch (Exception e)
+      {
+        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
+        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - capped");
+        StaticVariable.Errors.Add(e.Message);
+      }
+      try
+      {
+        var pulseQuery =
+        (from groups in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("PULSE")
+         select groups).Distinct();
+        foreach (var pq in pulseQuery)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + pq.ChargingType);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + pq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + pq.CustomerGroupBandDescription);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + pq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + pq.CustomerConnectionCost);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length:".PadRight(15, '.') + '\x0020' + pq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Pulse Unit:".PadRight(20, '.') + '\x0020' + pq.CustomerFirstSubseqRate);
+          StaticVariable.Errors.Add("\n");
+        }
+      }
+      catch (Exception e)
+      {
+        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
+        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - pulse");
+        StaticVariable.Errors.Add(e.Message);
+      }
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
+    }
+    public static void WriteToErrorlogIfMinCostAnd4ThRateSamePrice()
+    {
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
+      List<string> matches = new List<string>();
+      var query =
+        from peakAndMinCost in StaticVariable./*DestinationsMatchedByRegExDataRecord*/CustomerDetailsDataRecord
+        where peakAndMinCost.CustomerFourthSubseqRate.Equals(peakAndMinCost.CustomerMinCharge)
+        select new { peakAndMinCost.StdPrefixName, peakAndMinCost.CustomerFourthSubseqRate, peakAndMinCost.CustomerMinCharge, peakAndMinCost.CustomerPrefixName };
+
+      foreach (var pk in query)
+      {
+        if (pk.CustomerMinCharge.Equals(pk.CustomerFourthSubseqRate) && Convert.ToDouble(pk.CustomerMinCharge) > 0.0)
+        {
+          ValidateData.CheckIfDouble(pk.CustomerMinCharge);
+          matches.Add(Constants.FiveSpacesPadding + pk.CustomerPrefixName);
+        }
+      }
+      if (matches.Any())
+      {
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:DisplayMinCostV4thRateSamePrice()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "4th rate is the same price as Minimum Cost.");
+        foreach (var m in matches)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + m);
+        }
+      }
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
     }
   }
 }
