@@ -156,7 +156,7 @@ namespace ProcessTariffWorkbook
       string destinationName = string.Empty;
       var tmpList = new List<string>();
       int destination = 0;
-      int UniqueBandCounter = 100;
+      int uniqueBandCounter = 100;
       Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
       string regExAlphanumeric = @"[0-9|a-z|A-Z]"; //@"\w|\s"
       string regExExtraSpaces = "\x0020{2,}";
@@ -224,8 +224,8 @@ namespace ProcessTariffWorkbook
         }
         if (!found)
         {
-          tmpList.Add("^" + destinationName.Replace(" ", ".").TrimEnd(' ') + "\tU" + UniqueBandCounter + "\t" + destinationName + "\t" + destinationName.PadRight(20, ' ').Substring(0, 20));
-          UniqueBandCounter++;
+          tmpList.Add("^" + destinationName.Replace(" ", ".").TrimEnd(' ') + "\tU" + uniqueBandCounter + "\t" + destinationName + "\t" + destinationName.PadRight(20, ' ').Substring(0, 20));
+          uniqueBandCounter++;
         }
       }
       if (tmpList.Count > 0)
