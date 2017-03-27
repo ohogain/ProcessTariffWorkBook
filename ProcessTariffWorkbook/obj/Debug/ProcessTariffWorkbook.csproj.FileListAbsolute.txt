@@ -1,0 +1,7 @@
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\bin\Debug\ProcessTariffWorkbook.exe.config
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.csprojResolveAssemblyReference.cache
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\bin\Debug\ProcessTariffWorkbook.exe
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\bin\Debug\ProcessTariffWorkbook.pdb
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.exe
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.pdb
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\bin\Debug\SpreadsheetGear2012.dll

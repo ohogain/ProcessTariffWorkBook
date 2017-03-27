@@ -1,0 +1,41 @@
+﻿Main:
+	--> ProcessRequiredFiles.VerifyRequiredFiles(args);
+	    --> StaticVariable.DirectoryName = GetDirectoryName();
+		--> StaticVariable.XlsxFileName = GetFileName();
+		--> CreateFinalFolder();
+		--> StaticVariable.CountryCode = GetCountryCode();
+		--> StaticVariable.DatasetFolderToUse = GetDatasetsFolderToUse();
+		--> StaticVariable.HeaderFile = GetHeaderFile();
+		--> ReadHeaderFileIntoLists();
+		--> CheckTariffPlanList();
+		--> CheckTableLinksList();
+		--> CheckTimeSchemesList();
+		--> CheckTimeSchemeExceptionsList();
+		--> CheckSpellingList();
+		--> CheckSourceDestinationsBandList(); -- Further testing required. the band length needs to be rechecked when outputting TC2 ini files.
+												-- the bands in matrix need to be checked against the local, national & regional bands
+		--> CheckForStdIntAndBandsFile();
+		--> StaticVariable.NewFileName = CreateNewFileName();
+		--> StaticVariable.CategoryMatrixXlsx = CreateXlsxFileName(Constants.CategoryMatrixFile); 
+		--> CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsx);
+		--> StaticVariable.OutpuXlsxFile = CreateXlsxFileName(StaticVariable.NewFileName);
+		--> CreateOutputXlsxFile(StaticVariable.OutpuXlsxFile);
+		--> RearrangeDefaultEntries(); -- added the 'charging type' column to end.
+		--> CopyIniFilesToFinalFolder((Directory.GetFiles(StaticVariable.DatasetFolderToUse, Constants.IniExtensionSearch)), "Domestic");
+		--> CopyIniFilesToFinalFolder((Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.IniExtensionSearch)), "International");
+		--> ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
+		--> ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International");
+		--> CombinePrefixesInDataRecord(StaticVariable.PrefixNumbers);
+
+
+
+
+to do 
+CheckForDestinationTypes(): V5: fixed number (8) of destination types, names are set, V6: no fixed number. Names can vary
+   remove this check until a solutionis found
+
+"ValidateData::CheckForNonUniqueGroupBands()" - possible rewrite of this method using 'group into'"
+   No country code with tc2 prefixes.ini. It is added here "ReadPrefixesIntoList" for TWB. 
+	
+
+	
