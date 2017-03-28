@@ -1169,7 +1169,7 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Minimum Intervals=" + dr.CustomerMinimumIntervals);
       pricesini.Add("Intervals at Initial Cost=" + dr.CustomerIntervalsAtInitialCost);
       string bandDescription = dr.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? dr.CustomerGroupBandDescription : dr.StdPrefixDescription;
-      bandDescription = bandDescription.Length > Constants.v5BandDescriptionLength ? bandDescription.Substring(0, 20) : bandDescription;
+      bandDescription = bandDescription.Length > Constants.V5Tc2BandDescriptionLength ? bandDescription.Substring(0, 20) : bandDescription;
       pricesini.Add("Band Description=" + bandDescription);
       pricesini.Add("Interval Rounding=" + AdjustRoundingValueForPricesIni(dr.CustomerRounding));
       pricesini.Add("Initial Interval Length=" + dr.CustomerInitialIntervalLength);
@@ -1197,7 +1197,7 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Minimum Digits=" + details.CustomerMinDigits);
       pricesini.Add("Minimum Intervals=" + details.CustomerMinimumIntervals);
       pricesini.Add("Intervals at Initial Cost=" + details.CustomerIntervalsAtInitialCost);
-      string bandDescription = details.CustomerPrefixName.Length > Constants.v5BandDescriptionLength ? details.CustomerPrefixName.Substring(0, 20) : details.CustomerPrefixName;
+      string bandDescription = details.CustomerPrefixName.Length > Constants.V5Tc2BandDescriptionLength ? details.CustomerPrefixName.Substring(0, 20) : details.CustomerPrefixName;
       pricesini.Add("Band Description=" + bandDescription);
       pricesini.Add("Interval Rounding=" + AdjustRoundingValueForPricesIni(details.CustomerRounding));
       pricesini.Add("Initial Interval Length=" + details.CustomerInitialIntervalLength);
@@ -1225,7 +1225,7 @@ namespace ProcessTariffWorkbook
       pricesini.Add(Constants.tollFreeHardCoded);
       pricesini.Add("All Schemes=" + details.CustomerAllSchemes);
       pricesini.Add("Minimum Digits=" + details.CustomerMinDigits);
-      string bandDescription = details.CustomerPrefixName.Length > Constants.v5BandDescriptionLength ? details.CustomerPrefixName.Substring(0, 20) : details.CustomerPrefixName;
+      string bandDescription = details.CustomerPrefixName.Length > Constants.V5Tc2BandDescriptionLength ? details.CustomerPrefixName.Substring(0, 20) : details.CustomerPrefixName;
       pricesini.Add("Band Description=" + bandDescription);
       pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(details.CustomerMinCharge));
       pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost));

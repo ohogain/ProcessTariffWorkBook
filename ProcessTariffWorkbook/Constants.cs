@@ -21,9 +21,9 @@ namespace ProcessTariffWorkbook
     public const int NumberOfFieldsExcludingPrefixNameAndRates = 22; // check this figure
     public const int XlsxFileNameSplitIntoTwoParts = 2;
     public const int NumberOfHeadersInHeadersFile = 7;
-    public const int NdsBandLengthLimit = 5; // current RMAdmin limit.
+    public const int V5Tc2BandLengthLimit = 5; // current RMAdmin limit.
     public const int TwbBandLengthLimit = 100; // current TWB (V6) limit 
-    public const int v5BandDescriptionLength = 20;
+    public const int V5Tc2BandDescriptionLength = 20;
     public const string alwaysAddBandHardCoded = "Always Add Band=FALSE";
     public const string tollFreeHardCoded = "Toll Free=FALSE";    
     public const string EncodingUnicode = "Unicode";

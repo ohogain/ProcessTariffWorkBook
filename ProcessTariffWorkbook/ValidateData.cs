@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace ProcessTariffWorkbook
 {
@@ -42,7 +43,7 @@ namespace ProcessTariffWorkbook
       CheckAllSchemes();
       CheckDialTime();
       CheckMinimumTime();
-      CheckIntervalsAtInitialCost();
+      CheckIntervalsAtInitialCostGreaterOrEqualToZero();
       CheckDestinationTypesNames();
       CheckTableNames();
 
@@ -52,13 +53,11 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate()");
-      CheckForDuplicateBands();
-      CheckTimeSchemesListAgain();      
+      CheckForDuplicateBands();        
       CheckForNonUniqueGroupBands();      
       CheckSourceDestinationBandsPresentInPrefixBands();
       ErrorProcessing.WriteOutGroupBandsToErrorLog();
-      ErrorProcessing.WriteToErrorlogIfMinCostAnd4ThRateSamePrice();
-      //CheckFinalFolderForDupeIntAndDomesticMobileFiles(StaticVariable.FinalDirectory);
+      ErrorProcessing.WriteToErrorlogIfMinCostAnd4ThRateSamePrice();      
       CheckIfAllMatrixBandsUsed();
       CheckForNonMatchingNames();
       CheckChargingType();
@@ -331,11 +330,10 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry()");
-      List<string> tmpList = new List<string>();       
+      List<string> errors = new List<string>();       
       try
       {
-        var query =
-        //from DataRecord dr in StaticVariable.PreRegExDataRecord
+        var query =        
         from DataRecord db in StaticVariable.CustomerDetailsDataRecord
         select new { db.CustomerRounding, db.CustomerPrefixName, db.ChargingType };
 
@@ -349,18 +347,17 @@ namespace ProcessTariffWorkbook
               custRounding.Equals("NO") || custRounding.Equals("3") || custRounding.Equals("N") ||
               custRounding.Equals("EXACT") || custRounding.Equals("NO ROUND") || custRounding.Equals("NOROUND")))
           {
-            tmpList.Add(q.CustomerPrefixName + " is --> " + custRounding);
+            errors.Add(q.CustomerPrefixName + " is --> " + custRounding);
           }
         }
-        if (tmpList.Any())
+        if (errors.Any())
         {
           StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckRoundingForIncorrectEntry()");
           StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Rounding Values are incorrect for these destinations.");
           StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be 'Yes', 'Y', 'ROUND UP', 'ROUNDUP' or '1' for round up and 'No', 'N', 'EXACT', 'NOROUND', 'NO ROUND' or '3' for no round");
-
-          foreach (string s in tmpList)
+          foreach (string error in errors)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error);
           }
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -376,73 +373,61 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry()");
-      List<string> tmpList = new List<string>();
+      List<string> errors = new List<string>();
       const int timeScheme = 0;
       bool found = false;
-      try
-      {
-        var queryCustomerTimeSchemes =
-        //from DataRecord db in StaticVariable.PreRegExDataRecord
-        from DataRecord db in StaticVariable.CustomerDetailsDataRecord
-        select new { db.CustomerTimeScheme, db.CustomerPrefixName };        
+      
+      var queryCustomerTimeSchemes =        
+      from DataRecord db in StaticVariable.CustomerDetailsDataRecord
+      select new { db.CustomerTimeScheme, db.CustomerPrefixName };        
 
-        foreach (var q in queryCustomerTimeSchemes)
-        {
-          foreach (var timeSchemeName in StaticVariable.TimeSchemes)
-          {
-            string[] timeschemes = timeSchemeName.Split('\t');
-            if (q.CustomerTimeScheme.ToUpper().Equals(timeschemes[timeScheme].ToUpper()))
-            {
-              found = true;
-              break;
-            }
-          }
-          if (!found)
-          {
-            tmpList.Add(q.CustomerPrefixName + " is --> " + q.CustomerTimeScheme);
-          }
-          found = false;
-        }
-        if (tmpList.Any())
-        {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTimeSchemeForIncorrectEntry()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Time Scheme Values are incorrect for these destinations.");
-
-          foreach (string s in tmpList)
-          {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
-          }
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-        }
-      }
-      catch (Exception e)
+      foreach (var q in queryCustomerTimeSchemes)
       {
-        StaticVariable.Errors.Add("ValidateData::CheckRounding()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Exception Message :: " + e.Message);
+        foreach (var timeSchemeName in StaticVariable.TimeSchemes)
+        {
+          string[] timeschemes = timeSchemeName.Split('\t');
+          if (!q.CustomerTimeScheme.ToUpper().Equals(timeschemes[timeScheme].ToUpper())) continue;
+          found = true;
+          break;
+        }
+        if (!found)
+        {
+          errors.Add(q.CustomerPrefixName + " is --> " + q.CustomerTimeScheme);
+        }
+        found = false;
       }
+      if (errors.Any())
+      {
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTimeSchemeForIncorrectEntry()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Time Scheme Values are incorrect for these destinations.");
+        foreach (string error in errors)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error);
+        }
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+      }     
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckRounding() -- finished");
     }
     private static void CheckIfMinCostAndRate4SubseqAreSame()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame()");
-      List<string> tmpList = new List<string>();
+      List<string> pricesTheSame = new List<string>();
 
-      var query =
-        //from DataRecord drm in StaticVariable.PreRegExDataRecord
+      var query =        
         from DataRecord drm in StaticVariable.CustomerDetailsDataRecord
         where drm.CustomerFourthSubseqRate.Equals(drm.CustomerMinCharge) && Convert.ToDouble(drm.CustomerMinCharge) > 0.0
         select new { drm.CustomerPrefixName, drm.CustomerMinCharge, drm.CustomerFourthSubseqRate };
 
       foreach (var q in query)
       {
-        tmpList.Add(q.CustomerPrefixName + ": MinCost = " + q.CustomerMinCharge + ", 4th Rate Subsequential = " + q.CustomerFourthSubseqRate);
+        pricesTheSame.Add(q.CustomerPrefixName + ": MinCost = " + q.CustomerMinCharge + ", 4th Rate Subsequential = " + q.CustomerFourthSubseqRate);
       }
-      if (tmpList.Any())
+      if (pricesTheSame.Any())
       {
-        tmpList.Sort();
+        pricesTheSame.Sort();
         StaticVariable.Errors.Add(Environment.NewLine + "Minimum Cost is the same price as the 4th Rate Subsequent price. Check it out.");
-        foreach (string s in tmpList)
+        foreach (string s in pricesTheSame)
         {
           StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
         }
@@ -453,12 +438,13 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForFreephone() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForFreephone()");
-      var result =
-        //from DataRecord db in StaticVariable.PreRegExDataRecord
+      var result =        
         from DataRecord db in StaticVariable.CustomerDetailsDataRecord
-        where (db.CustomerPrefixName.ToUpper().Contains("FREE") || db.StdBand.ToUpper().Equals("FREE") ||
-          db.CustomerGroupBand.ToUpper().Equals("FREE") || db.CustomerPrefixName.ToUpper().Contains("GRAT") ||
-          db.StdBand.ToUpper().Equals("GRAT")) && !db.StdPrefixName.ToUpper().Contains("INT")
+        where db.CustomerPrefixName.ToUpper().Contains("FREE") || db.StdBand.ToUpper().Equals("FREE") ||
+              db.CustomerGroupBand.ToUpper().Equals("FREE") || db.CustomerGroupBand.ToUpper().Equals("TOLL") ||
+              db.CustomerPrefixName.ToUpper().Contains("GRAT") || db.StdBand.ToUpper().Equals("GRAT") || 
+              db.CustomerPrefixName.ToUpper().Contains("TOLL") || db.StdBand.ToUpper().Equals("TOLL") 
+              && !db.StdPrefixName.ToUpper().Contains("INT")
         select db.StdBand;
 
       if (result.Count().Equals(0))
@@ -476,12 +462,13 @@ namespace ProcessTariffWorkbook
       bool bFound = false;
       string custName = string.Empty;
 
-      var result =
-        //from DataRecord db in StaticVariable.PreRegExDataRecord
+      var results =        
         from DataRecord db in StaticVariable.CustomerDetailsDataRecord
-        where (db.CustomerPrefixName.ToUpper().Contains("FREE") || db.StdBand.ToUpper().Equals("FREE") ||
-          db.CustomerGroupBand.ToUpper().Equals("FREE") || db.CustomerPrefixName.ToUpper().Contains("GRAT") ||
-          db.StdBand.ToUpper().Equals("GRAT")) && !db.StdPrefixName.ToUpper().Contains("INT")
+        where db.CustomerPrefixName.ToUpper().Contains("FREE") || db.StdBand.ToUpper().Equals("FREE") ||
+              db.CustomerGroupBand.ToUpper().Equals("FREE") || db.CustomerGroupBand.ToUpper().Equals("TOLL") ||
+              db.CustomerPrefixName.ToUpper().Contains("GRAT") || db.StdBand.ToUpper().Equals("GRAT") ||
+              db.CustomerPrefixName.ToUpper().Contains("TOLL") || db.StdBand.ToUpper().Equals("TOLL")
+              && !db.StdPrefixName.ToUpper().Contains("INT")
         select new
         {
           db.CustomerPrefixName,
@@ -499,19 +486,19 @@ namespace ProcessTariffWorkbook
           db.CustomerConnectionCost
         };
 
-      foreach (var res in result)
+      foreach (var result in results)
       {
-        custName = res.CustomerPrefixName;
-        if (CheckIfPriceZero(res.CustomerFirstInitialRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerFirstSubseqRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerSecondInitialRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerSecondSubseqRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerThirdInitialRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerThirdSubseqRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerFourthInitialRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerFourthSubseqRate)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerMinCharge)) { bFound = true; }
-        else if (CheckIfPriceZero(res.CustomerConnectionCost)) { bFound = true; }
+        custName = result.CustomerPrefixName;
+        if (CheckIfPriceZero(result.CustomerFirstInitialRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerFirstSubseqRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerSecondInitialRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerSecondSubseqRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerThirdInitialRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerThirdSubseqRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerFourthInitialRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerFourthSubseqRate)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerMinCharge)) { bFound = true; }
+        else if (CheckIfPriceZero(result.CustomerConnectionCost)) { bFound = true; }
       }
       if (bFound)
       {
@@ -523,88 +510,91 @@ namespace ProcessTariffWorkbook
     }
     private static bool CheckIfPriceZero(string sValue)
     {     
-      bool bNotZero = false;
+      bool notZero = false;
       foreach (char c in sValue)
       {
         if (!c.Equals('0') && !c.Equals('.'))
         {
-          bNotZero = true;
+          notZero = true;
           break;
         }
       }
-      return bNotZero;
+      return notZero;
     }
     private static void CheckGrouping()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckGrouping() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckGrouping()");
-      List<string> usingList = new List<string>();
-      List<string> bandList = new List<string>();
-      List<string> bandDescriptionList = new List<string>();
-
-
-      var query =
-        //from DataRecord db in StaticVariable.PreRegExDataRecord
-        from DataRecord db in StaticVariable.CustomerDetailsDataRecord
-        select new { db.CustomerGroupBand, db.CustomerGroupBandDescription, db.CustomerUsingGroupBands, db.CustomerPrefixName };
-
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckGrouping()");                  
       #region using group bands
-      foreach (var q in query)
+      List<string> usingGroupBands = new List<string>();
+      var queryUsingGroupBands =
+        from DataRecord db in StaticVariable.CustomerDetailsDataRecord
+        where !db.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && !db.CustomerUsingGroupBands.ToUpper().Equals("FALSE")
+        select new { db.CustomerUsingGroupBands, db.CustomerPrefixName };
+
+      foreach (var q in queryUsingGroupBands)
       {
-        if (!(q.CustomerUsingGroupBands.Equals("FALSE") || q.CustomerUsingGroupBands.Equals("TRUE")))
-        {
-          usingList.Add(q.CustomerPrefixName + " --> " + q.CustomerUsingGroupBands);
-        }
+        usingGroupBands.Add(q.CustomerPrefixName + " --> " + q.CustomerUsingGroupBands);       
       }
-      if (usingList.Any())
+      if (usingGroupBands.Any())
       {
         StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Using Group Bands field are incorrect for these destinations.");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be 'TRUE' or 'FALSE'");
 
-        foreach (string s in usingList)
+        foreach (string s in usingGroupBands)
         {
           StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      # endregion 
-      # region group band
-      foreach (var q in query)
+      #endregion
+      #region group band
+      List<string> groupBands = new List<string>();
+      var queryGroupBand =
+        from DataRecord db in StaticVariable.CustomerDetailsDataRecord
+        select new { db.CustomerGroupBand, db.CustomerPrefixName, db.CustomerUsingGroupBands };
+
+      foreach (var q in queryGroupBand)
       {
-        if (q.CustomerGroupBand.Length > 4 && StaticVariable.ExportNds.ToUpper().Equals("TRUE") && q.CustomerUsingGroupBands.Equals("TRUE"))
+        if (q.CustomerGroupBand.Length > Constants.V5Tc2BandLengthLimit && StaticVariable.ExportNds.ToUpper().Equals("TRUE") && q.CustomerUsingGroupBands.Equals("TRUE"))
         {
-          bandList.Add(q.CustomerPrefixName + " --> " + q.CustomerGroupBand);
+          groupBands.Add(q.CustomerPrefixName + " --> " + q.CustomerGroupBand);
         }
       }
-      if (bandList.Any())
+      if (groupBands.Any())
       {
         StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Group Band field are too long for these destinations.");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be no greater than 4 chars long.");
 
-        foreach (string s in bandList)
+        foreach (string band in groupBands)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + band);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       # endregion
       # region group band description
-      foreach (var q in query)
+      List<string> groupBandDescriptions = new List<string>();
+      var queryGroupBandDescription =
+        from DataRecord db in StaticVariable.CustomerDetailsDataRecord
+        select new { db.CustomerGroupBandDescription, db.CustomerPrefixName, db.CustomerUsingGroupBands };
+
+      foreach (var q in queryGroupBandDescription)
       {
-        if (q.CustomerGroupBandDescription.Length > 20 && StaticVariable.ExportNds.Equals("TRUE") && q.CustomerUsingGroupBands.Equals("TRUE"))
+        if (q.CustomerGroupBandDescription.Length > Constants.V5Tc2BandDescriptionLength && StaticVariable.ExportNds.Equals("TRUE") && q.CustomerUsingGroupBands.Equals("TRUE"))
         {
-          bandDescriptionList.Add(q.CustomerPrefixName + " --> " + q.CustomerGroupBandDescription);
+          groupBandDescriptions.Add(q.CustomerPrefixName + " --> " + q.CustomerGroupBandDescription);
         }
       }
-      if (bandDescriptionList.Any()) 
+      if (groupBandDescriptions.Any()) 
       {
         StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Group Band Description field are too long for these destinations.");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be no greater than 20 chars long.");
 
-        foreach (string s in bandDescriptionList)
+        foreach (string s in groupBandDescriptions)
         {
           StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
         }
@@ -617,59 +607,78 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()-- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()");
-      List<string> resultsList = new List<string>();
-      List<string> errList = new List<string>();      
+      List<string> results = new List<string>();
+      List<string> errors = new List<string>();      
       int nValue = 0;
+      const string defaultIntervalLength = "60";
       
-      var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
-        from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
-        select new { dr.CustomerInitialIntervalLength, dr.CustomerSubsequentIntervalLength, dr.ChargingType }).Distinct();
+      var queryIntervalLengthGreaterThanZero =
+        (from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
+         where !dr.ChargingType.ToUpper().Equals("PULSE")
+         select new { dr.CustomerInitialIntervalLength, dr.CustomerSubsequentIntervalLength }).Distinct();
           
-      foreach (var tok in query)
+      foreach (var tok in queryIntervalLengthGreaterThanZero)
       {
-        if (!tok.ChargingType.ToUpper().Equals("PULSE"))
+        results.Add(tok.CustomerInitialIntervalLength);
+        results.Add(tok.CustomerSubsequentIntervalLength);
+      }
+      results = results.Distinct().ToList();
+     
+      foreach (string intervalLength in results)
+      {
+        int nParsedValue = 0;
+        if (int.TryParse(intervalLength, out nParsedValue))
         {
-          resultsList.Add(tok.CustomerInitialIntervalLength);
-          resultsList.Add(tok.CustomerSubsequentIntervalLength);
+          nValue = nParsedValue;
+        }
+        else
+        {
+          errors.Add(intervalLength);
+        }
+        if (nValue <= 0)
+        {
+          errors.Add(intervalLength);
         }
       }
-      resultsList = resultsList.Distinct().ToList();
-      try
-      {
-        foreach (string intervalLength in resultsList)
-        {
-          int nParsedValue = 0;
-          if (int.TryParse(intervalLength, out nParsedValue))
-          {
-            nValue = nParsedValue;
-          }
-          else
-          {
-            errList.Add(intervalLength);
-          }
-          if (nValue < 0)
-          {
-            errList.Add(intervalLength);
-          }
-        }
-      }
-      catch (Exception e)
+      
+      if (errors.Any())
       {
         StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
-        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }
-      if (errList.Any())
-      {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the interval lengths is not an integer or is less than zero. ");
-        foreach (string tok in errList)
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One or more of the interval lengths is not an integer or is less than 1. ");
+        foreach (string error in errors)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + tok);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The illegal value is - " + error);
+          var query =
+            from qry in StaticVariable.CustomerDetailsDataRecord
+            where qry.CustomerInitialIntervalLength.Equals(error) || qry.CustomerSubsequentIntervalLength.Equals(error)
+            select new {qry.CustomerPrefixName, qry.CustomerInitialIntervalLength , qry.CustomerSubsequentIntervalLength };
+
+          foreach (var q in query)
+          {
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " - ");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + q.CustomerInitialIntervalLength );
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + q.CustomerSubsequentIntervalLength );
+          }
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }                  
+      }
+      var queryIntervalLengthValues =
+        from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
+        where !dr.ChargingType.ToUpper().Equals("PULSE") && (!dr.CustomerInitialIntervalLength.Equals(defaultIntervalLength) || !dr.CustomerSubsequentIntervalLength.Equals(defaultIntervalLength))
+        select new { dr.CustomerInitialIntervalLength, dr.CustomerSubsequentIntervalLength, dr.CustomerPrefixName };    
+          
+      if (queryIntervalLengthValues.Any())
+      {
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The interval lengths listed below are not the default 60 seconds. ");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This may be correct. ");
+        foreach (var interval in queryIntervalLengthValues)
+        {
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + interval.CustomerPrefixName + " - ");
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + interval.CustomerInitialIntervalLength);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + interval.CustomerSubsequentIntervalLength);
+        }
+      }    
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()-- finished");
     }
     public static void CheckUsingCustomerNames()
@@ -678,19 +687,20 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames()");
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
-        select new { dr.CustomerUsingCustomerNames }).Distinct();
-      foreach (var tok in query)
+        where !dr.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") && !dr.CustomerUsingCustomerNames.ToUpper().Equals("FALSE")
+        select new { dr.CustomerUsingCustomerNames, dr.CustomerPrefixName };
+
+      if (query.Any())
       {
-        if (!(tok.CustomerUsingCustomerNames.ToUpper().Equals("TRUE")) && !(tok.CustomerUsingCustomerNames.ToUpper().Equals("FALSE")))
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckUsingCustomerNames()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Using Customer Names values must be TRUE or FALSE. The destinations below are incorrect.");
+        foreach (var tok in query)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckUsingCustomerNames()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Using Customer Names values must be TRUE or FALSE. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + tok.CustomerUsingCustomerNames);
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " : " + tok.CustomerUsingCustomerNames);
         }
-      }
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+      }      
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames()-- finished");
     }
     public static void CheckMinimumIntervals()
@@ -947,16 +957,16 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumTime()-- finished");
     }
-    public static void CheckIntervalsAtInitialCost()
+    public static void CheckIntervalsAtInitialCostGreaterOrEqualToZero()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCost()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCost()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()-- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()");
       List<string> errList = new List<string>();      
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
-        from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
+        (from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select dr.CustomerIntervalsAtInitialCost).Distinct();
+
       foreach (var tok in query)
       {
         int nParsedValue = 0;
@@ -969,44 +979,61 @@ namespace ProcessTariffWorkbook
         {
           errList.Add(tok);
         }
-        if (nValue < 0)
+        if (nValue <= 0)
         {
           errList.Add(tok);
         }
       }
-      errList = errList.Distinct().ToList();
+            
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalsAtInitialCost()");
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalsAtInitialCostGreaterOrEqualToZero()");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Intervals At Initial Cost is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + token);
+          var errQuery =
+            from db in StaticVariable.CustomerDetailsDataRecord
+            where db.CustomerIntervalsAtInitialCost.Equals(token)
+            select new {db.CustomerPrefixName, db.CustomerIntervalsAtInitialCost};
+
+          foreach (var error in errQuery)
+          {
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error.CustomerPrefixName + " : " + error.CustomerIntervalsAtInitialCost);
+          }          
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCost()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()-- finished");
     }
     public static void CheckTableNames()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableNames()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableNames()");     
       var queryTableName =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
-        select dr.CustomerTableName).Distinct();      
-              
-      StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
+        where !dr.CustomerTableName.Contains(StaticVariable.CountryCode) || !dr.CustomerTableName.Contains("_")
+        select new { dr.CustomerPrefixName, dr.CustomerTableName };
 
-      foreach (var tok in queryTableName)
-      {       
-        if (!tok.ToUpper().Contains(StaticVariable.CountryCode) || !tok.ToUpper().Contains("_"))
-        {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This table entry is incorrect --> " + tok);
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-        }        
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Names used --> " + tok);
+      if (queryTableName.Any())
+      {
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This table entry is incorrect : ");
+        foreach (var table in queryTableName)
+        {          
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + table.CustomerPrefixName + " : " + table.CustomerTableName);       
+        }
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
+      var queryTableNameUnique =
+        (from DataRecord dr in StaticVariable.CustomerDetailsDataRecord        
+        select dr.CustomerTableName).Distinct();
+
+      StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
+      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Names used : ");
+      foreach (var uniqueTable in queryTableNameUnique)
+      {
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + uniqueTable);
+      }           
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames()-- finished");
     }
     public static void CheckDestinationTypesNames()
@@ -1014,33 +1041,23 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()-- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()");
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
-        select dr.CustomerDestinationType).Distinct();
-      foreach (var tok in query)
+        where !dr.CustomerDestinationType.ToUpper().Equals("LOCAL") && !dr.CustomerDestinationType.ToUpper().Equals("NATIONAL") &&
+        !dr.CustomerDestinationType.ToUpper().Equals("INTERNATIONAL") && !dr.CustomerDestinationType.ToUpper().Equals("INTERNATIONAL MOBILE") &&
+        !dr.CustomerDestinationType.ToUpper().Equals("MOBILE") && !dr.CustomerDestinationType.ToUpper().Equals("SERVICES") &&
+        !dr.CustomerDestinationType.ToUpper().Equals("OTHER")
+        select new { dr.CustomerDestinationType, dr.CustomerPrefixName};
+
+      if (query.Any())
       {
-        switch (tok.ToUpper())
+        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckDestinationTypesNames()");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Destination types that don't match the V5 default ones of 'Local', 'National', International', International Mobile', 'Mobile', 'Services' & 'Other'");
+        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "If the tariff is for V6 (TDI) then these default destination types are irrelevant");
+        foreach (var q in query)
         {
-          case "LOCAL":
-            break;
-          case "NATIONAL":
-            break;
-          case "INTERNATIONAL":
-            break;
-          case "INTERNATIONAL MOBILE":
-            break;
-          case "MOBILE":
-            break;
-          case "SERVICES":
-            break;
-          case "OTHER":
-            break;
-          default:
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckDestinationTypesNames()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Destination types don't match the default ones --> " + tok);
-            break;
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " : " + q.CustomerDestinationType);
         }
-      }
+      }                                      
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()-- finished");
     }
     private static void CheckForDuplicateBands()
@@ -1057,9 +1074,9 @@ namespace ProcessTariffWorkbook
            orderby newgroup.Key
            select newgroup).Distinct();
 
-        foreach (var group in query) //foreach the keys
+        foreach (var group in query) //the keys
         {
-          foreach (var g in group) // foreach the values.
+          foreach (var g in group) //the values.
           {
             tmpList.Add(g.StdBand + " --> " + g.CustomerPrefixName);
           }
@@ -1088,11 +1105,11 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles()");      
       
-      int count = GetRegExFile(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
-      string[] regexes = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
+      int count = CountNumberOfRegExFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);      
       if (!count.Equals(1))
       {
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetsFolder);
+        string[] regexes = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
         foreach (var regex in regexes)
         {
           if (regex.ToUpper().Contains("REGEX"))
@@ -1103,11 +1120,11 @@ namespace ProcessTariffWorkbook
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
 
-      count = GetRegExFile(StaticVariable.DatasetFolderToUse, Constants.TxtExtensionSearch);
-      string[] files = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
+      count = CountNumberOfRegExFiles(StaticVariable.DatasetFolderToUse, Constants.TxtExtensionSearch);      
       if (!count.Equals(1))
       {
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetFolderToUse);
+        string[] files = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
         foreach (var regex in files)
         {
           if (regex.ToUpper().Contains("REGEX"))
@@ -1119,10 +1136,8 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- finished");
     }
-    private static int GetRegExFile(string folder, string findTextFiles)
-    {
-      //Console.WriteLine("ValidateData".PadRight(30, '.') + "GetRegExFile() -- started");
-      //StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "GetRegExFile()");
+    private static int CountNumberOfRegExFiles(string folder, string findTextFiles)
+    {     
       int fileFound = 0;
       string[] files = Directory.GetFiles(folder, findTextFiles);
       foreach (var file in files)
@@ -1131,130 +1146,37 @@ namespace ProcessTariffWorkbook
         {
           fileFound++;          
         }
-      }
-      //Console.WriteLine("ValidateData".PadRight(30, '.') + "GetRegExFile() -- finished");
+      }      
       return fileFound;      
-    }
-    private static void CheckTimeSchemesListAgain()
-    {
-      Console.WriteLine(Environment.NewLine + "ValidateData".PadRight(30, '.') + "CheckTimeSchemesListAgain()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemesListAgain()");
-      List<string> tmpList = new List<string>();
-      const int timeSchemeName = 0;
-
-      var query =
-        (from drm in StaticVariable.CustomerDetailsDataRecord
-         select drm.CustomerTimeScheme).Distinct();
-     
-      foreach (string token in query)
-      {
-        var bFound = false;
-        foreach (string tok in StaticVariable.TimeSchemes)
-        {
-          string[] times = tok.Split('\t');
-          if (token.ToUpper().Equals(times[timeSchemeName].ToUpper()))
-          {
-            bFound = true;
-          }
-        }
-        if (!bFound)
-        {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTimeSchemesListAgain()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There is an extra time scheme in the regex list than defined in the header file. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TITLE=TIMESCHEMES may contain an undefined time scheme. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "the offending Time Scheme is : \"" + token + "\"");
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-        }
-      }
-      StaticVariable.TwbHeader.Add(Environment.NewLine + "Number of Times Schemes is " + StaticVariable.NumberOfTimeSchemes);
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemesListAgain() -- Finished");
-    }
+    }   
     private static void CheckForNonMatchingNames()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()-- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()");      
       List<string> tmpList = new List<string>();
 
-      var result =
+      var queryNames =
         from db in StaticVariable.CustomerDetailsDataRecord
-        orderby db.StdPrefixName
+        where !db.StdPrefixName.ToUpper().Equals(db.CustomerPrefixName.ToUpper())
         select new { db.StdPrefixName, db.CustomerPrefixName };
 
-      foreach (var names in result)
-      {
-        int nIsFound = string.Compare(names.CustomerPrefixName.Trim().ToUpper(), names.StdPrefixName.ToUpper());
-        if (!nIsFound.Equals(0))
-        {
-          tmpList.Add(names.StdPrefixName.PadRight(44, '.') + " : " + names.CustomerPrefixName);
-        }
-      }
-      if (tmpList.Any())
+      if (queryNames.Any())
       {
         StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForNonMatchingNames()");
         StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Std RegEx Names that don't match the Client Names exactly");
-        foreach (string name in tmpList)
+        foreach (var names in queryNames)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name);
+          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + names.StdPrefixName.PadRight(44, '.') + " : " + names.CustomerPrefixName);
         }
-      }
+      }           
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()-- finished");
     }
-    private static void CheckForNonUniqueGroupBands()
+    private static void CheckForNonUniqueGroupBands() // to remodel
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands()-- started");
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands()");      
       List<string> tmpList = new List<string>();
 
-      /* 
-       * trying different re writes
-      var result1 =
-      from db in StaticVariable.DestinationsMatchedByRegExDataRecord
-        select new
-        {
-          db.CustomerGroupBand,
-          db.CustomerGroupBandDescription,
-          db.CustomerFirstInitialRate,
-          db.CustomerAllSchemes,
-          db.CustomerConnectionCost,
-          db.CustomerCutOff1Cost,
-          db.CustomerCutOff2Duration,
-          db.CustomerDestinationType,
-          db.CustomerDialTime,
-          db.CustomerFirstSubseqRate,
-          db.CustomerFourthInitialRate,
-          db.CustomerFourthSubseqRate,
-          db.CustomerInitialIntervalLength,
-          db.CustomerIntervalsAtInitialCost,
-          db.CustomerMinCharge,
-          db.CustomerMinDigits,
-          db.CustomerMinimumTime,
-          db.CustomerMinimumIntervals,
-          db.CustomerMultiLevelEnabled,
-          db.CustomerRounding,
-          db.CustomerSecondInitialRate,
-          db.CustomerSecondSubseqRate,
-          db.CustomerSubsequentIntervalLength,
-          db.CustomerTableName,
-          db.CustomerThirdInitialRate,
-          db.CustomerThirdSubseqRate,
-          db.CustomerTimeScheme,
-          db.CustomerUsingGroupBands,
-          db.ChargingType
-        }
-        into temp
-        where
-        (!temp.CustomerGroupBand.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase) ||
-         !temp.CustomerGroupBandDescription.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase))
-        && (temp.CustomerUsingGroupBands.ToUpper().Equals("TRUE"))
-        orderby temp.CustomerGroupBand
-        select new { temp.CustomerGroupBand, temp.ChargingType}
-        into anotherTemp
-        where 
-
-
-      var tmp = result1.ToList();
-      delete above
-      */
       var result =
         (from db in StaticVariable.CustomerDetailsDataRecord
          where (!db.CustomerGroupBand.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase) || !db.CustomerGroupBandDescription.ToUpper().Equals("NULL", StringComparison.CurrentCultureIgnoreCase))
@@ -1329,20 +1251,27 @@ namespace ProcessTariffWorkbook
       List<string> errorList = new List<string>();      
       const int sourceDestinationBand = 3;
 
+      //var result = StaticVariable.CustomerDetailsDataRecord.Where(a => a.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? a.CustomerPrefixName : a.StdPrefixName);
+
+      var result2 = StaticVariable.CustomerDetailsDataRecord.Where(b => b.ChargingType.ToUpper().Equals("PULSE"));
+
+      
+      
+
       foreach (string sdb in StaticVariable.SourceDestinationBands)
       {
         string[] sourceDestinationAry = sdb.Split('\t');
         uniqueSourceDestinations.Add(sourceDestinationAry[sourceDestinationBand]);
       }
       uniqueSourceDestinations = uniqueSourceDestinations.Distinct().ToList();
-      List<string> bandsInUse = new List<string>();
+      var bandsInUse = new List<string>();
       bool found = false;
 
       foreach (DataRecord d in StaticVariable.CustomerDetailsDataRecord)
       {        
         bandsInUse.Add(d.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? d.CustomerGroupBand : d.StdBand);       
       }
-      bandsInUse = bandsInUse.Distinct().ToList();
+      bandsInUse = bandsInUse.Distinct().ToList();      
 
       foreach (var tok in uniqueSourceDestinations)
       {
@@ -2033,10 +1962,10 @@ namespace ProcessTariffWorkbook
             StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It must be no greater than " + Constants.TwbBandLengthLimit);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
-          if (StaticVariable.ExportNds.ToUpper().Equals("TRUE") && matrixTokens[band].Length > Constants.NdsBandLengthLimit)
+          if (StaticVariable.ExportNds.ToUpper().Equals("TRUE") && matrixTokens[band].Length > Constants.V5Tc2BandLengthLimit)
           {
             StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The NDS band length is over " + Constants.NdsBandLengthLimit + " characters limit.");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The NDS band length is over " + Constants.V5Tc2BandLengthLimit + " characters limit.");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           foreach (string token in matrixTokens)
