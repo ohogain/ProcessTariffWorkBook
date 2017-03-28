@@ -25,7 +25,6 @@ namespace ProcessTariffWorkbook
       ErrorProcessing.AddMainlandPricesToDependentCountries();
       ErrorProcessing.FindMissingInternationalCountries();
 
-
       StaticVariable.Errors.Add(Environment.NewLine + "........finished");
       ErrorProcessing.OutputToErrorLog();
       Console.WriteLine("oxo....");

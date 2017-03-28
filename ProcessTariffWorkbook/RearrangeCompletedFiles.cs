@@ -1177,8 +1177,8 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Destination Type=" + dr.CustomerDestinationType);
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpelling : dr.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName);
-      pricesini.Add("Minimum Cost=" + dr.CustomerMinCharge);
-      pricesini.Add("Connection Charge=" + dr.CustomerConnectionCost + Environment.NewLine);
+      pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerMinCharge));
+      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerConnectionCost + Environment.NewLine));
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader()-- finished");
     }
     private static void CreateCappedHeader(List<string> pricesini, DataRecord details, string headerName)
@@ -1205,8 +1205,8 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Destination Type=" + details.CustomerDestinationType);
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpelling : details.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName);
-      pricesini.Add("Minimum Cost=" + details.CustomerMinCharge);
-      pricesini.Add("Connection Charge=" + details.CustomerConnectionCost + Environment.NewLine);
+      pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(details.CustomerMinCharge));
+      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost + Environment.NewLine));
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()-- finished");
     }
     private static void CreatePulseHeader(List<string> pricesini, DataRecord details, string headerName)
@@ -1227,8 +1227,8 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Minimum Digits=" + details.CustomerMinDigits);
       string bandDescription = details.CustomerPrefixName.Length > Constants.v5BandDescriptionLength ? details.CustomerPrefixName.Substring(0, 20) : details.CustomerPrefixName;
       pricesini.Add("Band Description=" + bandDescription);
-      pricesini.Add("Minimum Cost=" + details.CustomerMinCharge);
-      pricesini.Add("Connection Charge=" + details.CustomerConnectionCost);
+      pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(details.CustomerMinCharge));
+      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost));
       pricesini.Add("Destination Type=" + details.CustomerDestinationType);
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpelling : details.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName + Environment.NewLine);
@@ -1238,10 +1238,10 @@ namespace ProcessTariffWorkbook
     {
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()-- started");
       //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()");
-      string rate1 = result.CustomerFirstInitialRate.Equals(result.CustomerFirstSubseqRate) ? result.CustomerFirstInitialRate : "(" + result.CustomerFirstInitialRate + "," + result.CustomerFirstSubseqRate + ")";
-      string rate2 = result.CustomerSecondInitialRate.Equals(result.CustomerSecondSubseqRate) ? result.CustomerSecondInitialRate : "(" + result.CustomerSecondInitialRate + "," + result.CustomerSecondSubseqRate + ")";
-      string rate3 = result.CustomerThirdInitialRate.Equals(result.CustomerThirdSubseqRate) ? result.CustomerThirdInitialRate : "(" + result.CustomerThirdInitialRate + "," + result.CustomerThirdSubseqRate + ")";
-      string rate4 = result.CustomerFourthInitialRate.Equals(result.CustomerFourthSubseqRate) ? result.CustomerFourthInitialRate : "(" + result.CustomerFourthInitialRate + "," + result.CustomerFourthSubseqRate + ")";
+      string rate1 = result.CustomerFirstInitialRate.Equals(result.CustomerFirstSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate) + ")";
+      string rate2 = result.CustomerSecondInitialRate.Equals(result.CustomerSecondSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondSubseqRate) + ")";
+      string rate3 = result.CustomerThirdInitialRate.Equals(result.CustomerThirdSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdSubseqRate) + ")";
+      string rate4 = result.CustomerFourthInitialRate.Equals(result.CustomerFourthSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthSubseqRate) + ")";
       return rate1 + "," + rate2 + "," + rate3 + "," + rate4;
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()-- finished");
     }
@@ -1249,7 +1249,7 @@ namespace ProcessTariffWorkbook
     {
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()-- started");
       //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()");
-      return result.CustomerFirstInitialRate + "," + result.CustomerFirstSubseqRate;
+      return ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate);
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()-- finished");
     }
     private static string GetPulsePrices(DataRecord result)

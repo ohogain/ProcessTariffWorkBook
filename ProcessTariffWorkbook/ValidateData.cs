@@ -92,12 +92,11 @@ namespace ProcessTariffWorkbook
     }
     public static string SetToFourDecimalPlaces(string value)
     {
-      double parsedValue = 0.0;
       string result = String.Empty;
       value = value.Trim();
-
       try
       {
+        var parsedValue = 0.0;
         if (Double.TryParse(value, out parsedValue))
         {
           double dValue = parsedValue;
@@ -137,8 +136,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat()");
       List<string> resultsList = new List<string>();
 
-      var query =
-        //from DataRecord dr in StaticVariable.PreRegExDataRecord
+      var query =        
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select new { dr.CustomerPrefixName, dr.CustomerFirstInitialRate, dr.CustomerFirstSubseqRate, dr.CustomerSecondInitialRate, dr.CustomerSecondSubseqRate, 
           dr.CustomerThirdInitialRate, dr.CustomerThirdSubseqRate, dr.CustomerFourthInitialRate, dr.CustomerFourthSubseqRate, dr.CustomerMinCharge, 
@@ -162,17 +160,11 @@ namespace ProcessTariffWorkbook
           {
             foreach (string price in resultsList)
             {
-              if (CheckIfDouble(price))
-              {
-                continue;
-              }
-              else
-              {
-                StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the prices is not a double. ");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " --> " + price);
-                ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-              }
+              if (CheckIfDouble(price)) continue;
+              StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the prices is not a double. ");
+              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " --> " + price);
+              ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
           catch (Exception e)
@@ -188,54 +180,71 @@ namespace ProcessTariffWorkbook
           int parsedIntValue = 0;
           if (!double.TryParse(tok.CustomerFirstInitialRate, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Price per minute is not in correct format. it must be a double: " + tok.CustomerFirstInitialRate);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Price per minute is not in correct format. it must be a double: " + tok.CustomerFirstInitialRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerFirstSubseqRate, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Capped Price is not in correct format. it must be a double: " + tok.CustomerFirstSubseqRate);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Capped Price is not in correct format. it must be a double: " + tok.CustomerFirstSubseqRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!int.TryParse(tok.CustomerSecondInitialRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Capped Time is not in correct format. it must be a int. time in minutes: " + tok.CustomerSecondInitialRate);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Capped Time is not in correct format. it must be a int. time in minutes: " + tok.CustomerSecondInitialRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerMinCharge, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Minimum Cost is not in correct format. it must be a double. " + tok.CustomerMinCharge);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double. " + tok.CustomerMinCharge);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerConnectionCost, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Connection Cost is not in correct format. it must be a double. " + tok.CustomerConnectionCost);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double. " + tok.CustomerConnectionCost);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
         else if (tok.ChargingType.ToUpper().Equals(Constants.Pulse))
         {
+          const int minimumPulseLength = 1;
           double parsedDoubleValue = 0.0;
           int parsedIntValue = 0;
           if (!int.TryParse(tok.CustomerFirstInitialRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Pulse Length given in decimal format must be multipled by 100. it must be changed to an int: " + tok.CustomerFirstInitialRate);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length given in decimal format must be multipled by 100. it must be changed to an int: " + tok.CustomerFirstInitialRate);
+            ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+          }
+          if (parsedIntValue / 100 < minimumPulseLength)
+          {
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length is too short: " + tok.CustomerFirstInitialRate);
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It may not have been multipled by 100. It must be changed to an int from a decimal: ");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!int.TryParse(tok.CustomerFirstSubseqRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Pulse Unit is not in correct format. it must be a int, normally 1: " + tok.CustomerFirstSubseqRate);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Unit is not in correct format. it must be a int, normally 1: " + tok.CustomerFirstSubseqRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerMinCharge, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Minimum Cost is not in correct format. it must be a double: " + tok.CustomerMinCharge);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double: " + tok.CustomerMinCharge);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerConnectionCost, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "Connection Cost is not in correct format. it must be a double: " + tok.CustomerConnectionCost);
+            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double: " + tok.CustomerConnectionCost);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-          }
+          }          
         }
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat() -- finished");
@@ -254,8 +263,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes()");      
       if (StaticVariable.ExportNds.ToUpper().Equals("TRUE"))
       {
-        var query =
-        //from DataRecord dr in StaticVariable.PreRegExDataRecord
+        var query =        
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         where !dr.CustomerDestinationType.ToUpper().Equals("LOCAL") && !dr.CustomerDestinationType.ToUpper().Equals("NATIONAL") &&
             !dr.CustomerDestinationType.ToUpper().Equals("INTERNATIONAL") && !dr.CustomerDestinationType.ToUpper().Equals("INTERNATIONAL MOBILE") &&
@@ -298,8 +306,9 @@ namespace ProcessTariffWorkbook
          where db.PrefixNumber.Equals("?")
          select db.TableName;
 
-      var extraTablesInPrefixes = prefixes.Except(tmpTableLinksList).ToList();
-      var extraTablesInTableLinks = tmpTableLinksList.Except(prefixes).ToList();
+      var enumerable = prefixes as IList<string> ?? prefixes.ToList();
+      var extraTablesInPrefixes = enumerable.Except(tmpTableLinksList).ToList();
+      var extraTablesInTableLinks = tmpTableLinksList.Except(enumerable).ToList();
 
       if (extraTablesInPrefixes.Any())
       {
