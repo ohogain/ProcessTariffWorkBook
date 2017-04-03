@@ -17,8 +17,8 @@ namespace ProcessTariffWorkbook
     
     public static void CreateCategoryMatrix()
   {
-    Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix()-- started");
-    StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix()");
+    Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- started");    
+    StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- started");
     const string categoryMatrixHeader = "Source\tBand\tBand Type\tBand Description\tEnterprise Destination\tMobile Destination\tLandLine Destination\tEnterprise Call Type Filter\tMobile Top Premium Text Filter\tMobile Top Data Roaming Filter\tMobile Top Directory Enquiry Filter\tTop Directory Enquiry Filter\tLandline Top Directory Enquiry Filter\tEGL Subscription Report\tOperator Revenue\tBill Band Group Filter\tVoice Traffic Filter\tData Traffic Filter\tMessage Traffic Filter\tParentEnterpriseLeagueTables\tMobile Top Roaming Filter\tRoaming Calls Report\tFlat Rate\tRoaming Trips\tRoaming Costs Reports";
     StringBuilder sb = new StringBuilder();
     const string categoryMatrixTab = "CategoryMatrix";    
@@ -120,19 +120,20 @@ namespace ProcessTariffWorkbook
     }
     catch (Exception e)
     {
-      StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CreateCategoryMatrix()");
-      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem writing to category matrix xlsx file");
-      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CreateCategoryMatrix() -- started");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem writing to category matrix xlsx file");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
       ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
     }
-    StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CreateCategoryMatrix()");
-    StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The CategoryMatrix has been written to final folder");
-    Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix()-- finished");
-  }
+    StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CreateCategoryMatrix() -- started");
+    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The CategoryMatrix has been written to final folder");
+    Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- finished");
+    }
     public static void WriteToV6TwbXlsxFile()
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV6TwbXlsxFile() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV6TwbXlsxFile()");                        
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV6TwbXlsxFile() -- started");                        
       try
       { //need to go through each method and clean up / improve
         SpreadsheetGear.IWorkbook workbook = SpreadsheetGear.Factory.GetWorkbook(StaticVariable.V6TwbOutputXlsxFile);      
@@ -149,17 +150,18 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToV6TwbXlsxFile()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem writing to output xlsx file");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToV6TwbXlsxFile() -- started");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem writing to output xlsx file");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV6TwbXlsxFile() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV6TwbXlsxFile() -- finish");
     }
     private static void WriteToBandsWorkSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToBandsWorkSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToBandsWorkSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToBandsWorkSheet() -- started");
       const string bandsHeader = "Band Name\tDescription\tRate1\tRate1 Initial\tRate1 Subseq\tRate2\tRate2 Initial\tRate2 Subseq" +
                                  "\tRate3\tRate3 Initial\tRate3 Subseq\tRate4\tRate4 Initial\tRate4 Subseq\tMinimum Call Cost" +
                                  "\tConnection Charge" + "\tWhole Interval Charging\tTime Scheme Name\tInitial Interval Length" +
@@ -240,9 +242,9 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem with writing duration Bands into Excel sheet");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem with writing duration Bands into Excel sheet");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }        
       }
@@ -291,9 +293,9 @@ namespace ProcessTariffWorkbook
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem with writing capped Bands into Excel sheet");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet() -- started");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem with writing capped Bands into Excel sheet");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -347,20 +349,21 @@ namespace ProcessTariffWorkbook
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem with writing pulse Bands into Excel sheet");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToBandsWorkSheet() -- started");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem with writing pulse Bands into Excel sheet");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
       }
       #endregion       // column allocation incorect
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToBandsWorkSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToBandsWorkSheet() -- finish");
     }
     private static void WriteToTariffPlanSheet(SpreadsheetGear.IWorkbook workbook) 
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTariffPlanSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTariffPlanSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTariffPlanSheet() -- started");
       int yAxis = 0;
       string line = string.Empty;
       const string sheetName = "TariffPlan";  
@@ -373,9 +376,9 @@ namespace ProcessTariffWorkbook
         if (tariffPlanLine[0].ToUpper().Contains("TARIFF PLAN NAME"))
         {
           line = tariffPlanLine[0] + "\t" + tariffPlanLine[1] + " " + StaticVariable.Version; 
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToTariffPlanSheet");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "'Tariff Plan Name' has the version number added to it - '" + tariffPlanLine[1] + " " + StaticVariable.Version + "'");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The version number can be removed when V6 (TDI) uses the tariff plan naming convention");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteToTariffPlanSheet");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "'Tariff Plan Name' has the version number added to it - '" + tariffPlanLine[1] + " " + StaticVariable.Version + "'");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The version number can be removed when V6 (TDI) uses the tariff plan naming convention");
         }
         else if (tariffPlanLine[0].ToUpper().Contains("RATE"))
         {
@@ -414,11 +417,12 @@ namespace ProcessTariffWorkbook
         }                               
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTariffPlanSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTariffPlanSheet() -- finish");
     }
     private static void WriteToTableLinksSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTableLinksSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTableLinksSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTableLinksSheet() -- started");
       int yAxis = 0;      
       const string tableLinksHeader = "Table Name\tPrefix\tPass Prefix\tDestination";
       const string sheetName = "TableLinks";
@@ -444,11 +448,12 @@ namespace ProcessTariffWorkbook
         yAxis++;
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTableLinksSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTableLinksSheet() -- finish");
     }
     private static void WriteToPrefixBandsSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixBandsSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixBandsSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixBandsSheet() -- started");
       int yAxis = 0;
       string pBDestination = string.Empty;
       string pBBand = string.Empty;
@@ -479,11 +484,12 @@ namespace ProcessTariffWorkbook
         yAxis++;
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixBandsSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixBandsSheet() -- finish");
     }
     private static void WriteToPrefixNumbersSheet(SpreadsheetGear.IWorkbook workbook, List<string> prefixList)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- started");
       int yAxis = 0;      
       const string prefixNumbersHeader = "Table Name\tPrefix Number\tPrefix Name";
       const string sheetName = "PrefixNumbers";
@@ -522,12 +528,13 @@ namespace ProcessTariffWorkbook
         }
         yAxis++;
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- finished");
     }    
     private static void WriteToSourceDestinationBandsSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToSourceDestinationBandsSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToSourceDestinationBandsSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToSourceDestinationBandsSheet() -- started");
       int yAxis = 0;
       const string sourceDestinationBandsHeader = "Table Name\tSource\tDestination\tBand";
       const string sheetName = "SourceDestinationBands";
@@ -553,11 +560,12 @@ namespace ProcessTariffWorkbook
         yAxis++;
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToSourceDestinationBandsSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToSourceDestinationBandsSheet() -- finish");
     }
     private static void WriteToTimeSchemesSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesSheet() -- started");
       int yAxis = 0;
       const string timeSchemesHeader = "Time Scheme Name\tHolidays Relevant\tDefault Rate";
       const string sheetName = "TimeSchemes";
@@ -584,11 +592,12 @@ namespace ProcessTariffWorkbook
         yAxis++;
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesSheet() -- finish");
     }
     private static void WriteToTimeSchemesExceptionsSheet(SpreadsheetGear.IWorkbook workbook)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesExceptionsSheet() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesExceptionsSheet()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesExceptionsSheet() -- started");
       int yAxis = 0;
       const string timeSchemeExceptionsHeader = "Time Scheme Name\tDay\tStart\tFinish\tRate";
       const string sheetName = "TimeSchemeExceptions";
@@ -614,11 +623,12 @@ namespace ProcessTariffWorkbook
         yAxis++;
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesExceptionsSheet() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToTimeSchemesExceptionsSheet() -- finish");
     }    
     public static void CopyOutputXlsxFileToV6OpUtilFolder(bool moveXlsxFileToOpUtilFolder)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder()");                            
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- started");                            
 
       if (moveXlsxFileToOpUtilFolder)
       {        
@@ -632,10 +642,10 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception de)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem deleting sheet files in TWB drop folder");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + de.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem deleting sheet files in TWB drop folder");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + de.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         try
@@ -644,71 +654,80 @@ namespace ProcessTariffWorkbook
         }
         catch (PathTooLongException ptl)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Path too long. It must not exceed 248 chars");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + ptl.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Path too long. It must not exceed 248 chars");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ptl.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         catch (ArgumentException ae)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is a zero-length string, has invalid chars or only white space");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + ae.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is a zero-length string, has invalid chars or only white space");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ae.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         catch (NotSupportedException nse)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is in an invalid format");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + nse.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is in an invalid format");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + nse.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         catch (FileNotFoundException fnf)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Source file not found");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + fnf.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Source file not found");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + fnf.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem moving sheet files to TWB drop folder");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem moving sheet files to TWB drop folder");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- finished");
     }
     public static void WriteOutV5Tc2Files()
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- started");
       CreateV5Tc2PricesFile();
+
+      // matrix must come after the duration, pulse & capped rates - change this.
+
       WritePrefixIniFiles(MatchPrefixesWithDestinations());
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- finished");
     }
     private static void CreateV5Tc2PricesFile()
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile() -- started");
       List<string> v5PricesIni = new List<string>();
       MakeGeneralHeader(v5PricesIni);
       AddDurationPrices(v5PricesIni);
       AddCappedPrices(v5PricesIni);
-      AddPulsePrices(v5PricesIni);                   
+      AddPulsePrices(v5PricesIni);
+      GetDurationMatrix(v5PricesIni);
+      GetCappedMatrix(v5PricesIni);
+      GetPulseMatrix(v5PricesIni);
       WriteToV5Tc2PricesFile(v5PricesIni);
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateV5Tc2PricesFile() -- finished");
     }
     private static void MakeGeneralHeader(List<string> pricesIni )
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader()"); 
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader() -- started"); 
       pricesIni.Add("[GENERAL]");
       pricesIni.Add("Carrier=" + GetTariffPlanValues("OPERATOR NAME"));
       pricesIni.Add("Release Note=New Prices");
@@ -736,12 +755,13 @@ namespace ProcessTariffWorkbook
       pricesIni.Add(Environment.NewLine + "[LINK]");
       pricesIni.Add("Start Table=" + GetTariffPlanValues("STARTING POINT TABLE NAME"));
       FillTableLinksValues(StaticVariable.TableLinks, pricesIni);
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader() -- finished");
     }    
     private static string GetTariffPlanValues(string word)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- started");
       string result = string.Empty;
       const int key = 0;
       const int value = 1;
@@ -754,13 +774,14 @@ namespace ProcessTariffWorkbook
           break;
         }
       }
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- finished");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- finished");
       return result;
     }
     private static void FillTableLinksValues(List<string> tableLinks, List<string> defaultheader )
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- started");
       const int startTable = 0;
       const int prefix = 1;
       const int passPrefix = 2;
@@ -770,24 +791,25 @@ namespace ProcessTariffWorkbook
         string[] line = variable.Split('\t');        
         defaultheader.Add(line[startTable] + ", " + line[destinationTable].Substring(line[destinationTable].IndexOf("_") + 1) + ", " + line[prefix] + ", " + line[destinationTable] + ", " + line[passPrefix]);       
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- finished");
     }
     private static void FillHolidays(List<string> pricesini)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays() -- started");
       string hols = GetTariffPlanValues("HOLIDAY");
       string[] holidays = hols.Split(',');
       foreach (var var in holidays)
       {
         pricesini.Add(var.Trim());
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillHolidays() -- finished");
     }  
     private static void FillTimeSchemes(List<string> pricesini )
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes() -- started");
       const int timeSchemeName = 0;      
       const int defaultRate = 2;
       const int day = 1;
@@ -811,12 +833,13 @@ namespace ProcessTariffWorkbook
           }
         }
       }      
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes() -- finished");
     }    
     private static string GetDefaultEntriesValues(string word)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues() -- started");
       string result = string.Empty;
       const int key = 0;
       const int value = 1;
@@ -829,11 +852,13 @@ namespace ProcessTariffWorkbook
           break;
         }
       }
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDefaultEntriesValues() -- finished");
       return result;
     }
     private static string AdjustRoundingValueForPricesIni(string value)
     {
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AdjustRoundingValueForPricesIni() -- started");
       string result = string.Empty;
 
       if (value.ToLower().Equals("yes") || value.ToLower().Equals("y") || value.ToLower().Equals("1") || value.ToLower().Equals("roundup") || value.ToLower().Equals("round up"))
@@ -844,12 +869,13 @@ namespace ProcessTariffWorkbook
       {
         result = "3";
       }
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AdjustRoundingValueForPricesIni() -- finished");
       return result;
     }
     private static void WriteToV5Tc2PricesFile(List<string> pricesini)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile() -- started");
       string pricesFile = StaticVariable.V6TwbOutputXlsxFile.Replace(".xlsx", ".ini");
 
       if (File.Exists(pricesFile))
@@ -864,12 +890,13 @@ namespace ProcessTariffWorkbook
         }
         oSw.Close();
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToV5Tc2PricesFile() -- finished");
     } 
     private static void WritePrefixIniFiles(List<string> prefixList)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- started");
       const int tableName = 0;
       const int prefix = 1;
       const int prefixName = 2;
@@ -918,12 +945,13 @@ namespace ProcessTariffWorkbook
           oSw.Close();          
         }
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- finished");
     }
     private static List<string> MatchPrefixesWithDestinations()
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
       List<string> prefixesMatched = new List<string>();
 
       var query =
@@ -938,27 +966,29 @@ namespace ProcessTariffWorkbook
           : entry.StandardPrefixName;
         prefixesMatched.Add(entry.TableName + "\t" + entry.PrefixNumber + "\t" + prefixName);
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations()-- finished");
       prefixesMatched = prefixesMatched.Distinct().ToList();
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");      
       return prefixesMatched;
     }
     private static List<string> GetNationalDomesticPrefixes()
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- started");
       var nationalTableResult =
         from pndr in StaticVariable.PrefixNumbersRecord
         where pndr.TableName.ToUpper().Equals(StaticVariable.NationalTableSpelling.ToUpper()) && !pndr.PrefixNumber.ToUpper().Equals("?") //exclude national,?     
         select pndr;
 
       var nationalPrefixes = nationalTableResult.Select(column => column.TableName + "\t" + ValidateData.CapitaliseWord(column.PrefixNumber + "\t" + column.StandardPrefixName)).ToList();
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
       return nationalPrefixes;
     }
     private static void AddDurationPrices(List<string> pricesini)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices() -- started");
       string previousBand = string.Empty;           
 
       var queryDuration =
@@ -979,13 +1009,14 @@ namespace ProcessTariffWorkbook
         pricesini.Add("(" + currentBand + ")" + name + "," + GetDurationPrices(details));
         previousBand = currentBand;        
       }
-      GetDurationMatrix(pricesini);
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices()-- finished");
+      //GetDurationMatrix(pricesini);
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices() -- finished");
     }
     private static void AddCappedPrices(List<string> pricesini)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices() -- started");
       string previousBand = string.Empty;      
       string name = string.Empty;
 
@@ -1006,13 +1037,14 @@ namespace ProcessTariffWorkbook
         pricesini.Add("(" + currentBand + ")" + name + "," + GetCappedPrices(details));
         previousBand = currentBand;
       }
-      GetCappedMatrix(pricesini);
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices()-- finished");
+      //GetCappedMatrix(pricesini);
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddCappedPrices() -- finished");
     }
     private static void AddPulsePrices(List<string> pricesini)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices()");            
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices() -- started");            
       string previousBand = string.Empty;      
       string name = string.Empty;
 
@@ -1033,13 +1065,14 @@ namespace ProcessTariffWorkbook
         pricesini.Add("(" + currentBand + ")" + name + "," + GetPulsePrices(details));
         previousBand = currentBand;
       }
-      GetPulseMatrix(pricesini);
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices()-- finished");
+      //GetPulseMatrix(pricesini);
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AddPulsePrices() -- finished");
     }   
     private static void GetDurationMatrix(List<string> priceIni)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix() -- started");
       const int sourceColumn = 1;
       const int destinationColumn = 2;
       const int bandColumn = 3;
@@ -1072,12 +1105,13 @@ namespace ProcessTariffWorkbook
           }
         }
       }      
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix()-- finished");      
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationMatrix() -- finished");
     }
     private static void GetCappedMatrix(List<string> priceIni)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix() -- started");
       const int sourceColumn = 1;
       const int destinationColumn = 2;
       const int bandColumn = 3;
@@ -1110,12 +1144,13 @@ namespace ProcessTariffWorkbook
           }
         }
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedMatrix() -- finished");
     }
     private static void GetPulseMatrix(List<string> priceIni)
     {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix()");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix() -- started");
       const int sourceColumn = 1;
       const int destinationColumn = 2;
       const int bandColumn = 3;
@@ -1148,12 +1183,13 @@ namespace ProcessTariffWorkbook
           }
         }
       }
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix()-- finished");
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix() -- finished");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix() -- finished");
     }
     private static void CreateDurationHeader(List<string> pricesini, DataRecord dr, string headerName)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.alwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + dr.CustomerTimeScheme);
@@ -1179,12 +1215,13 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Prefix Table=" + tableName);
       pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerMinCharge));
       pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerConnectionCost + Environment.NewLine));
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- finished");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- finished");
     }
     private static void CreateCappedHeader(List<string> pricesini, DataRecord details, string headerName)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.alwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
@@ -1207,12 +1244,13 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Prefix Table=" + tableName);
       pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(details.CustomerMinCharge));
       pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost + Environment.NewLine));
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
     }
     private static void CreatePulseHeader(List<string> pricesini, DataRecord details, string headerName)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.alwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
@@ -1232,38 +1270,43 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Destination Type=" + details.CustomerDestinationType);
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpelling : details.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName + Environment.NewLine);
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
     }
     private static string GetDurationPrices(DataRecord result)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- started");
       string rate1 = result.CustomerFirstInitialRate.Equals(result.CustomerFirstSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate) + ")";
       string rate2 = result.CustomerSecondInitialRate.Equals(result.CustomerSecondSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondSubseqRate) + ")";
       string rate3 = result.CustomerThirdInitialRate.Equals(result.CustomerThirdSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdSubseqRate) + ")";
       string rate4 = result.CustomerFourthInitialRate.Equals(result.CustomerFourthSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthSubseqRate) + ")";
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- finished");
       return rate1 + "," + rate2 + "," + rate3 + "," + rate4;
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- finished");
+      
     }
     private static string GetCappedPrices(DataRecord result)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- finished");
       return ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate);
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- finished");
+      
     }
     private static string GetPulsePrices(DataRecord result)
     {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices()-- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices()");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- started");
+      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- started");
       const string pulseZeroRate = "1,0";
       return result.CustomerFirstInitialRate + "," + result.CustomerFirstSubseqRate + "," + pulseZeroRate + "," + pulseZeroRate + "," + pulseZeroRate;
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices()-- finished");
+      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- finished");
     }
     private static List<string> DisplayHolidays(string[] tariffPlanLine)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays()");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- started");
       string firstHoliday = string.Empty;
       List<string> holidaysListed = new List<string>();
 
@@ -1281,6 +1324,7 @@ namespace ProcessTariffWorkbook
         holidaysListed.Add(tariffPlanLine[0] + "\t" + tariffPlanLine[1].Trim());
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- finish");
       return holidaysListed;
     }
   }

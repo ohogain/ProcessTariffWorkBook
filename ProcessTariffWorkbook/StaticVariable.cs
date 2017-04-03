@@ -12,9 +12,11 @@ namespace ProcessTariffWorkbook
     public static string ToTwbFolder = string.Empty;
     public static bool MoveOutputSpreadSheetToV6TwbFolder = false;
     public static string DirectoryName = string.Empty;
-    public static List<string> ConsoleOutput = new List<string>();
-    public static string ErrorLogFile = string.Empty;
-    public static List<string> Errors = new List<string>();
+    public static List<string> ConsoleOutput = new List<string>();    
+    public static string ProgressFile = string.Empty;
+    public static string ConsoleErrorFile = string.Empty;
+    public static List<string> ProgressDetails = new List<string>();
+    //public static List<string> ConsoleErrorDetails = new List<string>();
     public static List<string> TwbHeader = new List<string>();
     public static string IntermediateLog= string.Empty;
     public static string InputFile = string.Empty;

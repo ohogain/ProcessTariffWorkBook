@@ -6,15 +6,12 @@
 //---------
 
 using System;
-using System.CodeDom.Compiler;
+
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
+
 
 namespace ProcessTariffWorkbook
 {
@@ -23,7 +20,7 @@ namespace ProcessTariffWorkbook
     public static void PreRegExDataRecordValidate()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "PreRegExDataRecordValidate() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PreRegExDataRecordValidate()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PreRegExDataRecordValidate() -- started");
 
       CheckPricesAreInCorrectFormat();
       CheckForDestinationTypes();
@@ -40,19 +37,20 @@ namespace ProcessTariffWorkbook
       CheckMinimumDigits();
       CheckCutOffDuration();
       CheckMultiLevelEnabled();
-      CheckAllSchemes();
+      CheckAllSchemes(); 
       CheckDialTime();
       CheckMinimumTime();
       CheckIntervalsAtInitialCostGreaterOrEqualToZero();
       CheckDestinationTypesNames();
       CheckTableNames();
-
+      // check for duplicates in the prefix list - dictionary (key - prefix), seperate by table.
       Console.WriteLine("ValidateData".PadRight(30, '.') + "PreRegExDataRecordValidate() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PreRegExDataRecordValidate() -- finished");
     }
     public static void PostRegExDataRecordValidate()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate() -- started");
       CheckForDuplicateBands();        
       CheckForNonUniqueGroupBands();      
       CheckSourceDestinationBandsPresentInPrefixBands();
@@ -62,6 +60,7 @@ namespace ProcessTariffWorkbook
       CheckForNonMatchingNames();
       CheckChargingType();
       Console.WriteLine("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "PostRegExDataRecordValidate() -- finished");
     }
     public static bool CheckIfInteger(string value)
     {
@@ -82,10 +81,10 @@ namespace ProcessTariffWorkbook
     {
       if (sComma.Contains(","))
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForCommasInPrices()");
-        StaticVariable.Errors.Add("ParseInputFile:ReadXLSXFileIntoList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the prices contains a comma. ");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + sComma);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForCommasInPrices()");
+        StaticVariable.ProgressDetails.Add("ParseInputFile:ReadXLSXFileIntoList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the prices contains a comma. ");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + sComma);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
     }
@@ -104,9 +103,9 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData::SetToFourDecimalPlaces()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Failed to set price to 4 decimal places:");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ValidateData::SetToFourDecimalPlaces()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Failed to set price to 4 decimal places:");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       return result;
@@ -132,7 +131,7 @@ namespace ProcessTariffWorkbook
     private static void CheckPricesAreInCorrectFormat()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat() -- started");
       List<string> resultsList = new List<string>();
 
       var query =        
@@ -160,16 +159,16 @@ namespace ProcessTariffWorkbook
             foreach (string price in resultsList)
             {
               if (CheckIfDouble(price)) continue;
-              StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the prices is not a double. ");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " --> " + price);
+              StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the prices is not a double. ");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " --> " + price);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -179,32 +178,32 @@ namespace ProcessTariffWorkbook
           int parsedIntValue = 0;
           if (!double.TryParse(tok.CustomerFirstInitialRate, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Price per minute is not in correct format. it must be a double: " + tok.CustomerFirstInitialRate);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Price per minute is not in correct format. it must be a double: " + tok.CustomerFirstInitialRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerFirstSubseqRate, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Capped Price is not in correct format. it must be a double: " + tok.CustomerFirstSubseqRate);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Capped Price is not in correct format. it must be a double: " + tok.CustomerFirstSubseqRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!int.TryParse(tok.CustomerSecondInitialRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Capped Time is not in correct format. it must be a int. time in minutes: " + tok.CustomerSecondInitialRate);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Capped Time is not in correct format. it must be a int. time in minutes: " + tok.CustomerSecondInitialRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerMinCharge, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double. " + tok.CustomerMinCharge);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double. " + tok.CustomerMinCharge);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerConnectionCost, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double. " + tok.CustomerConnectionCost);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double. " + tok.CustomerConnectionCost);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -215,38 +214,39 @@ namespace ProcessTariffWorkbook
           int parsedIntValue = 0;
           if (!int.TryParse(tok.CustomerFirstInitialRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length given in decimal format must be multipled by 100. it must be changed to an int: " + tok.CustomerFirstInitialRate);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Pulse Length given in decimal format must be multipled by 100. it must be changed to an int: " + tok.CustomerFirstInitialRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (parsedIntValue / 100 < minimumPulseLength)
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length is too short: " + tok.CustomerFirstInitialRate);
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It may not have been multipled by 100. It must be changed to an int from a decimal: ");
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Pulse Length is too short: " + tok.CustomerFirstInitialRate);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "It may not have been multipled by 100. It must be changed to an int from a decimal: ");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!int.TryParse(tok.CustomerFirstSubseqRate, out parsedIntValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Unit is not in correct format. it must be a int, normally 1: " + tok.CustomerFirstSubseqRate);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Pulse Unit is not in correct format. it must be a int, normally 1: " + tok.CustomerFirstSubseqRate);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerMinCharge, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double: " + tok.CustomerMinCharge);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Minimum Cost is not in correct format. it must be a double: " + tok.CustomerMinCharge);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (!double.TryParse(tok.CustomerConnectionCost, out parsedDoubleValue))
           {
-            StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double: " + tok.CustomerConnectionCost);
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckPricesAreInCorrectFormat()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Connection Cost is not in correct format. it must be a double: " + tok.CustomerConnectionCost);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }          
         }
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckPricesAreInCorrectFormat() -- finished");
     }
     public static bool CheckIfDouble(string sValue)
     {
@@ -259,7 +259,7 @@ namespace ProcessTariffWorkbook
       // This function may need to be removed as V6 does not use hard coded destination types.
       // this function will work for V5 however you may have to remove it for V6 if you need an NDS to test.
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes()");      
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes() -- started");      
       if (StaticVariable.ExportNds.ToUpper().Equals("TRUE"))
       {
         var query =        
@@ -272,23 +272,24 @@ namespace ProcessTariffWorkbook
 
         if (query.Any())
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForDestinationTypes()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This destination type is invalid for V5 RingMaster. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It must be either 'Local', 'National', International', 'International Mobile', 'Mobile', 'Services' or 'Other'");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForDestinationTypes()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "This destination type is invalid for V5 RingMaster. ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "It must be either 'Local', 'National', International', 'International Mobile', 'Mobile', 'Services' or 'Other'");
           foreach (var item in query)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + item.CustomerPrefixName + " - " + item.CustomerDestinationType);            
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + item.CustomerPrefixName + " - " + item.CustomerDestinationType);            
           }
-          StaticVariable.Errors.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Comment out 'ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();' in method to supress killing program");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Comment out 'ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();' in method to supress killing program");
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }            
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDestinationTypes() -- finished");
     }
     private static void CheckTablesForDefaultValue()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue()");       
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue() -- started");       
       const int tableName = 0;
       const int destinationTable = 3;
       List<string> tmpTableLinksList = new List<string>();
@@ -311,25 +312,26 @@ namespace ProcessTariffWorkbook
 
       if (extraTablesInPrefixes.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTablesForDefaultValue()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "A default prefix does not have a entry in prefix links header. \nIs the prefix file missing?");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Is there an INI file that is not required?");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + extraTablesInPrefixes[0]);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckTablesForDefaultValue()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "A default prefix does not have a entry in prefix links header. \nIs the prefix file missing?");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Is there an INI file that is not required?");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + extraTablesInPrefixes[0]);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       if (extraTablesInTableLinks.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTablesForDefaultValue()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "A table in prefix links header file does not have a default prefix - ?");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Or an ini file may be missing for that prefix link.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckTablesForDefaultValue()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "A table in prefix links header file does not have a default prefix - ?");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Or an ini file may be missing for that prefix link.");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTablesForDefaultValue() -- finished");
     }
     private static void CheckRoundingForIncorrectEntry()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry() -- started");
       List<string> errors = new List<string>();       
       try
       {
@@ -352,27 +354,28 @@ namespace ProcessTariffWorkbook
         }
         if (errors.Any())
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckRoundingForIncorrectEntry()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Rounding Values are incorrect for these destinations.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be 'Yes', 'Y', 'ROUND UP', 'ROUNDUP' or '1' for round up and 'No', 'N', 'EXACT', 'NOROUND', 'NO ROUND' or '3' for no round");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckRoundingForIncorrectEntry()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Rounding Values are incorrect for these destinations.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The must be 'Yes', 'Y', 'ROUND UP', 'ROUNDUP' or '1' for round up and 'No', 'N', 'EXACT', 'NOROUND', 'NO ROUND' or '3' for no round");
           foreach (string error in errors)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
           }
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData::CheckRounding()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Exception Message :: " + e.Message);
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckRounding()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Exception Message :: " + e.Message);
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckRounding() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckRoundingForIncorrectEntry() -- finished");
     }
     private static void CheckTimeSchemeForIncorrectEntry()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry() -- started");
       List<string> errors = new List<string>();
       const int timeScheme = 0;
       bool found = false;
@@ -398,20 +401,21 @@ namespace ProcessTariffWorkbook
       }
       if (errors.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTimeSchemeForIncorrectEntry()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Time Scheme Values are incorrect for these destinations.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckTimeSchemeForIncorrectEntry()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Time Scheme Values are incorrect for these destinations.");
         foreach (string error in errors)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }     
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckRounding() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeForIncorrectEntry() -- finished");
     }
     private static void CheckIfMinCostAndRate4SubseqAreSame()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");
       List<string> pricesTheSame = new List<string>();
 
       var query =        
@@ -426,18 +430,19 @@ namespace ProcessTariffWorkbook
       if (pricesTheSame.Any())
       {
         pricesTheSame.Sort();
-        StaticVariable.Errors.Add(Environment.NewLine + "Minimum Cost is the same price as the 4th Rate Subsequent price. Check it out.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "Minimum Cost is the same price as the 4th Rate Subsequent price. Check it out.");
         foreach (string s in pricesTheSame)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + s);
         }
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- finished");
     }
     private static void CheckForFreephone()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForFreephone() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForFreephone()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForFreephone() -- started");
       var result =        
         from DataRecord db in StaticVariable.CustomerDetailsDataRecord
         where db.CustomerPrefixName.ToUpper().Contains("FREE") || db.StdBand.ToUpper().Equals("FREE") ||
@@ -449,16 +454,17 @@ namespace ProcessTariffWorkbook
 
       if (result.Count().Equals(0))
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForFreephone()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There is no entry for Freephone.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForFreephone()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There is no entry for Freephone.");
         Console.WriteLine("There is no entry for Freephone.............");
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForFreephone() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForFreephone() -- started");
     }
     private static void CheckIfFreephoneIsFree()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIfFreephoneIsFree() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIfFreephoneIsFree()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIfFreephoneIsFree() -- started");
       bool bFound = false;
       string custName = string.Empty;
 
@@ -502,11 +508,12 @@ namespace ProcessTariffWorkbook
       }
       if (bFound)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIfFreephoneIsFree()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Freephone is not zero priced. - " + custName);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckIfFreephoneIsFree()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Freephone is not zero priced. - " + custName);
         Console.WriteLine("Freephone is not zero............");
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIfFreephoneIsFree() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIfFreephoneIsFree() -- finished");
     }
     private static bool CheckIfPriceZero(string sValue)
     {     
@@ -524,7 +531,7 @@ namespace ProcessTariffWorkbook
     private static void CheckGrouping()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckGrouping() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckGrouping()");                  
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckGrouping() -- started");                  
       #region using group bands
       List<string> usingGroupBands = new List<string>();
       var queryUsingGroupBands =
@@ -538,13 +545,13 @@ namespace ProcessTariffWorkbook
       }
       if (usingGroupBands.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Using Group Bands field are incorrect for these destinations.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be 'TRUE' or 'FALSE'");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Using Group Bands field are incorrect for these destinations.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The must be 'TRUE' or 'FALSE'");
 
         foreach (string s in usingGroupBands)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + s);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
@@ -564,13 +571,13 @@ namespace ProcessTariffWorkbook
       }
       if (groupBands.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Group Band field are too long for these destinations.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be no greater than 4 chars long.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Group Band field are too long for these destinations.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The must be no greater than 4 chars long.");
 
         foreach (string band in groupBands)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + band);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + band);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
@@ -590,23 +597,24 @@ namespace ProcessTariffWorkbook
       }
       if (groupBandDescriptions.Any()) 
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Group Band Description field are too long for these destinations.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The must be no greater than 20 chars long.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckGrouping()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Group Band Description field are too long for these destinations.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The must be no greater than 20 chars long.");
 
         foreach (string s in groupBandDescriptions)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + s);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + s);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       # endregion
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckGrouping() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckGrouping() -- finished");
     }
     public static void CheckIntervalLengthsGreaterOrEqualToZero()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero() -- started");
       List<string> results = new List<string>();
       List<string> errors = new List<string>();      
       int nValue = 0;
@@ -643,11 +651,11 @@ namespace ProcessTariffWorkbook
       
       if (errors.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One or more of the interval lengths is not an integer or is less than 1. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One or more of the interval lengths is not an integer or is less than 1. ");
         foreach (string error in errors)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The illegal value is - " + error);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The illegal value is - " + error);
           var query =
             from qry in StaticVariable.CustomerDetailsDataRecord
             where qry.CustomerInitialIntervalLength.Equals(error) || qry.CustomerSubsequentIntervalLength.Equals(error)
@@ -655,9 +663,9 @@ namespace ProcessTariffWorkbook
 
           foreach (var q in query)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " - ");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + q.CustomerInitialIntervalLength );
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + q.CustomerSubsequentIntervalLength );
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " - ");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + q.CustomerInitialIntervalLength );
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + q.CustomerSubsequentIntervalLength );
           }
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
@@ -669,22 +677,23 @@ namespace ProcessTariffWorkbook
           
       if (queryIntervalLengthValues.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The interval lengths listed below are not the default 60 seconds. ");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This may be correct. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckIntervalLengthsGreaterOrEqualToZero()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The interval lengths listed below are not the default 60 seconds. ");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "This may be correct. ");
         foreach (var interval in queryIntervalLengthValues)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + interval.CustomerPrefixName + " - ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + interval.CustomerInitialIntervalLength);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + interval.CustomerSubsequentIntervalLength);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + interval.CustomerPrefixName + " - ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "initial interval Length    = " + interval.CustomerInitialIntervalLength);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.FiveSpacesPadding + "subsequent interval length = " + interval.CustomerSubsequentIntervalLength);
         }
       }    
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalLengthsGreaterOrEqualToZero() -- finished");
     }
     public static void CheckUsingCustomerNames()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames() -- started");
 
       var query =
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
@@ -693,24 +702,25 @@ namespace ProcessTariffWorkbook
 
       if (query.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckUsingCustomerNames()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Using Customer Names values must be TRUE or FALSE. The destinations below are incorrect.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckUsingCustomerNames()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Using Customer Names values must be TRUE or FALSE. The destinations below are incorrect.");
         foreach (var tok in query)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " : " + tok.CustomerUsingCustomerNames);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok.CustomerPrefixName + " : " + tok.CustomerUsingCustomerNames);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }      
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckUsingCustomerNames() -- finished");
     }
     public static void CheckMinimumIntervals()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals() -- started");
       List<string> errList = new List<string>();      
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select dr.CustomerMinimumIntervals).Distinct();
 
@@ -734,26 +744,26 @@ namespace ProcessTariffWorkbook
       errList = errList.Distinct().ToList();
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckMinimumIntervals()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the interval lengths is not an integer. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckMinimumIntervals()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the interval lengths is not an integer. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + token);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + token);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumIntervals() -- finished");
     }
     public static void CheckMinimumDigits()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumDigits()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumDigits()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumDigits() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumDigits() -- started");
       List<string> errList = new List<string>();
       
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
-        select new { dr.CustomerMinDigits, dr.CustomerPrefixName, dr.ChargingType });
+        select new { dr.CustomerMinDigits, dr.CustomerPrefixName, dr.ChargingType };
 
       foreach (var tok in query)
       {       
@@ -778,25 +788,26 @@ namespace ProcessTariffWorkbook
       }        
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckMinimumDigits()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the minimum digits is not an integer or is less than zero. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckMinimumDigits()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the minimum digits is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + token);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + token);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumDigits()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumDigits() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumDigits() -- finished");
     }
     public static void CheckCutOffDuration()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckCutOffDuration()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckCutOffDuration()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckCutOffDuration() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckCutOffDuration() -- started");
       List<string> errList = new List<string>();
       List<string> cutOffList = new List<string>();
       
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select new { dr.CustomerCutOff1Cost, dr.CustomerCutOff2Duration }).Distinct();
       foreach (var tok in query)
@@ -825,66 +836,69 @@ namespace ProcessTariffWorkbook
       errList = errList.Distinct().ToList();
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckCutOffDuration()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the Cut-Off values is not an integer or is less than zero. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckCutOffDuration()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the Cut-Off values is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "incorrect value  --> " + token);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "incorrect value  --> " + token);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckCutOffDuration()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckCutOffDuration() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckCutOffDuration() -- finished");
     }
     public static void CheckMultiLevelEnabled()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled() -- started");
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select new { dr.CustomerMultiLevelEnabled }).Distinct();
       foreach (var tok in query)
       {
         if (!(tok.CustomerMultiLevelEnabled.ToUpper().Equals("TRUE")) && !(tok.CustomerMultiLevelEnabled.ToUpper().Equals("FALSE")))
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckMultiLevelEnabled()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Multi Level Enabled values must be TRUE or FALSE. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + tok.CustomerMultiLevelEnabled);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckMultiLevelEnabled()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Multi Level Enabled values must be TRUE or FALSE. ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + tok.CustomerMultiLevelEnabled);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMultiLevelEnabled() -- finished");
     }
     public static void CheckAllSchemes()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckAllSchemes()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckAllSchemes()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckAllSchemes() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckAllSchemes() -- started");
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select new { dr.CustomerAllSchemes }).Distinct();
       foreach (var tok in query)
       {
         if (!(tok.CustomerAllSchemes.ToUpper().Equals("TRUE")) && !(tok.CustomerAllSchemes.ToUpper().Equals("FALSE")))
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckAllSchemes()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "All Schemes values must be TRUE or FALSE. ");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + tok.CustomerAllSchemes);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckAllSchemes()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "All Schemes values must be TRUE or FALSE. ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + tok.CustomerAllSchemes);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckAllSchemes()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckAllSchemes() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckAllSchemes() -- finished");
     }
     public static void CheckDialTime()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDialTime()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDialTime()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDialTime() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDialTime() -- started");
       List<string> errList = new List<string>();
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select dr.CustomerDialTime).Distinct();
       foreach (var tok in query)
@@ -907,26 +921,28 @@ namespace ProcessTariffWorkbook
       errList = errList.Distinct().ToList();
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckDialTime()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the Dial Time values is not an integer or is less than zero. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckDialTime()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the Dial Time values is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + token);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + token);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDialTime()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDialTime() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDialTime() -- finished");
     }
     public static void CheckMinimumTime()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumTime()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumTime()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumTime() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumTime() -- started");
       List<string> errList = new List<string>();      
 
       var query =
-        (//from DataRecord dr in StaticVariable.PreRegExDataRecord
+        (
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         select dr.CustomerMinimumTime).Distinct();
+
       foreach (var tok in query)
       {
         int nParsedValue = 0;
@@ -947,24 +963,26 @@ namespace ProcessTariffWorkbook
       errList = errList.Distinct().ToList();
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckMinimumTime()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "One of the minimum digits is not an integer or is less than zero. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckMinimumTime()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "One of the minimum digits is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " --> " + token);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " --> " + token);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumTime()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckMinimumTime() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckMinimumTime() -- finished");
     }
     public static void CheckIntervalsAtInitialCostGreaterOrEqualToZero()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero() -- started");
       List<string> errList = new List<string>();      
 
       var query =
         (from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
+         
         select dr.CustomerIntervalsAtInitialCost).Distinct();
 
       foreach (var tok in query)
@@ -987,8 +1005,8 @@ namespace ProcessTariffWorkbook
             
       if (errList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckIntervalsAtInitialCostGreaterOrEqualToZero()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Intervals At Initial Cost is not an integer or is less than zero. ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckIntervalsAtInitialCostGreaterOrEqualToZero()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Intervals At Initial Cost is not an integer or is less than zero. ");
         foreach (string token in errList)
         {
           var errQuery =
@@ -998,17 +1016,18 @@ namespace ProcessTariffWorkbook
 
           foreach (var error in errQuery)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + error.CustomerPrefixName + " : " + error.CustomerIntervalsAtInitialCost);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error.CustomerPrefixName + " : " + error.CustomerIntervalsAtInitialCost);
           }          
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIntervalsAtInitialCostGreaterOrEqualToZero() -- finished");
     }
     public static void CheckTableNames()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableNames()");     
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableNames() -- started");     
       var queryTableName =
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         where !dr.CustomerTableName.Contains(StaticVariable.CountryCode) || !dr.CustomerTableName.Contains("_")
@@ -1016,11 +1035,11 @@ namespace ProcessTariffWorkbook
 
       if (queryTableName.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "This table entry is incorrect : ");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "This table entry is incorrect : ");
         foreach (var table in queryTableName)
         {          
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + table.CustomerPrefixName + " : " + table.CustomerTableName);       
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + table.CustomerPrefixName + " : " + table.CustomerTableName);       
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
@@ -1028,18 +1047,19 @@ namespace ProcessTariffWorkbook
         (from DataRecord dr in StaticVariable.CustomerDetailsDataRecord        
         select dr.CustomerTableName).Distinct();
 
-      StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
-      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Names used : ");
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckTableNames()");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Table Names used : ");
       foreach (var uniqueTable in queryTableNameUnique)
       {
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + uniqueTable);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + uniqueTable);
       }           
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableNames() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableNames() -- finished");
     }
     public static void CheckDestinationTypesNames()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames() -- started");
       var query =
         from DataRecord dr in StaticVariable.CustomerDetailsDataRecord
         where !dr.CustomerDestinationType.ToUpper().Equals("LOCAL") && !dr.CustomerDestinationType.ToUpper().Equals("NATIONAL") &&
@@ -1050,20 +1070,21 @@ namespace ProcessTariffWorkbook
 
       if (query.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckDestinationTypesNames()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Destination types that don't match the V5 default ones of 'Local', 'National', International', International Mobile', 'Mobile', 'Services' & 'Other'");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "If the tariff is for V6 (TDI) then these default destination types are irrelevant");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckDestinationTypesNames()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Destination types that don't match the V5 default ones of 'Local', 'National', International', International Mobile', 'Mobile', 'Services' & 'Other'");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If the tariff is for V6 (TDI) then these default destination types are irrelevant");
         foreach (var q in query)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " : " + q.CustomerDestinationType);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + q.CustomerPrefixName + " : " + q.CustomerDestinationType);
         }
       }                                      
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckDestinationTypesNames() -- finished");
     }
     private static void CheckForDuplicateBands()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForDuplicateBands() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDuplicateBands()");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDuplicateBands() -- started");
       List<string> tmpList = new List<string>();
       try
       {
@@ -1084,37 +1105,38 @@ namespace ProcessTariffWorkbook
         tmpList = tmpList.Distinct().ToList();
         if (tmpList.Any())
         {          
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForDuplicateBands()");
-          StaticVariable.Errors.Add("Duplicate Bands:");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForDuplicateBands()");
+          StaticVariable.ProgressDetails.Add("Duplicate Bands:");
           foreach (string tok in tmpList)
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
           }
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData::CheckForDuplicateBands()");
-        StaticVariable.Errors.Add("Exception Message :: " + e.Message);
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckForDuplicateBands()");
+        StaticVariable.ProgressDetails.Add("Exception Message :: " + e.Message);
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForDuplicateBands() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForDuplicateBands() -- finished");
     }
     public static void CheckForMoreThanTwoRegExFiles()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles()");      
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- started");      
       
       int count = CountNumberOfRegExFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);      
       if (!count.Equals(1))
       {
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetsFolder);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetsFolder);
         string[] regexes = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
         foreach (var regex in regexes)
         {
           if (regex.ToUpper().Contains("REGEX"))
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- " + Path.GetFileName(regex));
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- " + Path.GetFileName(regex));
           }
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
@@ -1123,21 +1145,24 @@ namespace ProcessTariffWorkbook
       count = CountNumberOfRegExFiles(StaticVariable.DatasetFolderToUse, Constants.TxtExtensionSearch);      
       if (!count.Equals(1))
       {
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetFolderToUse);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There can only be ONE RegEx file in the " + StaticVariable.DatasetFolderToUse);
         string[] files = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
         foreach (var regex in files)
         {
           if (regex.ToUpper().Contains("REGEX"))
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- " + Path.GetFileName(regex));
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- " + Path.GetFileName(regex));
           }
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForMoreThanTwoRegExFiles() -- finished");
     }
     private static int CountNumberOfRegExFiles(string folder, string findTextFiles)
-    {     
+    {
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CountNumberOfRegExFiles() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CountNumberOfRegExFiles() -- started");
       int fileFound = 0;
       string[] files = Directory.GetFiles(folder, findTextFiles);
       foreach (var file in files)
@@ -1146,13 +1171,15 @@ namespace ProcessTariffWorkbook
         {
           fileFound++;          
         }
-      }      
+      }
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CountNumberOfRegExFiles() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CountNumberOfRegExFiles() -- finished");
       return fileFound;      
     }   
     private static void CheckForNonMatchingNames()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()");      
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames() -- started");      
       List<string> tmpList = new List<string>();
 
       var queryNames =
@@ -1162,19 +1189,20 @@ namespace ProcessTariffWorkbook
 
       if (queryNames.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForNonMatchingNames()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Std RegEx Names that don't match the Client Names exactly");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForNonMatchingNames()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Std RegEx Names that don't match the Client Names exactly");
         foreach (var names in queryNames)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + names.StdPrefixName.PadRight(44, '.') + " : " + names.CustomerPrefixName);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + names.StdPrefixName.PadRight(44, '.') + " : " + names.CustomerPrefixName);
         }
       }           
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonMatchingNames() -- finished");
     }
     private static void CheckForNonUniqueGroupBands() // to remodel
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands()");      
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands() -- started");      
       List<string> tmpList = new List<string>();
 
       var result =
@@ -1232,33 +1260,34 @@ namespace ProcessTariffWorkbook
 
       if (tmpList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckForNonUniqueGroupBands()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There are duplicate group bands.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The bands entry may be the same but other fields may be different.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckForNonUniqueGroupBands()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There are duplicate group bands.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The bands entry may be the same but other fields may be different.");
         foreach (string dupe in tmpList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + dupe);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + dupe);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForNonUniqueGroupBands() -- finished");
     }
     public static void CheckSourceDestinationBandsPresentInPrefixBands()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands()-- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands() -- started");
       List<string> uniqueSourceDestinations = new List<string>();
       List<string> errorList = new List<string>();      
-      const int sourceDestinationBand = 3;
+      const int sourceDestinationBand = 3;      
 
-      //var result = StaticVariable.CustomerDetailsDataRecord.Where(a => a.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? a.CustomerPrefixName : a.StdPrefixName);
-
+      //var result = StaticVariable.CustomerDetailsDataRecord.Where(a => (a.CustomerUsingGroupBands.ToUpper().Equals("TRUE")) ? a.CustomerPrefixName : a.StdPrefixName);
+      
       var result2 = StaticVariable.CustomerDetailsDataRecord.Where(b => b.ChargingType.ToUpper().Equals("PULSE"));
 
       
       
 
-      foreach (string sdb in StaticVariable.SourceDestinationBands)
+      foreach (string sdb in StaticVariable.SourceDestinationBands) 
       {
         string[] sourceDestinationAry = sdb.Split('\t');
         uniqueSourceDestinations.Add(sourceDestinationAry[sourceDestinationBand]);
@@ -1290,16 +1319,17 @@ namespace ProcessTariffWorkbook
       }
       if (errorList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:CheckSourceDestinationBandsPresentInPrefixBands()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There is a Source Destination band in header file that is not found in spreadsheet.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "You may be missing an spreadsheet entry for 'Local', 'National' or 'Regional'?");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData:CheckSourceDestinationBandsPresentInPrefixBands()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There is a Source Destination band in header file that is not found in spreadsheet.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "You may be missing an spreadsheet entry for 'Local', 'National' or 'Regional'?");
         foreach (string band in errorList)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + band);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + band);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSourceDestinationBandsPresentInPrefixBands() -- finished");
     }
     public static string AdjustRoundingValueForV6Twb(string value)
     {
@@ -1317,8 +1347,8 @@ namespace ProcessTariffWorkbook
       else
       {
         result = "NULL";
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::AdjustRoundingValueForV6Twb()");
-        StaticVariable.Errors.Add(Environment.NewLine + "The rounding value is incorrect - " + value);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::AdjustRoundingValueForV6Twb()");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "The rounding value is incorrect - " + value);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       //Console.WriteLine("ValidateData".PadRight(30, '.') + "AdjustRoundingValueForV6Twb() -- finish");
@@ -1326,7 +1356,8 @@ namespace ProcessTariffWorkbook
     }        
     private static void CheckIfAllMatrixBandsUsed()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIfAllMatrixBandsUsed() -- started");      
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIfAllMatrixBandsUsed() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIfAllMatrixBandsUsed() -- started");
       HashSet<string> sourceDestinationBands = new HashSet<string>();
       List<string> allBands = new List<string>();
       const int bandColumn = 3;
@@ -1353,16 +1384,18 @@ namespace ProcessTariffWorkbook
         var found = allBands.Any(band => hSet.ToUpper().Equals(band.ToUpper()));       
         if (!found)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:CheckIfAllMatrixBandsUsed()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The matrix band - " + hSet + " was not found");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData:CheckIfAllMatrixBandsUsed()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The matrix band - " + hSet + " was not found");
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckIfAllMatrixBandsUsed() -- finish");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckIfAllMatrixBandsUsed() -- finish");
     }
     private static void CheckChargingType()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckChargingType() -- started");      
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckChargingType() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckChargingType() -- started");
       string[] chargingTypes = { Constants.Duration, Constants.Capped, Constants.Pulse };
       bool found = false;
       var queryChargingTypes =
@@ -1381,27 +1414,28 @@ namespace ProcessTariffWorkbook
         }
         if (!found)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ValidateData::CheckChargingType()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type is incorrect.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It must be either Duration, Capped or Pulse, not: " + type);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::CheckChargingType()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type is incorrect.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "It must be either Duration, Capped or Pulse, not: " + type);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         found = false;
       }
       Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckChargingType() -- finish");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckChargingType() -- finish");
     }
     public static void CheckTariffPlanList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTariffPlanList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckTariffPlanList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTariffPlanList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTariffPlanList() -- started");
       string name = string.Empty;
       string value = string.Empty;
       const int fiveCharsLong = 5;
 
       if (StaticVariable.TariffPlan.Count.Equals(0))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckTariffPlanList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "TariffPlanList is empty");
+        StaticVariable.ProgressDetails.Add("ValidateData".PadRight(30, '.') + "CheckTariffPlanList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "TariffPlanList is empty");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       else
@@ -1417,9 +1451,9 @@ namespace ProcessTariffWorkbook
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Name \t Value must be tab seperated");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Name \t Value must be tab seperated");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           switch (name.ToUpper())
@@ -1427,10 +1461,10 @@ namespace ProcessTariffWorkbook
             case Constants.TariffPlanName:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Tariff Plan Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Tariff Plan Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1442,10 +1476,10 @@ namespace ProcessTariffWorkbook
             case Constants.OperatorName:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Operator Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Operator Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1456,10 +1490,10 @@ namespace ProcessTariffWorkbook
             case Constants.ReleaseDate:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Release Date Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Release Date Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1471,10 +1505,10 @@ namespace ProcessTariffWorkbook
             case Constants.EffectiveFrom:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Effective From Date Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Effective From Date Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1485,10 +1519,10 @@ namespace ProcessTariffWorkbook
             case Constants.Country:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Country Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Country Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1500,10 +1534,10 @@ namespace ProcessTariffWorkbook
             case Constants.CountryCode:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Country Code Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Country Code Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1515,10 +1549,10 @@ namespace ProcessTariffWorkbook
             case Constants.CurrencyIsoCode:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Currency (ISOCode) Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Currency (ISOCode) Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1529,10 +1563,10 @@ namespace ProcessTariffWorkbook
             case Constants.StartingPointTableName:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Starting Point Table Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Starting Point Table Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1543,10 +1577,10 @@ namespace ProcessTariffWorkbook
             case Constants.IsPrivate:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Is Private Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Is Private Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1557,10 +1591,10 @@ namespace ProcessTariffWorkbook
             case Constants.Rate1:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 1 Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 1 Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1572,10 +1606,10 @@ namespace ProcessTariffWorkbook
             case Constants.Rate2:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 2 Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 2 Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1587,10 +1621,10 @@ namespace ProcessTariffWorkbook
             case Constants.Rate3:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 3 Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 3 Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1602,10 +1636,10 @@ namespace ProcessTariffWorkbook
             case Constants.Rate4:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 4 Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Rate 4 Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1617,20 +1651,20 @@ namespace ProcessTariffWorkbook
             case Constants.TariffReferenceNumber:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: T-ref Number Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  --> " + value + " ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: T-ref Number Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  --> " + value + " ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
               {
                 if (!value.Length.Equals(fiveCharsLong) /*|| !value.StartsWith("T")*/)
                 {
-                  StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                  StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Tariff reference Number Value Column may have an invalid value.");
-                  StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue. It must be 5 chars long.");
-                  StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  --> " + value + " ?");
+                  StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                  StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Tariff reference Number Value Column may have an invalid value.");
+                  StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue. It must be 5 chars long.");
+                  StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  --> " + value + " ?");
                   ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
                 }
                 else
@@ -1643,10 +1677,10 @@ namespace ProcessTariffWorkbook
             case Constants.Using:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Using Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Using Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1657,10 +1691,10 @@ namespace ProcessTariffWorkbook
             case Constants.Version:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Version Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Version Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1672,10 +1706,10 @@ namespace ProcessTariffWorkbook
             case Constants.ExportNds:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Export NDS Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Export NDS Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1687,10 +1721,10 @@ namespace ProcessTariffWorkbook
             case Constants.CarrierUnitPrice:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList:Carrier Unit Price Value Column has no entry. It must have a value.");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList:Carrier Unit Price Value Column has no entry. It must have a value.");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1703,10 +1737,10 @@ namespace ProcessTariffWorkbook
             case Constants.Holiday:
               if (string.IsNullOrEmpty(value))
               {
-                StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Holiday Value Column has no entry. It must have at least one value. They are comma seperated");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + "  ?");
+                StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTariffPlanList: Holiday Value Column has no entry. It must have at least one value. They are comma seperated");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + "  ?");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               }
               else
@@ -1716,21 +1750,23 @@ namespace ProcessTariffWorkbook
               }
               break;
             default:
-              StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTariffPlanList()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "CheckTariffPlanList: Default Error: A Column has no entry. It must have a value.");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + name + " ? ");
+              StaticVariable.ProgressDetails.Add("ValidateData::CheckTariffPlanList()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "CheckTariffPlanList: Default Error: A Column has no entry. It must have a value.");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Name\t\tValue");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name + " ? ");
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
               break;
           }
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTariffPlanList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTariffPlanList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTariffPlanList() -- finished");
+
     }
     private static void GetHolidaysIntoList(string value)
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetHolidaysIntoList() -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetHolidaysIntoList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "GetHolidaysIntoList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "GetHolidaysIntoList() -- started");      
       string[] differentHolidays = value.Split(',');
       foreach (string tok in differentHolidays)
       {
@@ -1744,19 +1780,20 @@ namespace ProcessTariffWorkbook
         }
         else
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles::GetHolidaysIntoList()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The holidays are not in the correct format. They must be like so: DD-Mmm-YYYY.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Check for additional white space. dates must be comma seperated");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+          StaticVariable.ProgressDetails.Add("ValidateData::GetHolidaysIntoList()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The holidays are not in the correct format. They must be like so: DD-Mmm-YYYY.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Check for additional white space. dates must be comma seperated");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetHolidaysIntoList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "GetHolidaysIntoList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "GetHolidaysIntoList() -- finished");
     }
     public static void CheckTableLinksList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTableLinksList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckTableLinksList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableLinksList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableLinksList() -- started");      
       const int headerPlusAtLeastOneEntry = 2;
       const int numberOfTableLinksColumns = 4;
       const int tableName = 0;
@@ -1766,8 +1803,8 @@ namespace ProcessTariffWorkbook
 
       if (StaticVariable.TableLinks.Count < headerPlusAtLeastOneEntry)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTableLinksList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Links List is empty");
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckTableLinksList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Table Links List is empty");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       else
@@ -1779,38 +1816,39 @@ namespace ProcessTariffWorkbook
           string[] aryLine = tok.Split('\t');
           if (!aryLine.Length.Equals(numberOfTableLinksColumns))
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTableLinksList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Links has an incorrect entry. There should be 4 columns");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckTableLinksList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Table Links has an incorrect entry. There should be 4 columns");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           for (int i = 0; i < numberOfTableLinksColumns; i++)
           {
             if (string.IsNullOrEmpty(aryLine[i]))
             {
-              StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTableLinksList()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Links has an incorrect entry. One of the columns is empty");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + aryLine[i]);
+              StaticVariable.ProgressDetails.Add("ValidateData::CheckTableLinksList()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Table Links has an incorrect entry. One of the columns is empty");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + aryLine[i]);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
           StaticVariable.TwbHeader.Add(Constants.FiveSpacesPadding + aryLine[tableName].PadRight(23, ' ') + aryLine[prefix].PadRight(9, ' ') + aryLine[passPrefix].PadRight(19, ' ') + aryLine[destination]);
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTableLinksList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTableLinksList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableLinksList() -- finished");
     }
     public static void CheckTimeSchemesList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemesList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemesList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemesList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTableLinksList() -- finished");      
       const int numberOfColumns = 3;
       const int schemeName = 0;
       const int holidaysRelevant = 1;
       const int defaultRate = 2;
       if (StaticVariable.TimeSchemes.Count.Equals(0))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTimeSchemesList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTimeSchemesList is empty");
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckTimeSchemesList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckTimeSchemesList is empty");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       else
@@ -1823,18 +1861,18 @@ namespace ProcessTariffWorkbook
           string[] aryLine = tok.Split('\t');
           if (!aryLine.Length.Equals(numberOfColumns))
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTimeSchemesList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Time Schemes has an incorrect entry. There should be 3 columns");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckTimeSchemesList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Time Schemes has an incorrect entry. There should be 3 columns");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           for (int i = 0; i < numberOfColumns; i++)
           {
             if (string.IsNullOrEmpty(aryLine[i]))
             {
-              StaticVariable.Errors.Add("ProcessRequiredFiles::CheckTimeSchemesList()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Time Schemes has an incorrect entry. One of the columns is empty");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + aryLine[i]);
+              StaticVariable.ProgressDetails.Add("ValidateData::CheckTimeSchemesList()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Time Schemes has an incorrect entry. One of the columns is empty");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + aryLine[i]);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
@@ -1842,12 +1880,13 @@ namespace ProcessTariffWorkbook
           StaticVariable.TwbHeader.Add(Constants.FiveSpacesPadding + aryLine[schemeName].PadRight(19, ' ') + aryLine[holidaysRelevant].PadRight(24, ' ') + aryLine[defaultRate]);
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemesList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemesList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemesList() -- finished");
     }
     public static void CheckTimeSchemeExceptionsList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemeExceptionsList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemeExceptionsList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemeExceptionsList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeExceptionsList() -- started");
       StaticVariable.TwbHeader.Add(Environment.NewLine + "Time Schemes Exceptions:");
       StaticVariable.TwbHeader.Add(Constants.FiveSpacesPadding + "Time Scheme Name".PadRight(19, ' ') + "Day".PadRight(5, ' ') + "Start".PadRight(11, ' ') + "Finish".PadRight(11, ' ') + "Rate");
       List<string> timeSchemeExceptionNames = new List<string>();
@@ -1879,18 +1918,19 @@ namespace ProcessTariffWorkbook
           StaticVariable.TwbHeader.Add(Environment.NewLine + "The time scheme " + name + " was not defined in Time Scheme Exceptions. It does not need to be if only one rate (24/7) exists.");
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckTimeSchemeExceptionsList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckTimeSchemeExceptionsList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckTimeSchemeExceptionsList() -- finished");
     }
     public static void CheckSpellingList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckSpellingList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckSpellingList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSpellingList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSpellingList() -- started");
       string sValue = string.Empty;
       string sName = string.Empty;
       if (StaticVariable.TariffPlan.Count.Equals(0))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSpellingList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckSpellingList is empty");
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckSpellingList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "CheckSpellingList is empty");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       else
@@ -1903,9 +1943,9 @@ namespace ProcessTariffWorkbook
           sName = aryToken[0];
           if (string.IsNullOrEmpty(sValue))
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSpellingList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "TITLE=SPELLING in Header files has a missing value for ");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + sName);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSpellingList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TITLE=SPELLING in Header files has a missing value for ");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + sName);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (sName.ToUpper().Equals(Constants.InternationalMobileSpelling))
@@ -1925,75 +1965,77 @@ namespace ProcessTariffWorkbook
           }
           else
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSpellingList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "CheckSpellingList has an extra entry");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + sName + " = " + sValue);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSpellingList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "CheckSpellingList has an extra entry");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + sName + " = " + sValue);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckSpellingList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSpellingList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSpellingList() -- finished");
     }
     public static void CheckSourceDestinationsBandList()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckSourceDestinationsBandList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckSourceDestinationsBandList()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationsBandList() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSourceDestinationsBandList() -- started");
       const int numberOfColumns = 4;
       const int band = 3;
       const int table = 0;
       if (!StaticVariable.SourceDestinationBands.Count.Equals(0))
       {
-        StaticVariable.TwbHeader.Add(Environment.NewLine + "ProcessRequiredFiles::CheckSourceDestinationsBandList()");
+        StaticVariable.TwbHeader.Add(Environment.NewLine + "ValidateData::CheckSourceDestinationsBandList()");
         StaticVariable.TwbHeader.Add(Constants.FiveSpacesPadding + "SourceDestinationsBands: A Matrix is being used." + Environment.NewLine);
         foreach (string tok in StaticVariable.SourceDestinationBands)
         {
           string[] matrixTokens = tok.Split('\t');
           if (!matrixTokens.Length.Equals(numberOfColumns))
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Source Destination (Matrix) columns are incorrect.");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There must be " + numberOfColumns + " columns");
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSourceDestinationsBandList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Source Destination (Matrix) columns are incorrect.");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There must be " + numberOfColumns + " columns");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (matrixTokens[band].Length > Constants.TwbBandLengthLimit)
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Source Destination (Matrix) band length is greater than " + Constants.TwbBandLengthLimit + ".");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It must be no greater than " + Constants.TwbBandLengthLimit);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSourceDestinationsBandList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Source Destination (Matrix) band length is greater than " + Constants.TwbBandLengthLimit + ".");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "It must be no greater than " + Constants.TwbBandLengthLimit);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           if (StaticVariable.ExportNds.ToUpper().Equals("TRUE") && matrixTokens[band].Length > Constants.V5Tc2BandLengthLimit)
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The NDS band length is over " + Constants.V5Tc2BandLengthLimit + " characters limit.");
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSourceDestinationsBandList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The NDS band length is over " + Constants.V5Tc2BandLengthLimit + " characters limit.");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           foreach (string token in matrixTokens)
           {
             if (string.IsNullOrEmpty(token))
             {
-              StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "SourceDestinationsBands has an inncorrect number of columns. There should be " + numberOfColumns + " columns.");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Table Name\tSource\tDestination\tBand");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+              StaticVariable.ProgressDetails.Add("ValidateData::CheckSourceDestinationsBandList()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "SourceDestinationsBands has an inncorrect number of columns. There should be " + numberOfColumns + " columns.");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Table Name\tSource\tDestination\tBand");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
           if (!matrixTokens[table].ToUpper().Equals(StaticVariable.NationalTableSpelling.ToUpper()))
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::CheckSourceDestinationsBandList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "SourceDestinationsBands: The table name is not the national name. ");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+            StaticVariable.ProgressDetails.Add("ValidateData::CheckSourceDestinationsBandList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "SourceDestinationsBands: The table name is not the national name. ");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckSourceDestinationsBandList() -- Finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckSourceDestinationsBandList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckSourceDestinationsBandList() -- finished");
     }
     public static void CheckForStdIntAndBandsFile()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForStdIntAndBandsFile()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForStdIntAndBandsFile()");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForStdIntAndBandsFile() -- started");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForStdIntAndBandsFile() -- started");
       bool found = false;
       string[] ary = Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.TxtExtensionSearch);
       foreach (string tok in ary)
@@ -2008,19 +2050,20 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForStdIntAndBandsFile");
-          StaticVariable.Errors.Add(e.Message);
+          StaticVariable.ProgressDetails.Add("ValidateData::CheckForStdIntAndBandsFile");
+          StaticVariable.ProgressDetails.Add(e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       if (!found)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForStdIntAndBandsFile");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There is no Std International Bands file in the dataset folder");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "It needs to be called - Std_Int_Names_Bands.txt");
+        StaticVariable.ProgressDetails.Add("ValidateData::CheckForStdIntAndBandsFile");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There is no Std International Bands file in the dataset folder");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "It needs to be called - Std_Int_Names_Bands.txt");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForStdIntAndBandsFile()-- finished");
+      Console.WriteLine("ValidateData".PadRight(30, '.') + "CheckForStdIntAndBandsFile() -- finished");
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "CheckForStdIntAndBandsFile() -- finished");
     }
   }  
 }

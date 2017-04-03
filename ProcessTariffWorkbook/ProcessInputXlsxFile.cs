@@ -26,8 +26,8 @@ namespace ProcessTariffWorkbook
     }
     private static void ReadXlsxFileIntoList()
     {      
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList()");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
       string[] worksheetsTypes = {Constants.Duration, Constants.Capped, Constants.Pulse};      
       List<string> workSheetNotUsed = new List<string>();
       List<string> workSheetsUsed = new List<string>();
@@ -90,47 +90,49 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");          
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " : " );
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");          
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " : " );
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         }
       }
       workbook.Close();
       if (workSheetNotUsed.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
         foreach (var entry in workSheetNotUsed)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + entry + " rates are not being used.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry + " rates are not being used.");
         }
       }
       if (discardedLines.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");        
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Customer destinations discarded along with header lines.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");        
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Customer destinations discarded along with header lines.");
         discardedLines.Sort();
         foreach (var entry in discardedLines)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + entry);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry);
         }
       }      
       StaticVariable.TwbHeader.Add(Environment.NewLine + "ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList()-- completed");
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList()-- finished");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- finished");
     }
     private static void MergeDefaultPricesListWithInputFileList()
     {
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList()");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList() -- started");
       foreach (string tok in StaticVariable.DefaultEntries)
       {
         StaticVariable.InputXlsxFileDetails.Add(tok);
       }
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList()-- finished");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "MergeDefaultPricesListWithInputFileList() -- finished");
     }
     private static void AddToCustomerDetailsDataRecordList(List<string> lst)
     {
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList()");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- started");
       const string undefinedStandardInfo = "undefinedStandardBand\tundefinedStandardName\tundefinedStandardDestination\t";
       foreach (string token in lst)
       {
@@ -141,18 +143,19 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add("ProcessInputXlsxFile::AddToPreRegExDataRecordList()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem adding list to DataRecord");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add("ProcessInputXlsxFile::AddToPreRegExDataRecordList()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem adding list to DataRecord");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList()-- finished");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- finished");
     }
     private static void MatchInputXlsxFileWithRegExAndAddToDestinationsMatchedByRegExDataRecord()
     {
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList()");            
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- started");            
       string destinationName = string.Empty;
       var tmpList = new List<string>();
       int destination = 0;
@@ -183,9 +186,9 @@ namespace ProcessTariffWorkbook
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add("ParseInputFile::RegExMatchInputList()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There may be a problem with the input destination");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add("ParseInputFile::RegExMatchInputList()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be a problem with the input destination");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
           foreach (string regexExpression in StaticVariable.CombinedRegex)
@@ -208,16 +211,16 @@ namespace ProcessTariffWorkbook
 
                 StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok));
                 // for debugging
-                //StaticVariable.Errors.Add("ParseInputFile::RegExMatchInputList()  -- Debugging only");
-                //StaticVariable.Errors.Add(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok);
+                //StaticVariable.ProgressDetails.Add("ParseInputFile::RegExMatchInputList()  -- Debugging only");
+                //StaticVariable.ProgressDetails.Add(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok);
               }
             }
             catch (Exception e)
             {
-              StaticVariable.Errors.Add(Environment.NewLine + "ProcessInputXlsxFile::RegExMatchInputList()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There may be a problem with the regex");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Check if there are more than 1 international or domestic regex files");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+              StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::RegExMatchInputList()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be a problem with the regex");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Check if there are more than 1 international or domestic regex files");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
@@ -230,17 +233,18 @@ namespace ProcessTariffWorkbook
       }
       if (tmpList.Count > 0)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ProcessInputXlsxFile::RegExMatchInputList()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Destinations without regex");        
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::RegExMatchInputList()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Destinations without regex");        
         tmpList.Sort();
         foreach (string s in tmpList)
         {
-          StaticVariable.Errors.Add(s);
+          StaticVariable.ProgressDetails.Add(s);
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       newTimer.Enabled = false;
-      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList()-- finished");
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- finished");
     }
     private static void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
     {

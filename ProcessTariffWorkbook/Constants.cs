@@ -44,7 +44,8 @@ namespace ProcessTariffWorkbook
     public const string TimeSchemesSheet = ".TimeSchemes.sheet";
     public const string StdIntAndBands = "Std_Int_Names_Bands.txt";
     public const string IntermediateLog = "IntermediateLog.txt";
-    public const string ErrorLog = "ErrorLog.txt";
+    public const string ProgressLog = "ProgressLog.txt";
+    public const string ConsoleErrorLog = "ConsoleErrorLog.txt";
     public const string OutputXlsxFile = "OutputXLSX.xlsx";
     public const string TariffPlanName = "TARIFF PLAN NAME";
     public const string OperatorName = "OPERATOR NAME";

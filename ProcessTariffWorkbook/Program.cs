@@ -25,10 +25,12 @@ namespace ProcessTariffWorkbook
       ErrorProcessing.AddMainlandPricesToDependentCountries();
       ErrorProcessing.FindMissingInternationalCountries();
 
-      StaticVariable.Errors.Add(Environment.NewLine + "........finished");
-      ErrorProcessing.OutputToErrorLog();
-      Console.WriteLine("oxo....");
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
+      StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
+      ErrorProcessing.OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);
+      ErrorProcessing.OutputToLogs(StaticVariable.ConsoleOutput, StaticVariable.DirectoryName + @"\" + Constants.ConsoleErrorLog);
       ErrorProcessing.OutputConsoleLog();
+      Console.WriteLine("oxo....");
       MessageBox.Show("oxo");
       Environment.Exit(Constants.KillProgram);
     }

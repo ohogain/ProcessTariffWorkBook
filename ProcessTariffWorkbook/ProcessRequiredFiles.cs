@@ -55,9 +55,9 @@ namespace ProcessTariffWorkbook
     }                       
     public static void GetArguments(string[] args)
       {
-        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments()-- started");
-        StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments()");
-        StaticVariable.Errors.Add("Process starting".PadRight(20, '.') + Environment.NewLine);
+        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
+        StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
+        StaticVariable.ProgressDetails.Add("Process starting".PadRight(20, '.') + Environment.NewLine);
         try
         {
           if (args.Length.Equals(1))
@@ -85,12 +85,13 @@ namespace ProcessTariffWorkbook
         {
           Console.WriteLine("System Error: " + e.Message);
         }
-        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments()-- finished");        
-      }        
+        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
+        StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
+    }        
     public static string GetDirectoryName()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory() -- started");
       string directory = string.Empty;
       try
       {
@@ -101,13 +102,14 @@ namespace ProcessTariffWorkbook
           Console.WriteLine("cannot find directory" + e.Message);
           ErrorProcessing.StopProcessDueToFatalError();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDirectory() -- finished");
       return directory;
     }        
     public static string GetInputXlsxFileName()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName() -- started");
       string fileName = string.Empty;
       try
       {
@@ -119,13 +121,14 @@ namespace ProcessTariffWorkbook
         Console.WriteLine(e.Message);
         ErrorProcessing.StopProcessDueToFatalError();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetFileName() -- finished");
       return fileName;
     }
     private static void CreateFinalFolder()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- started");
       StaticVariable.FinalDirectory = StaticVariable.DirectoryName + @"\" + StaticVariable.XlsxFileName.Substring(0, StaticVariable.XlsxFileName.IndexOf('.')) + "_Final";
       if (Directory.Exists(StaticVariable.FinalDirectory))
       {
@@ -135,23 +138,23 @@ namespace ProcessTariffWorkbook
         }
         catch (IOException io )
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()");
+          StaticVariable.ProgressDetails.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()");
 
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be deleted.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Some of the resons may be:");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- A file with the same name and location specified by path exists");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- The directory specified by path is read-only, or recursive is false and path is not an empty directory.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- The directory is the application's current working directory.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- The directory contains a read-only file.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "- The directory is being used by another process.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + io.Message);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be deleted.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Some of the resons may be:");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- A file with the same name and location specified by path exists");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- The directory specified by path is read-only, or recursive is false and path is not an empty directory.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- The directory is the application's current working directory.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- The directory contains a read-only file.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "- The directory is being used by another process.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + io.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be deleted");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be deleted");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
@@ -161,26 +164,26 @@ namespace ProcessTariffWorkbook
       }
       catch (IOException e)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CreateFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be created.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "IO Error: The directory specified by path is a file or The network name is not known.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CreateFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be created.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "IO Error: The directory specified by path is a file or The network name is not known.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CreateFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be created.");        
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CreateFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.FinalDirectory + " - Final folder cannot be created.");        
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()-- finished");
-      //StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder()-- finished"); 
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- finished"); 
     }
     private static string GetCountryCode()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- started");
       string code = String.Empty;
       try
       {
@@ -193,39 +196,40 @@ namespace ProcessTariffWorkbook
           }
           else
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::GetCountryCode(");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The country code is not an integer.");
+            StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetCountryCode(");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The country code is not an integer.");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
         else
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles::GetCountryCode(");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There is either zero or are more than one '_' underscores in filename." + Environment.NewLine + Constants.FiveSpacesPadding + "There can be only one." + Environment.NewLine + Constants.FiveSpacesPadding + "It must seperate the country code from the name. e.g 353_filename");
+          StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetCountryCode(");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There is either zero or are more than one '_' underscores in filename." + Environment.NewLine + Constants.FiveSpacesPadding + "There can be only one." + Environment.NewLine + Constants.FiveSpacesPadding + "It must seperate the country code from the name. e.g 353_filename");
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::GetCountryCode()");
-        StaticVariable.Errors.Add(e.Message);
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetCountryCode()");
+        StaticVariable.ProgressDetails.Add(e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- finished");
       return code;
     }
     private static string GetDatasetsFolderToUse()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse()");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse() -- started");      
       string sPath = string.Empty;
       string datasetFolder = String.Empty;
       int nCount = 0;            
       StaticVariable.DatasetsFolder = StaticVariable.DirectoryName + "\\Datasets";
       if (!Directory.Exists(StaticVariable.DatasetsFolder))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::GetDatasetsFolderToUse()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Dataset Parent Folder cannot be found");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetDatasetsFolderToUse()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Dataset Parent Folder cannot be found");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       else
@@ -248,17 +252,18 @@ namespace ProcessTariffWorkbook
       }
       else
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::GetDatasetsFolderToUse(");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Country Dataset Folder cannot be found or else there is more than one folder with " + StaticVariable.CountryCode + " country code");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetDatasetsFolderToUse(");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Country Dataset Folder cannot be found or else there is more than one folder with " + StaticVariable.CountryCode + " country code");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse() -- finished");
       return datasetFolder;
     }
     private static string GetHeaderFile()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile() -- started");
       int nCount = 0;
       string[] aryFiles = Directory.GetFiles(StaticVariable.DatasetFolderToUse, Constants.TxtExtensionSearch);
       string file = String.Empty;      
@@ -272,17 +277,18 @@ namespace ProcessTariffWorkbook
       }
       if (!nCount.Equals(1))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForHeaderFile()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + ". Either no header or more than one header file in " + Path.GetFileName(StaticVariable.DatasetFolderToUse));
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForHeaderFile()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + ". Either no header or more than one header file in " + Path.GetFileName(StaticVariable.DatasetFolderToUse));
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForHeaderFile() -- finished");
       return file;
     }
     private static void ReadHeaderFileIntoLists()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists()");             
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- started");             
       List<string> headerNamesProcessed = new List<string>();             
       try
       {
@@ -399,9 +405,9 @@ namespace ProcessTariffWorkbook
                     headerNamesProcessed.Add("SPELLING");
                     break;
                   default:
-                    StaticVariable.Errors.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
-                    StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There may be a Header undefined in the Header file.");
-                    StaticVariable.Errors.Add(Constants.FiveSpacesPadding + title);
+                    StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
+                    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be a Header undefined in the Header file.");
+                    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + title);
                     ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
                     break;
                 }
@@ -413,15 +419,15 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "Problem with reading the Header file");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + "Problem with reading the Header file");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       if (!headerNamesProcessed.Count.Equals(Constants.NumberOfHeadersInHeadersFile))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + ". The missing Header is.");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + ". The missing Header is.");
         string[] headerTitles = { "TARIFFPLAN", "TABLELINKS", "TIMESCHEMES", "TIMESCHEMEEXCEPTIONS", "SPELLING", "DEFAULTENTRIES", "SOURCEDESTINATIONBANDS" };
         foreach (string tok in headerTitles)
         {
@@ -436,18 +442,18 @@ namespace ProcessTariffWorkbook
           }
           if (!bFound && !headerNamesProcessed.Count.Equals(Constants.NumberOfHeadersInHeadersFile))
           {
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + tok);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
           }
         }
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists()-- finished");
-      //StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- finished");
     }            
     private static string CreateNewFileName()
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName() -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName()");      
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName() -- started");      
       string monthNumber = string.Empty;
       string fileName = string.Empty;
       const int year = 2;
@@ -501,48 +507,51 @@ namespace ProcessTariffWorkbook
       }
       else
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CreateTWBFileName()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The Release Date is not in the correct format. It must be like so: DD-Mmm-YYYY");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CreateTWBFileName()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Release Date is not in the correct format. It must be like so: DD-Mmm-YYYY");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName() -- Finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateTWBFileName() -- finished");
       return fileName;
     }
     private static string CreateXlsxFileName(string fileName)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " ) -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " )");      
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " )-- Finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " ) -- started");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " ) -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateXlsxFileName( " + Path.GetFileName(fileName) + " ) -- finished");
       return StaticVariable.FinalDirectory + @"\" + fileName; ;
     }
     private static void CreateOutputXlsxFile(string file)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " )");      
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- started");      
       try
       {
         File.Create(file);
       }
       catch (IOException io)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ProcessRequiredFiles::CreateOutputXlsxFile( " + Path.GetFileName(file) + " )");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "An I/O error occurred while creating the file " + Path.GetFileName(file) + " file");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + io.Message);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::CreateOutputXlsxFile( " + Path.GetFileName(file) + " )");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "An I/O error occurred while creating the file " + Path.GetFileName(file) + " file");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + io.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ProcessRequiredFiles::CreateOutputXlsxFile( " + Path.GetFileName(file) + " )");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problem creating output " + Path.GetFileName(file) + " file");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::CreateOutputXlsxFile( " + Path.GetFileName(file) + " )");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem creating output " + Path.GetFileName(file) + " file");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " )-- Finished");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- finished");
     }
     private static void RearrangeDefaultEntries()
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()-- starting");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- started");
       string prices = string.Empty;
       string timeScheme = string.Empty;
       string minimumTime = string.Empty;
@@ -698,16 +707,16 @@ namespace ProcessTariffWorkbook
                 numberOfFieldsInFile++;
                 break;
               default:
-                StaticVariable.Errors.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
-                StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The column entry is incorrect - " + tok + ". There may be an column not catered for.");
+                StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect - " + tok + ". There may be an column not catered for.");
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
                 break;
             }
           }
           else
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The column entry is incorrect: " + tok + ". The name must be seperated by an '=' sign.");
+            StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect: " + tok + ". The name must be seperated by an '=' sign.");
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -732,15 +741,15 @@ namespace ProcessTariffWorkbook
             }
             else
             {
-              StaticVariable.Errors.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect: " + tok + ". There should be 8 prices and a destination after the (band), comma seperated");              
+              StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect: " + tok + ". There should be 8 prices and a destination after the (band), comma seperated");              
             }
           }
           catch (Exception e)
           {
-            StaticVariable.Errors.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect." + tok);
-            StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+            StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect." + tok);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -759,11 +768,11 @@ namespace ProcessTariffWorkbook
       }
       if (!numberOfPricesInFile.Equals(numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There may be an extra or missing field / prices entry in Default Entries.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "There should be " + Constants.NumberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Prefix Name and the 8 prices are excluded from the fields. The fields required are:" + Environment.NewLine);
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "ALL SCHEMES" + Environment.NewLine +
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be an extra or missing field / prices entry in Default Entries.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + Constants.NumberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and the 8 prices are excluded from the fields. The fields required are:" + Environment.NewLine);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "ALL SCHEMES" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CHARGING TYPE" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CONNECTION CHARGE" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CUT OFF1 COST" + Environment.NewLine +
@@ -785,19 +794,19 @@ namespace ProcessTariffWorkbook
                           Constants.FiveSpacesPadding + "USING CUSTOMERS NAMES" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "USING GROUP BANDS" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "WHOLE INTERVAL CHARGING" + Environment.NewLine);
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Total Number of fields = " + numberOfFieldsInFile + " and Total Number of Prices = " + numberOfPricesInFile);
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + Constants.NumberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "These figures should be equal.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "If number is different. There are either too many/few fields or too many/few prices.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Total Number of fields = " + numberOfFieldsInFile + " and Total Number of Prices = " + numberOfPricesInFile);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + Constants.NumberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "These figures should be equal.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If number is different. There are either too many/few fields or too many/few prices.");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()-- finished");
-      //ConsoleOutputList.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()-- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
     }    
     private static void CopyIniFilesToFinalFolder(string[] folder, string message)
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " )-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles()");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles() -- started");      
       try
       {
         foreach (string tok in folder)
@@ -807,29 +816,31 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::MoveIniFilesToFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + message + " INI files cannot be copied to Final folder");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::MoveIniFilesToFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + message + " INI files cannot be copied to Final folder");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         Console.WriteLine(e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " )-- finished");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- finished");
     }    
     private static void CombinePrefixesInDataRecord(List<string> lst)
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- started");
       lst = lst.Distinct().ToList();
       foreach (var tok in lst)
       {
         StaticVariable.PrefixNumbersRecord.Add(new PrefixNumbersDataRecord(tok));
       }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord()-- finished");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- finished");
     }
     private static void ReadPrefixesIntoList(string folder, string message)
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " )-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " )");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- started");      
       string[] folders = Directory.GetFiles(folder, Constants.IniExtensionSearch);      
       string tableName = string.Empty;
       string prefixName = string.Empty;
@@ -870,26 +881,27 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add("ProcessRequiredFiles::CombinePrefixes()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + message + ": Problem adding prefixes to PrefixNumbersDataRecord.");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombinePrefixes()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + message + ": Problem adding prefixes to PrefixNumbersDataRecord.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
       StaticVariable.PrefixNumbers = StaticVariable.PrefixNumbers.Distinct().ToList();
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " )-- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
     }
     private static void CheckForDuplicateIniFilesInFinalFolder()
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder()");
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- started");
       int intCount = 0;
       int mobileCount = 0;      
       string[] files = Directory.GetFiles(StaticVariable.FinalDirectory, Constants.IniExtensionSearch);
       if (files.Length.Equals(0))
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " There are no INI files in the Final folder");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are no INI files in the Final folder");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       foreach (string tok in files)
@@ -906,36 +918,23 @@ namespace ProcessTariffWorkbook
       }
       if (intCount > 1)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " There are " + intCount + " International INI files in the Final folder. Remove one");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are " + intCount + " International INI files in the Final folder. Remove one");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       if (mobileCount > 1)
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " There are " + mobileCount + " Mobile INI files in the Final folder. Remove one");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are " + mobileCount + " Mobile INI files in the Final folder. Remove one");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }
-      /*foreach (string token in files) //deletes ini files from final folder
-      {
-        try
-        {
-          File.Delete(token);
-        }
-        catch (Exception e)
-        {
-          StaticVariable.Errors.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + " Problems deleting the ini files in the final folder");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-        }
-      }*/
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder()-- finished");      
+      }     
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- finished");
     }
     private static void CombineRegExFiles(string sRegExPath)
     {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles()-- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles()");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");      
       string[] aryFiles = Directory.GetFiles(sRegExPath, Constants.TxtExtensionSearch);
       if (aryFiles.Length > 0)
       {
@@ -960,9 +959,9 @@ namespace ProcessTariffWorkbook
             }
             catch (Exception e)
             {
-              StaticVariable.Errors.Add("ProcessRequiredFiles::CombineRegExFiles()");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + /*sFileName + */"RegEx files cannot be read");
-              StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+              StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombineRegExFiles()");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + /*sFileName + */"RegEx files cannot be read");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
           }
@@ -970,12 +969,13 @@ namespace ProcessTariffWorkbook
       }
       else
       {
-        StaticVariable.Errors.Add("ProcessRequiredFiles::CombineRegExFiles()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + /*sFileName + */"No RegEx files in RegEx Folder");
+        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombineRegExFiles()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + /*sFileName + */"No RegEx files in RegEx Folder");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       StaticVariable.CombinedRegex = StaticVariable.CombinedRegex.Distinct().ToList();
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles()-- finished");      
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- finished");
     }
     
   }

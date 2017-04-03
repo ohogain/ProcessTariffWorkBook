@@ -15,80 +15,79 @@ namespace ProcessTariffWorkbook
   [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppress description for each element")]
   public static class ErrorProcessing
   {
-    public static void OutputToErrorLog()
-    {
-      //// Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "OutputToErrorLog()");
-      StaticVariable.ErrorLogFile = StaticVariable.DirectoryName + @"\" + Constants.ErrorLog;
+    public static void OutputToLogs(List<string> log, string logName )
+    {      
       try
       {
-          if (File.Exists(StaticVariable.ErrorLogFile))
-          {
-              File.Delete(StaticVariable.ErrorLogFile);
-          }
+        if (File.Exists(logName))
+        {
+          File.Delete(logName);
+        }
       }
       catch (Exception e)
       {
-          Console.WriteLine("ErrorProcessing::CreateErrorLog()");
-          Console.WriteLine(Constants.FiveSpacesPadding + "Error Log could not be deleted");
-          Console.WriteLine(Constants.FiveSpacesPadding + e.Message);
-          StopProcessDueToFatalError();
+        Console.WriteLine("ErrorProcessing::CreateErrorLog()");
+        Console.WriteLine(Constants.FiveSpacesPadding + logName + " Log could not be deleted");
+        Console.WriteLine(Constants.FiveSpacesPadding + e.Message);
+        StopProcessDueToFatalError();
       }
 
       try
       {
-          using (StreamWriter oSw = new StreamWriter(File.OpenWrite(StaticVariable.ErrorLogFile), Encoding.Unicode))
+        using (StreamWriter oSw = new StreamWriter(File.OpenWrite(logName), Encoding.Unicode))
+        {
+          foreach (string token in log)
           {
-              foreach (string token in StaticVariable.Errors)
-              {
-                  oSw.WriteLine(token);
-              }
-
-              oSw.Close();
+            oSw.WriteLine(token);
           }
+
+          oSw.Close();
+        }
       }
       catch (IOException io)
       {
-          Console.WriteLine("ErrorProcessing::OutputToErrorLog() -- io exception");
-          Console.WriteLine(Constants.FiveSpacesPadding + "Error Log could not be opened");
-          Console.WriteLine(Constants.FiveSpacesPadding + io.Message);
-          StopProcessDueToFatalError();
+        Console.WriteLine("ErrorProcessing::OutputToProcessLog() -- io exception");
+        Console.WriteLine(Constants.FiveSpacesPadding + "Error Log could not be opened");
+        Console.WriteLine(Constants.FiveSpacesPadding + io.Message);
+        StopProcessDueToFatalError();
       }
       catch (Exception e)
       {
-          Console.WriteLine("ErrorProcessing::OutputToErrorLog() -- general exception");
-          Console.WriteLine(Constants.FiveSpacesPadding + e.Message);
-          StopProcessDueToFatalError();
-      }
-      //// Console.WriteLine("Errors".PadRight(30, '.') + "OutputToErrorLog()-- finished");
-    }    
+        Console.WriteLine("ErrorProcessing::OutputToProcessLog() -- general exception");
+        Console.WriteLine(Constants.FiveSpacesPadding + e.Message);
+        StopProcessDueToFatalError();
+      }            
+    }
     public static void StopProcessDueToFatalError()
-    {
-      //// Console.WriteLine("ErrorProcessing::StopProcessDueToFatalError()");
+    {      
       Console.WriteLine(Environment.NewLine + Constants.FiveSpacesPadding + "Process stopped due to error. See Console error");
       Console.ReadKey(true);
       Environment.Exit(Constants.KillProgram);
     }    
     public static void StopProcessDueToFatalErrorOutputToLog()
-    {
-      //// Console.WriteLine("ErrorProcessing::StopProcessDueToFatalErrorOutputToLog");
-      OutputToErrorLog();
+    {      
+      OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);
+      OutputToLogs(StaticVariable.ConsoleOutput, StaticVariable.DirectoryName + @"\" + Constants.ConsoleErrorLog);     
       Console.WriteLine(Environment.NewLine + Constants.FiveSpacesPadding + "Process stopped due to error. See Error Log");
       Console.ReadKey(true);
       Environment.Exit(Constants.KillProgram);
     }        
     public static void AddRequiredDataDetailsToErrorLog()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- starting");
-      StaticVariable.Errors.Add("Default Headers details listed below.." + Environment.NewLine);
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- started");
+      StaticVariable.ProgressDetails.Add("Default Headers details listed below.." + Environment.NewLine);      
       foreach (string tok in StaticVariable.TwbHeader)
       {
-         StaticVariable.Errors.Add(tok);
+         StaticVariable.ProgressDetails.Add(tok);
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- finishing");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- finishing");
     }           
     public static void CreateIntermediateLog()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog()-- started");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- started");
       try
       {
         StaticVariable.IntermediateLog = StaticVariable.DirectoryName + @"\" + Constants.IntermediateLog;
@@ -96,17 +95,17 @@ namespace ProcessTariffWorkbook
         {
            File.Delete(StaticVariable.IntermediateLog);
         }
-
         File.Create(StaticVariable.IntermediateLog);
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ErrorProcessing::CreateIntermediateLog()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem creating this sheet");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ErrorProcessing::CreateIntermediateLog()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem creating this sheet");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog()-- finished");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- finished");
     }    
     public static void OutputConsoleLog()
     {
@@ -116,8 +115,7 @@ namespace ProcessTariffWorkbook
         if (File.Exists(consoleOutputLogFile))
         {
             File.Delete(consoleOutputLogFile);
-        }
-          //// File.Create(consoleOutputLogFile);        
+        }                
       }
       catch (Exception e)
       {
@@ -154,8 +152,8 @@ namespace ProcessTariffWorkbook
     }
     public static void AddMainlandPricesToDependentCountries()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries()-- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries()");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- started");
       List<string> tmpList = new List<string>();
       List<string> deptmpList = new List<string>();
       List<string> tmpMissingList = new List<string>();
@@ -223,19 +221,20 @@ namespace ProcessTariffWorkbook
       }
       if (tmpList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing:AddMainlandPricesToDependentCountries()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Countries given Mainland prices");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:AddMainlandPricesToDependentCountries()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Countries given Mainland prices");
         foreach (string price in tmpList)
         {
-          StaticVariable.Errors.Add(price);
+          StaticVariable.ProgressDetails.Add(price);
         }
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries()-- finished");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- finished");
     }
     public static void FindMissingInternationalCountries()
     {
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries()");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- started");
       List<string> tmpList = new List<string>();
       List<string> noPricesForCountriesList = new List<string>();
       List<string> bandsNotFoundList = new List<string>();
@@ -313,31 +312,32 @@ namespace ProcessTariffWorkbook
       if (tmpList.Any())
       {
         tmpList.Sort();
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Int mobile prices missing for these destinations, so given landine prices.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Int mobile prices missing for these destinations, so given landine prices.");
         foreach (string sEntry in tmpList)
         {
-          StaticVariable.Errors.Add(sEntry);
+          StaticVariable.ProgressDetails.Add(sEntry);
         }
       }
 
       if (noPricesForCountriesList.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "No prices supplied for these countries. They have been given a zero price.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "If a BT / Eir / KPN price is available for these destinations then use that price unless told to zero cost these destinations.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No prices supplied for these countries. They have been given a zero price.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If a BT / Eir / KPN price is available for these destinations then use that price unless told to zero cost these destinations.");
         noPricesForCountriesList.Sort();
         foreach (string sZeroEntry in noPricesForCountriesList)
         {
-          StaticVariable.Errors.Add(sZeroEntry);
+          StaticVariable.ProgressDetails.Add(sZeroEntry);
         }
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- finished");
     }
     public static void DestinationsAssignedIncorrectTable()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable()-- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable()");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- started");
 
       var query =
         from drm in StaticVariable.CustomerDetailsDataRecord
@@ -347,21 +347,22 @@ namespace ProcessTariffWorkbook
 
       if (query.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing::DestinationsAssignedIncorrectTable()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Prefix Name and prefix are assigned different tables.");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Perhaps check the RegExMatchedList for incorrect regex matching." + Environment.NewLine);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsAssignedIncorrectTable()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and prefix are assigned different tables.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Perhaps check the RegExMatchedList for incorrect regex matching." + Environment.NewLine);
         foreach (var entry in query)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + ("Prefix Table: " + entry.StandardPrefixName + " --> " + entry.TableName).PadRight(70) + "XLSX File: " + entry.CustomerPrefixName + " --> " + entry.CustomerTableName);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ("Prefix Table: " + entry.StandardPrefixName + " --> " + entry.TableName).PadRight(70) + "XLSX File: " + entry.CustomerPrefixName + " --> " + entry.CustomerTableName);
         }
         StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable()-- finished");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- finished");
     }
     public static void DestinationsWithoutPrefixes()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes()-- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes()");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");
       Dictionary<string, string> customerNames = new Dictionary<string, string>();
       List<string> stdNames = new List<string>();
 
@@ -377,9 +378,9 @@ namespace ProcessTariffWorkbook
         }
         catch (Exception e)
         {
-          StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary");
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           StopProcessDueToFatalErrorOutputToLog();
         }        
         stdNames.Add(variable.StdPrefixName.ToUpper());
@@ -393,21 +394,22 @@ namespace ProcessTariffWorkbook
 
       if (missingPrefixes.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "No Prefix Found:");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No Prefix Found:");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
         foreach (var entry in missingPrefixes)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Customer Name: " + customerNames[entry].PadRight(41, ' ') + ".".PadRight(20, '.') + " : Standard Name: " + ValidateData.CapitaliseWord(entry));
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Customer Name: " + customerNames[entry].PadRight(41, ' ') + ".".PadRight(20, '.') + " : Standard Name: " + ValidateData.CapitaliseWord(entry));
         }
         //StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes()-- finished");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
     }
     private static void CreateStdIntBandsDataRecord()
     {
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord()");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- started");
       try
       {
         using (StreamReader oSr = new StreamReader(File.OpenRead(StaticVariable.DatasetsFolder + @"\" + Constants.StdIntAndBands)))
@@ -425,17 +427,18 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ErrorProcessing::CreateStdIntBandsDataRecord()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "problem creating the Std Int Bands Data Record List");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::CreateStdIntBandsDataRecord()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "problem creating the Std Int Bands Data Record List");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- finished");
     }
     public static void WriteToIntermediateLog()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()-- started");
-      StaticVariable.ConsoleOutput.Add(Environment.NewLine + "ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- started");
       var allDetails =
         from db in StaticVariable.CustomerDetailsDataRecord
         select db;
@@ -461,18 +464,19 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ErrorProcessing::RearrangeToIntermediateLog()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem writing to Intermediate File");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + e.Message);
+        StaticVariable.ProgressDetails.Add("ErrorProcessing::WriteToIntermediateLog()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem writing to Intermediate File");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "RearrangeToIntermediateLog()-- finished");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- finished");
     }
     public static void WriteOutGroupBandsToErrorLog()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "WriteOutGroupBands() -- started");
-      StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:WriteOutGroupBands()");
-      StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "group bands used........." + Environment.NewLine);
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "group bands used........." + Environment.NewLine);
 
       try
       {
@@ -498,21 +502,21 @@ namespace ProcessTariffWorkbook
 
         foreach (var dg in durationQuery)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + dg.ChargingType);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + dg.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + dg.CustomerGroupBandDescription);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + dg.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + dg.CustomerConnectionCost);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Cheap_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cheap_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Standard_1:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Standard_2:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Economy_1:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Economy_2:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Peak_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Peak_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
-          StaticVariable.Errors.Add("\n");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + dg.ChargingType);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + dg.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + dg.CustomerGroupBandDescription);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + dg.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + dg.CustomerConnectionCost);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Cheap_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cheap_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Standard_1:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Standard_2:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Economy_1:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Economy_2:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Peak_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Peak_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
+          StaticVariable.ProgressDetails.Add("\n");
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
-        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - duration");
-        StaticVariable.Errors.Add(e.Message);
+        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
+        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - duration");
+        StaticVariable.ProgressDetails.Add(e.Message);
       }
       try
       {
@@ -522,19 +526,19 @@ namespace ProcessTariffWorkbook
          select groups).Distinct();
         foreach (var cq in cappedQuery)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + cq.ChargingType);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + cq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + cq.CustomerGroupBandDescription);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + cq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + cq.CustomerConnectionCost);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Standard:".PadRight(15, '.') + '\x0020' + cq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cap Price:".PadRight(20, '.') + '\x0020' + cq.CustomerFirstSubseqRate);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Cap Time:".PadRight(15, '.') + '\x0020' + cq.CustomerSecondInitialRate.PadRight(10, '\x0020'));
-          StaticVariable.Errors.Add("\n");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + cq.ChargingType);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + cq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + cq.CustomerGroupBandDescription);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + cq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + cq.CustomerConnectionCost);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Standard:".PadRight(15, '.') + '\x0020' + cq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cap Price:".PadRight(20, '.') + '\x0020' + cq.CustomerFirstSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Cap Time:".PadRight(15, '.') + '\x0020' + cq.CustomerSecondInitialRate.PadRight(10, '\x0020'));
+          StaticVariable.ProgressDetails.Add("\n");
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
-        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - capped");
-        StaticVariable.Errors.Add(e.Message);
+        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
+        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - capped");
+        StaticVariable.ProgressDetails.Add(e.Message);
       }
       try
       {
@@ -544,24 +548,26 @@ namespace ProcessTariffWorkbook
          select groups).Distinct();
         foreach (var pq in pulseQuery)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Charging Type: " + pq.ChargingType);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + pq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + pq.CustomerGroupBandDescription);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + pq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + pq.CustomerConnectionCost);
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "Pulse Length:".PadRight(15, '.') + '\x0020' + pq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Pulse Unit:".PadRight(20, '.') + '\x0020' + pq.CustomerFirstSubseqRate);
-          StaticVariable.Errors.Add("\n");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + pq.ChargingType);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + pq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + pq.CustomerGroupBandDescription);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + pq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + pq.CustomerConnectionCost);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Pulse Length:".PadRight(15, '.') + '\x0020' + pq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Pulse Unit:".PadRight(20, '.') + '\x0020' + pq.CustomerFirstSubseqRate);
+          StaticVariable.ProgressDetails.Add("\n");
         }
       }
       catch (Exception e)
       {
-        StaticVariable.Errors.Add("ValidateData: WriteOutGroupBands()");
-        StaticVariable.Errors.Add("Error in WriteOutGroupBands() - pulse");
-        StaticVariable.Errors.Add(e.Message);
+        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
+        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - pulse");
+        StaticVariable.ProgressDetails.Add(e.Message);
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
     }
     public static void WriteToErrorlogIfMinCostAnd4ThRateSamePrice()
     {
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
       List<string> matches = new List<string>();
       var query =
         from peakAndMinCost in StaticVariable.CustomerDetailsDataRecord
@@ -578,14 +584,15 @@ namespace ProcessTariffWorkbook
       }
       if (matches.Any())
       {
-        StaticVariable.Errors.Add(Environment.NewLine + "ValidateData:DisplayMinCostV4thRateSamePrice()");
-        StaticVariable.Errors.Add(Constants.FiveSpacesPadding + "4th rate is the same price as Minimum Cost.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:DisplayMinCostV4thRateSamePrice()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "4th rate is the same price as Minimum Cost.");
         foreach (var m in matches)
         {
-          StaticVariable.Errors.Add(Constants.FiveSpacesPadding + m);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + m);
         }
       }
-      Console.WriteLine("ValidateData".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
     }
   }
 }

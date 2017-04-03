@@ -38,4 +38,4 @@ CheckForDestinationTypes(): V5: fixed number (8) of destination types, names are
    No country code with tc2 prefixes.ini. It is added here "ReadPrefixesIntoList" for TWB. 
 	
 
-	
+	check for duplicates in the prefix file
