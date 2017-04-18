@@ -58,7 +58,7 @@ namespace ProcessTariffWorkbook
       try
       {
         string[] ary = line.Split('\t');
-        StdBand = ary[0].ToUpper().Trim();
+        StdBand = ary[0].Trim();
         StdPrefixName = ary[1].Trim();
         StdPrefixDescription = ary[2].Trim();
         CustomerPrefixName = ary[3].Trim();
@@ -72,38 +72,46 @@ namespace ProcessTariffWorkbook
         CustomerFourthSubseqRate = ary[11].Trim();
         CustomerMinCharge = ary[12].Trim();
         CustomerConnectionCost = ary[13].Trim();
-        CustomerUsingGroupBands = ary[14].ToUpper().Trim();
-        CustomerGroupBand = ary[15].ToUpper().Trim();
+        CustomerUsingGroupBands = ary[14].Trim();
+        CustomerGroupBand = ary[15].Trim();
         CustomerGroupBandDescription = ary[16].Trim();
         CustomerTableName = ary[17].Trim();
         CustomerDestinationType = ary[18].Trim();
-        CustomerRounding = ValidateData.AdjustRoundingValue(ary[19]).ToUpper().Trim();
+        CustomerRounding = ValidateData.AdjustRoundingValue(ary[19]).Trim();
         CustomerTimeScheme = ary[20].Trim();
-        CustomerUsingCustomerNames = ary[21].ToUpper().Trim();
-        CustomerInitialIntervalLength = ary[22].ToUpper().Trim();
-        CustomerSubsequentIntervalLength = ary[23].ToUpper().Trim();
-        CustomerMinimumIntervals = ary[24].ToUpper().Trim();
-        CustomerIntervalsAtInitialCost = ary[25].ToUpper().Trim();
-        CustomerMinimumTime = ary[26].ToUpper().Trim();
-        CustomerDialTime = ary[27].ToUpper().Trim();
-        CustomerAllSchemes = ary[28].ToUpper().Trim();
-        CustomerMultiLevelEnabled = ary[29].ToUpper().Trim();
-        CustomerMinDigits = ary[30].ToUpper().Trim();
-        CustomerCutOff1Cost = ary[31].ToUpper().Trim();
-        CustomerCutOff2Duration = ary[32].ToUpper().Trim();
-        ChargingType = ary[33].ToUpper().Trim();
+        CustomerUsingCustomerNames = ary[21].Trim();
+        CustomerInitialIntervalLength = ary[22].Trim();
+        CustomerSubsequentIntervalLength = ary[23].Trim();
+        CustomerMinimumIntervals = ary[24].Trim();
+        CustomerIntervalsAtInitialCost = ary[25].Trim();
+        CustomerMinimumTime = ary[26].Trim();
+        CustomerDialTime = ary[27].Trim();
+        CustomerAllSchemes = ary[28].Trim();
+        CustomerMultiLevelEnabled = ary[29].Trim();
+        CustomerMinDigits = ary[30].Trim();
+        CustomerCutOff1Cost = ary[31].Trim();
+        CustomerCutOff2Duration = ary[32].Trim();
+        ChargingType = ary[33].Trim();
       }
       catch (IndexOutOfRangeException i)
       {
+        StaticVariable.ConsoleOutput.Add("DataRecord".PadRight(30, '.') + "DataRecord() -- started");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "DataRecord::DataRecord()");        
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + i.Message);
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Is there any data?");
         Console.WriteLine("DataRecord: The Index is out of bounds");
         Console.WriteLine(i.Message);
-        Console.ReadKey();
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       catch (Exception e)
       {
+        StaticVariable.ConsoleOutput.Add("DataRecord".PadRight(30, '.') + "DataRecord() -- started");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "DataRecord::DataRecord()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "problem with creating the DataRecord");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         Console.WriteLine("DataRecord: problem with creating the DataRecord");
         Console.WriteLine(e.Message);
-        Console.ReadKey();
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }      
     }
   }

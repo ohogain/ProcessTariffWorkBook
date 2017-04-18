@@ -10,8 +10,10 @@ namespace ProcessTariffWorkbook
   {
     #region class variables    
     public string TableName { get; set; }
-    public string StandardPrefixName { get; set; }
+    public string PrefixName { get; set; }
     public string PrefixNumber { get; set; }
+    public string stdBand { get; set; }
+    public string stdPrefixName { get; set; }
     #endregion
 
     public PrefixNumbersDataRecord()
@@ -24,7 +26,9 @@ namespace ProcessTariffWorkbook
         string[] ary = sLine.Split('\t');
         TableName = ary[0];
         PrefixNumber = ary[1];
-        StandardPrefixName = ary[2];
+        PrefixName = ary[2];
+        stdBand = ary[3];
+        stdPrefixName = ary[4];
       }
       catch (IndexOutOfRangeException i)
       {

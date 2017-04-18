@@ -240,13 +240,13 @@ namespace ProcessTariffWorkbook
       List<string> bandsNotFoundList = new List<string>();
       string custband = string.Empty;
       const string zeroPrices = "0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000";
-      string otherInfo = "FALSE\tnull\tnull\t" + StaticVariable.CountryCode + "_International\tInternational\tRounding\tTimeScheme\tFALSE\t60\t60\t0\t1\t1\t1\tTRUE\tFALSE\t0\t0\t0\tCharging Type";
+      string otherInfo = "FALSE\tnull\tnull\t" + StaticVariable.CountryCodeValue + "_International\tInternational\tRounding\tTimeScheme\tFALSE\t60\t60\t0\t1\t1\t1\tTRUE\tFALSE\t0\t0\t0\tCharging Type";
 
       CreateStdIntBandsDataRecord();
       //from regexmatched get all int destinations into tmp list
       var intQuery =
         from drm in StaticVariable.CustomerDetailsDataRecord
-        where drm.CustomerTableName.ToUpper().Equals(StaticVariable.InternationalTableSpelling.ToUpper())
+        where drm.CustomerTableName.ToUpper().Equals(StaticVariable.InternationalTableSpellingValue.ToUpper())
         select new { drm.StdPrefixName, drm.StdBand, drm.CustomerPrefixName };
 
       var customerCountryList = intQuery.Select(q => q.StdBand + "\t" + q.StdPrefixName + "\t" + q.CustomerPrefixName).ToList();
@@ -290,12 +290,12 @@ namespace ProcessTariffWorkbook
             string name = dr.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? dr.CustomerPrefixName : dr.StdPrefixName;
             string groupBand = dr.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? dr.CustomerGroupBand + mobileBand : dr.StdBand + mobileBand;
             string groupBandDescription = dr.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? dr.CustomerGroupBandDescription + mobileBand : dr.StdPrefixDescription + mobileBand;
-            tmpList.Add(name + " " + StaticVariable.IntMobileSpelling + "\t" + dr.CustomerFirstInitialRate + "\t" +
+            tmpList.Add(name + " " + StaticVariable.InternationalMobileSpellingValue + "\t" + dr.CustomerFirstInitialRate + "\t" +
               dr.CustomerFirstSubseqRate + "\t" + dr.CustomerSecondInitialRate + "\t" + dr.CustomerSecondSubseqRate + "\t" +
               dr.CustomerThirdInitialRate + "\t" + dr.CustomerThirdSubseqRate + "\t" + dr.CustomerFourthInitialRate + "\t" +
               dr.CustomerFourthSubseqRate + "\t" + dr.CustomerMinCharge + "\t" + dr.CustomerConnectionCost + "\t" +
               "FALSE\t" + groupBand + "\t" + groupBandDescription + "\t" + ValidateData.CapitaliseWord(dr.CustomerTableName) + "\t" +
-              ValidateData.CapitaliseWord(dr.CustomerDestinationType + " " + StaticVariable.IntMobileSpelling) + "\t" + 
+              ValidateData.CapitaliseWord(dr.CustomerDestinationType + " " + StaticVariable.InternationalMobileSpellingValue) + "\t" + 
               dr.CustomerRounding + "\t" + ValidateData.CapitaliseWord(dr.CustomerTimeScheme) + "\t" +
               dr.CustomerUsingCustomerNames + "\t" + dr.CustomerInitialIntervalLength + "\t" + dr.CustomerSubsequentIntervalLength + "\t" + 
               dr.CustomerMinimumIntervals + "\t" + dr.CustomerIntervalsAtInitialCost + "\t" + dr.CustomerMinimumTime + "\t" + dr.CustomerDialTime + "\t" +
@@ -304,7 +304,7 @@ namespace ProcessTariffWorkbook
               );
           }
         }
-        else if (!stdCountryCode.Equals(StaticVariable.CountryCode) && !stdCountryCode.ToUpper().Equals("N/A"))
+        else if (!stdCountryCode.Equals(StaticVariable.CountryCodeValue) && !stdCountryCode.ToUpper().Equals("N/A"))
         {
           noPricesForCountriesList.Add(ValidateData.CapitaliseWord(custName) + "\t" + zeroPrices + "\t" + otherInfo);
         }
@@ -341,9 +341,9 @@ namespace ProcessTariffWorkbook
 
       var query =
         from drm in StaticVariable.CustomerDetailsDataRecord
-        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.StandardPrefixName.ToUpper()
+        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.PrefixName.ToUpper()
         where !drm.CustomerTableName.ToUpper().Equals(pn.TableName.ToUpper())
-        select new { pn.TableName, pn.StandardPrefixName, drm.CustomerTableName, drm.CustomerPrefixName };
+        select new { pn.TableName, pn.PrefixName, drm.CustomerTableName, drm.CustomerPrefixName };
 
       if (query.Any())
       {
@@ -352,7 +352,7 @@ namespace ProcessTariffWorkbook
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Perhaps check the RegExMatchedList for incorrect regex matching." + Environment.NewLine);
         foreach (var entry in query)
         {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ("Prefix Table: " + entry.StandardPrefixName + " --> " + entry.TableName).PadRight(70) + "XLSX File: " + entry.CustomerPrefixName + " --> " + entry.CustomerTableName);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ("Prefix Table: " + entry.PrefixName + " --> " + entry.TableName).PadRight(70) + "XLSX File: " + entry.CustomerPrefixName + " --> " + entry.CustomerTableName);
         }
         StopProcessDueToFatalErrorOutputToLog();
       }
@@ -362,46 +362,67 @@ namespace ProcessTariffWorkbook
     public static void DestinationsWithoutPrefixes()
     {
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");
-      Dictionary<string, string> customerNames = new Dictionary<string, string>();
-      List<string> stdNames = new List<string>();
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");      
+      Dictionary<string, string> errorNames = new Dictionary<string, string>();
+      List<string> stdNames = new List<string>();      
 
       var queryCustomerDetails =
         (from dr in StaticVariable.CustomerDetailsDataRecord
-         select new { dr.StdPrefixName, dr.CustomerPrefixName }).Distinct();
+         select new { dr.StdPrefixName, dr.CustomerPrefixName, dr.StdBand}).Distinct();
 
-      foreach (var variable in queryCustomerDetails)
-      {
+      foreach (var detail in queryCustomerDetails)
+      {        
         try
-        {
-          customerNames.Add(variable.StdPrefixName.ToUpper(), variable.CustomerPrefixName);
+        {                  
+          errorNames.Add(detail.StdPrefixName.ToUpper(), "Custname - " + detail.CustomerPrefixName + ",\t stdName - " + detail.StdPrefixName + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");          
         }
         catch (Exception e)
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message + " - " + detail.CustomerPrefixName);          
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'using customer name' is true, an entry like 'peru NGN PRS' will be assigned two different bands but the customer name will be added twice into the dictionary.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using standard prefixes: In the " + StaticVariable.XlsxFileName + " file split the entry 'peru NGN PRS' into two seperate entries - 'peru NGN' and 'peru PRS'.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using client supplied prefixes: In the regex, remove one of the regex matches.");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Existing dictionary entry : ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + errorNames[detail.CustomerPrefixName.ToUpper()]);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Duplicate entry :" );
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Custname - " + detail.CustomerPrefixName + ",\t StdName - " + detail.StdPrefixName  + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");             
           StopProcessDueToFatalErrorOutputToLog();
-        }        
-        stdNames.Add(variable.StdPrefixName.ToUpper());
+        }
+        stdNames.Add(detail.StdPrefixName);
       }
 
-      var queryPrefixes =
-        (from pn in StaticVariable.PrefixNumbersRecord
-         select pn.StandardPrefixName.ToUpper()).Distinct();
+      var queryPrefixNames =
+        (from pn in StaticVariable.PrefixNumbersRecord   
+         orderby pn.stdPrefixName
+         select pn.stdPrefixName).Distinct();     
 
-      var missingPrefixes = stdNames.Except(queryPrefixes);
+      var missingPrefixes = stdNames.Except(queryPrefixNames).ToList();
+      
+      missingPrefixes.Sort();                    
 
       if (missingPrefixes.Any())
       {
         StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No Prefix Found:");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
+
         foreach (var entry in missingPrefixes)
         {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Customer Name: " + customerNames[entry].PadRight(41, ' ') + ".".PadRight(20, '.') + " : Standard Name: " + ValidateData.CapitaliseWord(entry));
+          try
+          {
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding +
+                                               ValidateData.CapitaliseWord(errorNames[entry]));
+          }
+          catch (Exception e)
+          {
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No Prefix Found for : " + entry);
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+            //StopProcessDueToFatalErrorOutputToLog();
+          }
         }
-        //StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
@@ -476,7 +497,8 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
-      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "group bands used........." + Environment.NewLine);
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::WriteOutGroupBands()");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "group bands used.........");
 
       try
       {
@@ -505,10 +527,10 @@ namespace ProcessTariffWorkbook
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + dg.ChargingType);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + dg.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + dg.CustomerGroupBandDescription);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + dg.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + dg.CustomerConnectionCost);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Cheap_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cheap_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Standard_1:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Standard_2:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Economy_1:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Economy_2:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Peak_1:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Peak_2:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 1 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Rate 1 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 2 initial:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Rate 2 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 3 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Rate 3 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 4 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Rate 4 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
           StaticVariable.ProgressDetails.Add("\n");
         }
       }

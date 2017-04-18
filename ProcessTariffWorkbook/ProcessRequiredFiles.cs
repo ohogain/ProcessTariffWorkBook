@@ -24,9 +24,9 @@ namespace ProcessTariffWorkbook
       StaticVariable.DirectoryName = GetDirectoryName();
       StaticVariable.XlsxFileName = GetInputXlsxFileName();
       CreateFinalFolder();
-      StaticVariable.CountryCode = GetCountryCode();
+      StaticVariable.CountryCodeValue = GetCountryCode();
       StaticVariable.DatasetFolderToUse = GetDatasetsFolderToUse();
-      StaticVariable.HeaderFile = GetHeaderFile();
+      StaticVariable.HeaderFile = GetHeaderFile();      
       ReadHeaderFileIntoLists();
       ValidateData.CheckTariffPlanList();
       ValidateData.CheckTableLinksList();
@@ -49,9 +49,7 @@ namespace ProcessTariffWorkbook
       CombinePrefixesInDataRecord(StaticVariable.PrefixNumbers);
       ValidateData.CheckForMoreThanTwoRegExFiles();
       CombineRegExFiles(StaticVariable.DatasetFolderToUse);
-      CombineRegExFiles(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty
-
-      Console.WriteLine("End of Dataset data");
+      CombineRegExFiles(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty      
     }                       
     public static void GetArguments(string[] args)
       {
@@ -239,7 +237,7 @@ namespace ProcessTariffWorkbook
         {
           string dataset = Path.GetFileName(tok);
           string[] individualDatasets = dataset.Split('_');
-          if (individualDatasets[0].Equals(StaticVariable.CountryCode))
+          if (individualDatasets[0].Equals(StaticVariable.CountryCodeValue))
           {
             sPath = tok;
             nCount++;
@@ -253,7 +251,7 @@ namespace ProcessTariffWorkbook
       else
       {
         StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::GetDatasetsFolderToUse(");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Country Dataset Folder cannot be found or else there is more than one folder with " + StaticVariable.CountryCode + " country code");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Country Dataset Folder cannot be found or else there is more than one folder with " + StaticVariable.CountryCodeValue + " country code");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetDatasetsFolderToUse() -- finished");
@@ -289,7 +287,9 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadHeaderFileIntoLists() -- started");             
-      List<string> headerNamesProcessed = new List<string>();             
+      List<string> headerNamesProcessed = new List<string>();
+      int tariffPlanCount = 0;
+      const int numberOfRequiredEntriesExcludingCarrierUnitPrice = 18;
       try
       {
         using (StreamReader oSr = new StreamReader(File.OpenRead(StaticVariable.HeaderFile), Encoding.Unicode))
@@ -306,12 +306,13 @@ namespace ProcessTariffWorkbook
 
                 switch (title)
                 {
-                  case "TARIFFPLAN":
+                  case "TARIFFPLAN":                    
                     while (!line.ToUpper().Equals("ENDTITLE"))
                     {
                       line = oSr.ReadLine().Trim();
                       if (!string.IsNullOrEmpty(line) && !line.StartsWith(";") && !line.ToUpper().Equals("ENDTITLE"))
                       {
+                        ValidateData.CheckforAllTariffPlanEntries(line);
                         if (line.ToUpper().Contains(Constants.ReleaseDate))
                         {
                           string[] ary = line.Split('=');
@@ -326,7 +327,37 @@ namespace ProcessTariffWorkbook
                         {
                           StaticVariable.TariffPlan.Add(line);
                         }
-                      }
+                        if (!line.ToUpper().Contains(Constants.CarrierUnitPrice.ToUpper()))
+                        {
+                          tariffPlanCount++;
+                        }                        
+                      }                      
+                    }
+                    if (!tariffPlanCount.Equals(numberOfRequiredEntriesExcludingCarrierUnitPrice))
+                    {
+                      StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::CheckforAllTariffPlanEntries()");
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There are missing entries in the Tariff Plan header. These are the required entries.");
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.TariffPlanName);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.OperatorName);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.ReleaseDate);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.EffectiveFrom);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Country);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.CountryCode);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.CurrencyIsoCode);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.StartingPointTableName);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.IsPrivate);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Rate1);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Rate2);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Rate3);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Rate4);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Using);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.TariffReferenceNumber);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Version);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.ExportNds);
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.Holiday);
+                      StaticVariable.ProgressDetails.Add(Environment.NewLine + "If pulse is not being used, Carrier Unit Price should be deleted / commented out");
+                      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + Constants.CarrierUnitPrice);
+                      ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
                     }
                     headerNamesProcessed.Add("TARIFFPLAN");
                     break;
@@ -460,7 +491,7 @@ namespace ProcessTariffWorkbook
       const int day = 0;
       const int month = 1;
       const int dateLength = 3;
-      string[] dateTokens = StaticVariable.ReleaseDate.Split('-');
+      string[] dateTokens = StaticVariable.ReleaseDateValue.Split('-');
 
       if (dateTokens[month].Length.Equals(dateLength))
       {
@@ -503,7 +534,7 @@ namespace ProcessTariffWorkbook
             monthNumber = "12";
             break;
         }        
-        fileName = StaticVariable.CountryCode + "_" + StaticVariable.Country + "_" + StaticVariable.TariffReferenceNumber + "_" + StaticVariable.TariffPlanName.Replace(" ", "") + "_" + StaticVariable.Version + "_" + (dateTokens[year] + monthNumber + dateTokens[day]) + ".xlsx";
+        fileName = StaticVariable.CountryCodeValue + "_" + StaticVariable.CountryValue + "_" + StaticVariable.TariffReferenceNumberValue + "_" + StaticVariable.TariffPlanNameValue.Replace(" ", "") + "_" + StaticVariable.VersionValue + "_" + (dateTokens[year] + monthNumber + dateTokens[day]) + ".xlsx";
       }
       else
       {
@@ -709,6 +740,7 @@ namespace ProcessTariffWorkbook
               default:
                 StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
                 StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect - " + tok + ". There may be an column not catered for.");
+                DisplayAllHeadersFieldsUsed();
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
                 break;
             }
@@ -717,6 +749,7 @@ namespace ProcessTariffWorkbook
           {
             StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect: " + tok + ". The name must be seperated by an '=' sign.");
+            DisplayAllHeadersFieldsUsed();
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
@@ -772,7 +805,9 @@ namespace ProcessTariffWorkbook
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be an extra or missing field / prices entry in Default Entries.");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + Constants.NumberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and the 8 prices are excluded from the fields. The fields required are:" + Environment.NewLine);
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "ALL SCHEMES" + Environment.NewLine +
+        DisplayAllHeadersFieldsUsed();
+
+        /*StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "ALL SCHEMES" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CHARGING TYPE" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CONNECTION CHARGE" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "CUT OFF1 COST" + Environment.NewLine +
@@ -793,7 +828,7 @@ namespace ProcessTariffWorkbook
                           Constants.FiveSpacesPadding + "TIME SCHEME" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "USING CUSTOMERS NAMES" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "USING GROUP BANDS" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "WHOLE INTERVAL CHARGING" + Environment.NewLine);
+                          Constants.FiveSpacesPadding + "WHOLE INTERVAL CHARGING" + Environment.NewLine);*/
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Total Number of fields = " + numberOfFieldsInFile + " and Total Number of Prices = " + numberOfPricesInFile);
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + Constants.NumberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "These figures should be equal.");
@@ -802,28 +837,6 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
-    }    
-    private static void CopyIniFilesToFinalFolder(string[] folder, string message)
-    {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles() -- started");      
-      try
-      {
-        foreach (string tok in folder)
-        {          
-          File.Copy(tok, StaticVariable.FinalDirectory + @"\" + Path.GetFileName(tok));
-        }
-      }
-      catch (Exception e)
-      {
-        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::MoveIniFilesToFinalFolder()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + message + " INI files cannot be copied to Final folder");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-        Console.WriteLine(e.Message);
-        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- finished");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CopyIniFiles( " + message + " ) -- finished");
     }    
     private static void CombinePrefixesInDataRecord(List<string> lst)
     {
@@ -859,7 +872,7 @@ namespace ProcessTariffWorkbook
                 if (line.ToUpper().Contains("TABLE NAME="))
                 {
                   string[] lines = line.Split('=');
-                  tableName = StaticVariable.CountryCode + "_" + lines[1];
+                  tableName = StaticVariable.CountryCodeValue + "_" + lines[1];
                 }
                 if (line.Contains(','))
                 {
@@ -869,7 +882,7 @@ namespace ProcessTariffWorkbook
                 }
                 if (!string.IsNullOrEmpty(tableName) && !string.IsNullOrEmpty(prefixName))
                 {
-                  StaticVariable.PrefixNumbers.Add(ValidateData.CapitaliseWord(tableName) + "\t" + prefixNumber + "\t" + ValidateData.CapitaliseWord(prefixName));
+                  StaticVariable.PrefixNumbers.Add(ValidateData.CapitaliseWord(tableName) + "\t" + prefixNumber + "\t" + prefixName + "\tbandNotAssigned\t standardNameNotAssigned");
                 }
               }
             }
@@ -887,50 +900,11 @@ namespace ProcessTariffWorkbook
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
       }
+      StaticVariable.PrefixNumbers.Sort();
       StaticVariable.PrefixNumbers = StaticVariable.PrefixNumbers.Distinct().ToList();
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
-    }
-    private static void CheckForDuplicateIniFilesInFinalFolder()
-    {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- started");
-      int intCount = 0;
-      int mobileCount = 0;      
-      string[] files = Directory.GetFiles(StaticVariable.FinalDirectory, Constants.IniExtensionSearch);
-      if (files.Length.Equals(0))
-      {
-        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are no INI files in the Final folder");
-        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }
-      foreach (string tok in files)
-      {
-        string fileName = Path.GetFileName(tok);
-        if (fileName.ToUpper().Contains("INT"))
-        {
-          intCount++;
-        }
-        if (fileName.ToUpper().Contains("MOB"))
-        {
-          mobileCount++;
-        }
-      }
-      if (intCount > 1)
-      {
-        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are " + intCount + " International INI files in the Final folder. Remove one");
-        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }
-      if (mobileCount > 1)
-      {
-        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CheckForDuplicateIniFilesInFinalFolder()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " There are " + mobileCount + " Mobile INI files in the Final folder. Remove one");
-        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-      }     
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- finished");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CheckForDuplicateIniFilesInFinalFolder() -- finished");
-    }
+    }       
     private static void CombineRegExFiles(string sRegExPath)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");
@@ -977,6 +951,31 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- finished");
     }
-    
+    private static void DisplayAllHeadersFieldsUsed()
+    {
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The Fields used are listed below");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "All Schemes" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Charging Type" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Connection Charge" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Cut Off1 Cost" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Cut Off2 Duration" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Destination Type" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Dial Time" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Group Band Description" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Group Band" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Initial Interval Length" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Intervals At Initial Cost" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Minimum Cost" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Minimum Digits" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Minimum Intervals" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Minimum Time" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Multi Level Enabled" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Prefix Table" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Subsequent Interval Length" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Time Scheme" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Using Customers Names" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Using Group Bands" + Environment.NewLine +
+        Constants.FiveSpacesPadding + "Whole Interval Charging" + Environment.NewLine);
+    }   
   }
 }

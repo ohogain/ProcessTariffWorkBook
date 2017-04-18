@@ -15,10 +15,10 @@ namespace ProcessTariffWorkbook
       ErrorProcessing.CreateIntermediateLog();
       ErrorProcessing.AddRequiredDataDetailsToErrorLog();
       ProcessInputXlsxFile.ParseInputXlsxFile();
+      RearrangeCompletedFiles.CreateCategoryMatrix();
       ErrorProcessing.DestinationsAssignedIncorrectTable();
       ErrorProcessing.DestinationsWithoutPrefixes();
-      ErrorProcessing.WriteToIntermediateLog();
-      RearrangeCompletedFiles.CreateCategoryMatrix();
+      ErrorProcessing.WriteToIntermediateLog();      
       RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
       RearrangeCompletedFiles.WriteOutV5Tc2Files();
       RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);      

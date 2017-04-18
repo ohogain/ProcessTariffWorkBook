@@ -21,30 +21,34 @@ namespace ProcessTariffWorkbook
       AddToCustomerDetailsDataRecordList(StaticVariable.InputXlsxFileDetails);
       ValidateData.PreRegExDataRecordValidate();
       StaticVariable.CustomerDetailsDataRecord.Clear();
-      MatchInputXlsxFileWithRegExAndAddToDestinationsMatchedByRegExDataRecord();
+      MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails);
+      MatchPrefixesWithRegEx(StaticVariable.PrefixNumbers);
       ValidateData.PostRegExDataRecordValidate();
     }
     private static void ReadXlsxFileIntoList()
     {      
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Any line containing 'DefaultXX' will be ignored, as will all headers");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'Capped' or 'Pulse' rates are not being used, delete the worksheet.");
       string[] worksheetsTypes = {Constants.Duration, Constants.Capped, Constants.Pulse};      
-      List<string> workSheetNotUsed = new List<string>();
-      List<string> workSheetsUsed = new List<string>();
+      List<string> workSheetsNotUsed = new List<string>();      
       List<string> discardedLines = new List<string>();
+      List<string> workSheetsUsed = new List<string>();
       SpreadsheetGear.IWorkbook workbook = SpreadsheetGear.Factory.GetWorkbook(StaticVariable.InputFile);
 
-      foreach (string wksheet in worksheetsTypes) //get all work sheets present
+      foreach (string wksheet in worksheetsTypes) 
       {
         try
         {
           SpreadsheetGear.IWorksheet worksheet = workbook.Worksheets[wksheet];
           SpreadsheetGear.IRange cells = worksheet.Cells;
-          workSheetsUsed.Add(wksheet);
+          workSheetsUsed.Add(wksheet);         
         }
         catch (Exception)
         {
-          workSheetNotUsed.Add(wksheet);
+          workSheetsNotUsed.Add(wksheet);
         }        
       }
 
@@ -74,16 +78,13 @@ namespace ProcessTariffWorkbook
             }
             string sAdjustSb = sb.ToString().TrimEnd('\t');
 
-            if (string.IsNullOrEmpty(sAdjustSb) || sAdjustSb.Contains(";") || DiscardHeaderLine(sAdjustSb))
-            {
-              if (!string.IsNullOrEmpty(sAdjustSb))
-              {
-                discardedLines.Add("- " + sAdjustSb.Substring(0, sAdjustSb.IndexOf('\t')));
-              }
+            if ( sAdjustSb.Contains(";") && !DiscardHeaderLine(sAdjustSb))
+            {              
+              discardedLines.Add("- " + sAdjustSb.Substring(0, sAdjustSb.IndexOf('\t')));              
             }
-            else
+            else if (!string.IsNullOrEmpty(sAdjustSb) && !DiscardHeaderLine(sAdjustSb))
             {
-              ValidateData.CheckForCommasInPrices(sAdjustSb);
+              ValidateData.CheckForCommasInLine(sAdjustSb);
               StaticVariable.InputXlsxFileDetails.Add(sAdjustSb);
             }
           }
@@ -91,15 +92,15 @@ namespace ProcessTariffWorkbook
         catch (Exception e)
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");          
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + " : " );
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Error in reading in XLSX line into list. Is there any data? " );
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         }
       }
       workbook.Close();
-      if (workSheetNotUsed.Any())
+      if (workSheetsNotUsed.Any())
       {
         StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
-        foreach (var entry in workSheetNotUsed)
+        foreach (var entry in workSheetsNotUsed)
         {
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry + " rates are not being used.");
         }
@@ -152,13 +153,13 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "AddToPreRegExDataRecordList() -- finished");
     }
-    private static void MatchInputXlsxFileWithRegExAndAddToDestinationsMatchedByRegExDataRecord()
+    private static void MatchInputXlsxFileWithRegEx(List<string> listToUse)
     {
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "RegExMatchInputList() -- started");            
       string destinationName = string.Empty;
       var tmpList = new List<string>();
-      int destination = 0;
+      const int destination = 0;
       int uniqueBandCounter = 100;
       Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
       string regExAlphanumeric = @"[0-9|a-z|A-Z]"; //@"\w|\s"
@@ -171,10 +172,10 @@ namespace ProcessTariffWorkbook
       Regex regExRemoveExtraSpaces = new Regex(regExExtraSpaces, RegexOptions.Compiled);
       Regex regExCheckForAlphanumeric = new Regex(regExAlphanumeric, RegexOptions.Compiled);
 
-      foreach (string tok in StaticVariable.InputXlsxFileDetails)
+      foreach (string tok in listToUse)
       {
         var found = false;
-        if (!tok.ToUpper().Contains("NAME") || !tok.StartsWith(";"))
+        if (!tok.StartsWith(";"))
         {
           string[] aryLine;
           try
@@ -193,7 +194,7 @@ namespace ProcessTariffWorkbook
           }
           foreach (string regexExpression in StaticVariable.CombinedRegex)
           {
-            aryLine = regexExpression.Split('\t');
+            aryLine = regexExpression.Split(new char[] {'\t', ','});
             string regExPattern = aryLine[0];
             string regExBand = aryLine[1].Trim();
             string regexStandardName = aryLine[2].Trim();
@@ -252,7 +253,110 @@ namespace ProcessTariffWorkbook
     }
     private static bool DiscardHeaderLine(string line)
     {      
-      return line.ToUpper().StartsWith("DESTINATION") || line.ToUpper().Contains("NAME") && line.ToUpper().Contains("TABLE") && line.ToUpper().Contains("USING");      
+      return line.ToUpper().Contains("DESTINATION") || line.ToUpper().Contains("TABLE") || line.ToUpper().Contains("USING") || line.ToUpper().Contains("DEFAULTXX");      
+    }
+    private static void MatchPrefixesWithRegEx(List<string> listToUse)
+    {
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MatchPrefixesWithRegEx() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "MatchPrefixesWithRegEx() -- started");
+      string destinationName = string.Empty;
+      var tmpList = new List<string>();
+      List<string> prefixNamesOnly = new List<string>();
+      const int tableElement = 0;
+      const int prefixElement = 1;
+      const int destinationElement = 2;
+      string table = string.Empty;
+      string prefix = string.Empty;
+      string prefixName = string.Empty;
+      int uniqueBandCounter = 100;
+      Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
+      string regExAlphanumeric = @"[0-9|a-z|A-Z]"; //@"\w|\s"
+      string regExExtraSpaces = "\x0020{2,}";
+      string regExNull = "\x0000";
+      string regExNoise = @"\(|\)|( -|- )|\,|'";
+      //string regEx_Noise = @"\,|'";
+      Regex regExRemoveNull = new Regex(regExNull, RegexOptions.Multiline);
+      Regex regExRemoveNoise = new Regex(regExNoise, RegexOptions.Compiled);
+      Regex regExRemoveExtraSpaces = new Regex(regExExtraSpaces, RegexOptions.Compiled);
+      Regex regExCheckForAlphanumeric = new Regex(regExAlphanumeric, RegexOptions.Compiled);
+
+      StaticVariable.PrefixNumbersRecord.Clear();
+      foreach (var names in listToUse)
+      {
+        string[] name = names.Split('\t');
+        table = name[tableElement];
+        prefix = name[prefixElement];
+        prefixName = name[destinationElement];
+        if (table.ToUpper().Equals(StaticVariable.NationalTableSpellingValue.ToUpper())) continue;
+        prefixNamesOnly.Add(prefixName);
+      }
+      prefixNamesOnly = prefixNamesOnly.Distinct().ToList();
+      prefixNamesOnly.Sort();
+
+      foreach (string name in prefixNamesOnly)
+      {
+        var found = false;                
+        try
+        {         
+          destinationName = name.Trim();
+          destinationName = regExRemoveNoise.Replace(destinationName, " ");
+          destinationName = regExRemoveExtraSpaces.Replace(destinationName, " ");
+        }
+        catch (Exception e)
+        {
+          StaticVariable.ProgressDetails.Add("ParseInputFile::MatchPrefixesWithRegEx()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be a problem with the input destination");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+        }
+        foreach (string regexExpression in StaticVariable.CombinedRegex)
+        {
+          string[] aryLine = regexExpression.Split(new char[] { '\t' });
+          string regExPattern = aryLine[0];
+          string regExBand = aryLine[1].Trim();
+          string regexStandardName = aryLine[2].Trim();          
+
+          try
+          {
+            var regExCountry = new Regex(regExPattern, RegexOptions.IgnoreCase);
+            if (regExCountry.IsMatch(destinationName)) 
+            {
+              newTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+              newTimer.AutoReset = true;
+              newTimer.Enabled = true;
+              found = true;
+              StaticVariable.PrefixNumbersRecord.Add(new PrefixNumbersDataRecord(table + "\t" + prefix + "\t" + prefixName + "\t" + regExBand + "\t" + regexStandardName));
+            }
+          }
+          catch (Exception e)
+          {
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::MatchPrefixesWithRegEx()");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be a problem with the regex");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Check if there are more than 1 international or domestic regex files");
+            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+            ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+          }
+        }        
+        if (!found)
+        {
+          tmpList.Add(destinationName);
+          uniqueBandCounter++;
+        }
+      }
+      if (tmpList.Any())
+      {
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::MatchPrefixesWithRegEx()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefixes without regex. Change the prefix name to match the Customer name");
+        tmpList.Sort();
+        foreach (string entry in tmpList)
+        {
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry);
+        }
+        ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
+      }
+      newTimer.Enabled = false;
+      Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "MatchPrefixesWithRegEx() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "MatchPrefixesWithRegEx() -- finished");
     }
   }
 }
