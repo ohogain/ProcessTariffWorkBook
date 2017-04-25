@@ -5,13 +5,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text; 
 
 namespace ProcessTariffWorkbook
 {
-  using System;
-  using System.Diagnostics.CodeAnalysis;
-  using System.IO;
-  using System.Text;  
+  
   [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppress description for each element")]
   public static class ErrorProcessing
   {
@@ -77,36 +78,13 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- started");
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- started");
       StaticVariable.ProgressDetails.Add("Default Headers details listed below.." + Environment.NewLine);      
-      foreach (string tok in StaticVariable.TwbHeader)
+      foreach (string tok in StaticVariable.ProgressDetails)
       {
          StaticVariable.ProgressDetails.Add(tok);
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- finishing");
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddRequiredDataDetailsToErrorLog() -- finishing");
     }           
-    public static void CreateIntermediateLog()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- started");
-      try
-      {
-        StaticVariable.IntermediateLog = StaticVariable.DirectoryName + @"\" + Constants.IntermediateLog;
-        if (File.Exists(StaticVariable.IntermediateLog))
-        {
-           File.Delete(StaticVariable.IntermediateLog);
-        }
-        File.Create(StaticVariable.IntermediateLog);
-      }
-      catch (Exception e)
-      {
-        StaticVariable.ProgressDetails.Add("ErrorProcessing::CreateIntermediateLog()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem creating this sheet");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-        StopProcessDueToFatalErrorOutputToLog();
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateIntermediateLog() -- finished");
-    }    
     public static void OutputConsoleLog()
     {
       string consoleOutputLogFile = StaticVariable.DirectoryName + @"\ConsoleOutput.log";
@@ -149,323 +127,19 @@ namespace ProcessTariffWorkbook
         Console.WriteLine(Constants.FiveSpacesPadding + e.Message);
         StopProcessDueToFatalError();
       }
-    }
-    public static void AddMainlandPricesToDependentCountries()
+    }       
+    public static void CreateAndWriteToRegExMatchedLog()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- started");
-      List<string> tmpList = new List<string>();
-      List<string> deptmpList = new List<string>();
-      List<string> tmpMissingList = new List<string>();
-      Dictionary<string, string> dependentCountriresDict = new Dictionary<string, string>();
-      dependentCountriresDict.Add("CW", "Curacao\tAN");
-      dependentCountriresDict.Add("CWM", "Curacao Mobile\tANM");
-      dependentCountriresDict.Add("CYN", "Cyprus North\tTR");
-      dependentCountriresDict.Add("CYNM", "Cyprus North Mobile\tTRM");
-      dependentCountriresDict.Add("SX", "Sint Maarten\tAN");
-      dependentCountriresDict.Add("SXM", "Sint Maarten Mobile\tANM");
-      dependentCountriresDict.Add("ROD", "Rodriguez Island Mauritius\tMU");
-      dependentCountriresDict.Add("RODM", "Rodriguez Isl Mauritius Mobile\tMUM");
-      dependentCountriresDict.Add("KRF", "Khabarovsk Russian Federation\tRU");
-      dependentCountriresDict.Add("NRF", "Nakhodka Russian Federation\tRU");
-      dependentCountriresDict.Add("SRF", "Sakhalin Russian Federation\tRU");
-      dependentCountriresDict.Add("TAT", "Tatarstan Federation\tRU");
-      dependentCountriresDict.Add("SDS", "South Sudan\tSD");
-      dependentCountriresDict.Add("SDSM", "South Sudan Mobile\tSDM");
-      dependentCountriresDict.Add("CX", "Christmas Island\tAU");
-      dependentCountriresDict.Add("CC", "Cocos Island\tAU");
-      dependentCountriresDict.Add("XK", "Kosovo\tRS");
-      dependentCountriresDict.Add("XKM", "Kosovo Mobile\tRSM");
-      dependentCountriresDict.Add("VA", "Vatican City\tIT"); //CustomerDetailsDataRecord
-
-      var getBandsOnlyQuery =
-        from drm in StaticVariable.CustomerDetailsDataRecord
-        select drm.StdBand;
-
-      foreach (string dd in dependentCountriresDict.Keys)
-      {
-        deptmpList.Add(dd.ToUpper());
-      }
-
-      var dependentCountriesRequired = deptmpList.Except(getBandsOnlyQuery); //get only those dependent countries not in input xls
-
-      foreach (var mq in dependentCountriesRequired)
-      {
-        tmpMissingList.Add(dependentCountriresDict[mq]);
-      }
-
-      foreach (string token in tmpMissingList)
-      {
-        string[] dependantCountryAry = token.Split('\t');
-        string parentCode = dependantCountryAry[1];
-
-        var intQuery =
-          from drm in StaticVariable.CustomerDetailsDataRecord
-          where drm.StdBand.ToUpper().Equals(parentCode.ToUpper())
-          select drm;
-
-        foreach (var tok in intQuery)
-        {
-          tmpList.Add(dependantCountryAry[0] + "\t" + tok.CustomerFirstInitialRate + "\t" + tok.CustomerFirstSubseqRate + "\t" +
-            tok.CustomerSecondInitialRate + "\t" + tok.CustomerSecondSubseqRate + "\t" + tok.CustomerThirdInitialRate + "\t" +
-            tok.CustomerThirdSubseqRate + "\t" + tok.CustomerFourthInitialRate + "\t" + tok.CustomerFourthSubseqRate + "\t" +
-            tok.CustomerMinCharge + "\t" + tok.CustomerConnectionCost + "\t" + tok.CustomerUsingGroupBands + "\t" +
-            tok.CustomerGroupBand + "\t" + tok.CustomerGroupBandDescription + "\t" + ValidateData.CapitaliseWord(tok.CustomerTableName) + "\t" +
-            ValidateData.CapitaliseWord(tok.CustomerDestinationType) + "\t" + tok.CustomerRounding + "\t" + ValidateData.CapitaliseWord(tok.CustomerTimeScheme) + "\t" +
-            tok.CustomerUsingCustomerNames + "\t" + tok.CustomerInitialIntervalLength + "\t" + tok.CustomerSubsequentIntervalLength + "\t" +
-            tok.CustomerMinimumIntervals + "\t" + tok.CustomerIntervalsAtInitialCost + "\t" + tok.CustomerMinimumTime + "\t" +
-            tok.CustomerDialTime + "\t" + tok.CustomerAllSchemes + "\t" + tok.CustomerMultiLevelEnabled + "\t" +
-            tok.CustomerMinDigits + "\t" + tok.CustomerCutOff1Cost + "\t" + tok.CustomerCutOff2Duration + "\t" +
-            tok.ChargingType);
-        }
-      }
-      if (tmpList.Any())
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:AddMainlandPricesToDependentCountries()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Countries given Mainland prices");
-        foreach (string price in tmpList)
-        {
-          StaticVariable.ProgressDetails.Add(price);
-        }
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "AddMainlandPricesToDependentCountries() -- finished");
-    }
-    public static void FindMissingInternationalCountries()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- started");
-      List<string> tmpList = new List<string>();
-      List<string> noPricesForCountriesList = new List<string>();
-      List<string> bandsNotFoundList = new List<string>();
-      string custband = string.Empty;
-      const string zeroPrices = "0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000";
-      string otherInfo = "FALSE\tnull\tnull\t" + StaticVariable.CountryCodeValue + "_International\tInternational\tRounding\tTimeScheme\tFALSE\t60\t60\t0\t1\t1\t1\tTRUE\tFALSE\t0\t0\t0\tCharging Type";
-
-      CreateStdIntBandsDataRecord();
-      //from regexmatched get all int destinations into tmp list
-      var intQuery =
-        from drm in StaticVariable.CustomerDetailsDataRecord
-        where drm.CustomerTableName.ToUpper().Equals(StaticVariable.InternationalTableSpellingValue.ToUpper())
-        select new { drm.StdPrefixName, drm.StdBand, drm.CustomerPrefixName };
-
-      var customerCountryList = intQuery.Select(q => q.StdBand + "\t" + q.StdPrefixName + "\t" + q.CustomerPrefixName).ToList();
-      //check if all int bands are in input list.
-      foreach (StandardInternationalBandsDataRecord sib in StaticVariable.StandardInternationalBands)
-      {
-        bool bFound = false;
-        foreach (string tok in customerCountryList)
-        {
-          string[] ary = tok.Split('\t');
-          custband = ary[0];
-          if (sib.SBand.ToUpper().Equals(custband.ToUpper()))
-          {
-            bFound = true;
-            break;
-          }
-        }
-        if (!bFound)
-        {
-          bandsNotFoundList.Add(sib.SBand + "\t" + sib.SPrefixName + "\t" + sib.SCountryCode);
-        }
-      }
-      //find out if a fixed band exists. yes give it landline price.
-      foreach (string token in bandsNotFoundList)
-      {
-        string[] aryBandsNotFound = token.Split('\t');
-        custband = aryBandsNotFound[0];
-        string custName = aryBandsNotFound[1];
-        string stdCountryCode = aryBandsNotFound[2];
-        const string mobileBand = "M";
-
-        if (custband.EndsWith(mobileBand) && custband.Length > 2)
-        {
-          string tmpCustBand = custband.Substring(0, custband.Length - 1);
-          var mobileQuery =
-            from drm in StaticVariable.CustomerDetailsDataRecord
-            where tmpCustBand.ToUpper().Equals(drm.StdBand.ToUpper())
-            select drm;
-          foreach (var dr in mobileQuery)
-          {
-            string name = dr.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? dr.CustomerPrefixName : dr.StdPrefixName;
-            string groupBand = dr.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? dr.CustomerGroupBand + mobileBand : dr.StdBand + mobileBand;
-            string groupBandDescription = dr.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? dr.CustomerGroupBandDescription + mobileBand : dr.StdPrefixDescription + mobileBand;
-            tmpList.Add(name + " " + StaticVariable.InternationalMobileSpellingValue + "\t" + dr.CustomerFirstInitialRate + "\t" +
-              dr.CustomerFirstSubseqRate + "\t" + dr.CustomerSecondInitialRate + "\t" + dr.CustomerSecondSubseqRate + "\t" +
-              dr.CustomerThirdInitialRate + "\t" + dr.CustomerThirdSubseqRate + "\t" + dr.CustomerFourthInitialRate + "\t" +
-              dr.CustomerFourthSubseqRate + "\t" + dr.CustomerMinCharge + "\t" + dr.CustomerConnectionCost + "\t" +
-              "FALSE\t" + groupBand + "\t" + groupBandDescription + "\t" + ValidateData.CapitaliseWord(dr.CustomerTableName) + "\t" +
-              ValidateData.CapitaliseWord(dr.CustomerDestinationType + " " + StaticVariable.InternationalMobileSpellingValue) + "\t" + 
-              dr.CustomerRounding + "\t" + ValidateData.CapitaliseWord(dr.CustomerTimeScheme) + "\t" +
-              dr.CustomerUsingCustomerNames + "\t" + dr.CustomerInitialIntervalLength + "\t" + dr.CustomerSubsequentIntervalLength + "\t" + 
-              dr.CustomerMinimumIntervals + "\t" + dr.CustomerIntervalsAtInitialCost + "\t" + dr.CustomerMinimumTime + "\t" + dr.CustomerDialTime + "\t" +
-              dr.CustomerAllSchemes + "\t" + dr.CustomerMultiLevelEnabled + "\t" + dr.CustomerMinDigits + "\t" +
-              dr.CustomerCutOff1Cost + "\t" + dr.CustomerCutOff2Duration + "\t" + dr.ChargingType
-              );
-          }
-        }
-        else if (!stdCountryCode.Equals(StaticVariable.CountryCodeValue) && !stdCountryCode.ToUpper().Equals("N/A"))
-        {
-          noPricesForCountriesList.Add(ValidateData.CapitaliseWord(custName) + "\t" + zeroPrices + "\t" + otherInfo);
-        }
-      }
-      if (tmpList.Any())
-      {
-        tmpList.Sort();
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Int mobile prices missing for these destinations, so given landine prices.");
-        foreach (string sEntry in tmpList)
-        {
-          StaticVariable.ProgressDetails.Add(sEntry);
-        }
-      }
-
-      if (noPricesForCountriesList.Any())
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:FindMissingInternationalCountries()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No prices supplied for these countries. They have been given a zero price.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If a BT / Eir / KPN price is available for these destinations then use that price unless told to zero cost these destinations.");
-        noPricesForCountriesList.Sort();
-        foreach (string sZeroEntry in noPricesForCountriesList)
-        {
-          StaticVariable.ProgressDetails.Add(sZeroEntry);
-        }
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "FindMissingInternationalCountries() -- finished");
-    }
-    public static void DestinationsAssignedIncorrectTable()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- started");
-
-      var query =
-        from drm in StaticVariable.CustomerDetailsDataRecord
-        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.PrefixName.ToUpper()
-        where !drm.CustomerTableName.ToUpper().Equals(pn.TableName.ToUpper())
-        select new { pn.TableName, pn.PrefixName, drm.CustomerTableName, drm.CustomerPrefixName };
-
-      if (query.Any())
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsAssignedIncorrectTable()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and prefix are assigned different tables.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Perhaps check the RegExMatchedList for incorrect regex matching." + Environment.NewLine);
-        foreach (var entry in query)
-        {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ("Prefix Table: " + entry.PrefixName + " --> " + entry.TableName).PadRight(70) + "XLSX File: " + entry.CustomerPrefixName + " --> " + entry.CustomerTableName);
-        }
-        StopProcessDueToFatalErrorOutputToLog();
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsAssignedIncorrectTable() -- finished");
-    }
-    public static void DestinationsWithoutPrefixes()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- started");      
-      Dictionary<string, string> errorNames = new Dictionary<string, string>();
-      List<string> stdNames = new List<string>();      
-
-      var queryCustomerDetails =
-        (from dr in StaticVariable.CustomerDetailsDataRecord
-         select new { dr.StdPrefixName, dr.CustomerPrefixName, dr.StdBand}).Distinct();
-
-      foreach (var detail in queryCustomerDetails)
-      {        
-        try
-        {                  
-          errorNames.Add(detail.StdPrefixName.ToUpper(), "Custname - " + detail.CustomerPrefixName + ",\t stdName - " + detail.StdPrefixName + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");          
-        }
-        catch (Exception e)
-        {
-          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message + " - " + detail.CustomerPrefixName);          
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'using customer name' is true, an entry like 'peru NGN PRS' will be assigned two different bands but the customer name will be added twice into the dictionary.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using standard prefixes: In the " + StaticVariable.XlsxFileName + " file split the entry 'peru NGN PRS' into two seperate entries - 'peru NGN' and 'peru PRS'.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using client supplied prefixes: In the regex, remove one of the regex matches.");
-          StaticVariable.ProgressDetails.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Existing dictionary entry : ");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + errorNames[detail.CustomerPrefixName.ToUpper()]);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Duplicate entry :" );
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Custname - " + detail.CustomerPrefixName + ",\t StdName - " + detail.StdPrefixName  + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");             
-          StopProcessDueToFatalErrorOutputToLog();
-        }
-        stdNames.Add(detail.StdPrefixName);
-      }
-
-      var queryPrefixNames =
-        (from pn in StaticVariable.PrefixNumbersRecord   
-         orderby pn.stdPrefixName
-         select pn.stdPrefixName).Distinct();     
-
-      var missingPrefixes = stdNames.Except(queryPrefixNames).ToList();
-      
-      missingPrefixes.Sort();                    
-
-      if (missingPrefixes.Any())
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No Prefix Found:");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
-
-        foreach (var entry in missingPrefixes)
-        {
-          try
-          {
-            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding +
-                                               ValidateData.CapitaliseWord(errorNames[entry]));
-          }
-          catch (Exception e)
-          {
-            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No Prefix Found for : " + entry);
-            StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-            //StopProcessDueToFatalErrorOutputToLog();
-          }
-        }
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DestinationsWithoutPrefixes() -- finished");
-    }
-    private static void CreateStdIntBandsDataRecord()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- started");
-      try
-      {
-        using (StreamReader oSr = new StreamReader(File.OpenRead(StaticVariable.DatasetsFolder + @"\" + Constants.StdIntAndBands)))
-        {
-          while (!oSr.EndOfStream)
-          {
-            string sLine = oSr.ReadLine();
-            if (!string.IsNullOrEmpty(sLine) && !sLine.StartsWith(";"))
-            {
-              StaticVariable.StandardInternationalBands.Add(new StandardInternationalBandsDataRecord(sLine));
-            }
-          }
-          oSr.Close();
-        }
-      }
-      catch (Exception e)
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::CreateStdIntBandsDataRecord()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "problem creating the Std Int Bands Data Record List");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-        StopProcessDueToFatalErrorOutputToLog();
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "CreateStdIntBandsDataRecord() -- finished");
-    }
-    public static void WriteToIntermediateLog()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- started");
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- started");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- started");
+      const string regExMatchedLog = "RegExMatchedLog.txt";
+      string regExMatchedLogValue = StaticVariable.DirectoryName + @"\" + regExMatchedLog;
       var allDetails =
         from db in StaticVariable.CustomerDetailsDataRecord
         select db;
       try
       {
-        using (StreamWriter oSw = new StreamWriter(File.OpenWrite(StaticVariable.IntermediateLog), Encoding.Unicode))
+        using (StreamWriter oSw = new StreamWriter(File.OpenWrite(regExMatchedLogValue), Encoding.Unicode))
         {
           oSw.WriteLine("Standard Band\tStandard Name\tCustomer Name\tGroup Band\tGroup Band Description\tTable Name\tDestination Type\tStandard Description\tTime Scheme\tRounding\tRates");
           foreach (var ad in allDetails)
@@ -485,136 +159,96 @@ namespace ProcessTariffWorkbook
       }
       catch (Exception e)
       {
-        StaticVariable.ProgressDetails.Add("ErrorProcessing::WriteToIntermediateLog()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.IntermediateLog + ": Problem writing to Intermediate File");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::WriteToRegExMatchedLog()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + regExMatchedLogValue + ": Problem writing to RegExMatchedLog File");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         StopProcessDueToFatalErrorOutputToLog();
       }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- finished");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToIntermediateLog() -- finished");
-    }
-    public static void WriteOutGroupBandsToErrorLog()
+      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- finished");
+      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- finished");
+    }     
+    public static void TestWriteToPrefixNumbersSheet2()
     {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- started");
-      StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::WriteOutGroupBands()");
-      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "group bands used.........");
-
-      try
+      Console.WriteLine("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()");
+     // string sSheet = StaticVariable.FinalDirectory+ @"\" + StaticVariable.twb + sPrefixNumbersSheetCONST;      
+      string sName = string.Empty;
+      string sNumber = string.Empty;
+      string sTmpTable = string.Empty;
+      List<string> IncorrectTableList = new List<string>();
+      List<string> tmpMissingPrefixList = new List<string>();
+      List<string> tmpList = new List<string>();
+      bool bFound = false;
+            
+          foreach (DataRecord drm in StaticVariable.CustomerDetailsDataRecord)
+          {
+            bFound = false;
+            foreach (PrefixNumbersDataRecord pn in StaticVariable.PrefixNumbersRecord)
+            {
+              try
+              {
+                if (drm.StdPrefixName.ToUpper().Equals(pn.PrefixName.ToUpper()) || drm.CustomerPrefixName.ToUpper().Equals(pn.PrefixName.ToUpper()))
+                {
+                  bFound = true;
+                  sTmpTable = pn.TableName;
+                  sNumber = pn.PrefixNumber;
+                  sName = pn.stdPrefixName;
+                  if (drm.CustomerUsingCustomerNames.ToUpper().Equals("TRUE"))
+                  {
+                    tmpList.Add(pn.TableName + "\t" + pn.PrefixNumber + "\t" + ValidateData.CapitaliseWord(drm.CustomerPrefixName));
+                  }
+                  else
+                  {
+                    tmpList.Add(pn.TableName + "\t" + pn.PrefixNumber + "\t" + ValidateData.CapitaliseWord(drm.StdPrefixName));
+                  }
+                }
+              }
+              catch (Exception e)
+              {
+                StaticVariable.ProgressDetails.Add("RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ": Problem with writing the prefix file");
+                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+                StopProcessDueToFatalErrorOutputToLog();
+              }
+            }
+            if (bFound)
+            {
+              if (!drm.CustomerTableName.ToUpper().Equals(sTmpTable.ToUpper())) // Now check the table names are the same.
+              {
+                IncorrectTableList.Add(sTmpTable + " : " + drm.CustomerPrefixName + " - " + sNumber);
+              }
+            }
+            else
+            {
+              tmpMissingPrefixList.Add(drm.CustomerTableName + " : Customer Name : " + drm.CustomerPrefixName.PadRight(41, ' ') + " --> Standard Name : " + drm.StdPrefixName);
+            }
+          }          
+     
+      if (tmpMissingPrefixList.Count > 0)
       {
-        var durationQuery =
-        (from groups in StaticVariable.CustomerDetailsDataRecord
-         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("DURATION")
-         select new
-         {
-           groups.ChargingType,
-           groups.CustomerGroupBand,
-           groups.CustomerGroupBandDescription,
-           groups.CustomerMinCharge,
-           groups.CustomerConnectionCost,
-           groups.CustomerFirstInitialRate,
-           groups.CustomerFirstSubseqRate,
-           groups.CustomerSecondInitialRate,
-           groups.CustomerSecondSubseqRate,
-           groups.CustomerThirdInitialRate,
-           groups.CustomerThirdSubseqRate,
-           groups.CustomerFourthInitialRate,
-           groups.CustomerFourthSubseqRate
-         }).Distinct();
-
-        foreach (var dg in durationQuery)
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "No Prefix Found:");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is: No / Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
+        tmpMissingPrefixList.Sort();
+        foreach (string error in tmpMissingPrefixList)
         {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + dg.ChargingType);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + dg.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + dg.CustomerGroupBandDescription);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + dg.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + dg.CustomerConnectionCost);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 1 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Rate 1 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerFirstSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 2 initial:".PadRight(15, '.') + '\x0020' + dg.CustomerSecondInitialRate.PadRight(10, '\x0020') + " Rate 2 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerSecondSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 3 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerThirdInitialRate.PadRight(10, '\x0020') + " Rate 3 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerThirdSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Rate 4 Initial:".PadRight(15, '.') + '\x0020' + dg.CustomerFourthInitialRate.PadRight(10, '\x0020') + " Rate 4 Subseq:".PadRight(20, '.') + '\x0020' + dg.CustomerFourthSubseqRate);
-          StaticVariable.ProgressDetails.Add("\n");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
         }
       }
-      catch (Exception e)
+      if (IncorrectTableList.Count > 0)
       {
-        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
-        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - duration");
-        StaticVariable.ProgressDetails.Add(e.Message);
-      }
-      try
-      {
-        var cappedQuery =
-        (from groups in StaticVariable.CustomerDetailsDataRecord
-         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("CAPPED")
-         select groups).Distinct();
-        foreach (var cq in cappedQuery)
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "Destinations assigned a different table to the table where the prefix is.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Check the RegExMatchedList for incorrect regex matching.");
+        //StaticVariable.ProgressDetails.Add(@"StaticVariable.ProgressDetails.Add("Run the debug line:" + Enviroment.Newline + sRegExBand \t sRegexStandardName \t sRegExDescription \t + tok), in ParseInputFile::RegExMatchInputList");
+        IncorrectTableList.Sort();
+        foreach (string error in IncorrectTableList)
         {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + cq.ChargingType);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + cq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + cq.CustomerGroupBandDescription);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + cq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + cq.CustomerConnectionCost);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Standard:".PadRight(15, '.') + '\x0020' + cq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Cap Price:".PadRight(20, '.') + '\x0020' + cq.CustomerFirstSubseqRate);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Cap Time:".PadRight(15, '.') + '\x0020' + cq.CustomerSecondInitialRate.PadRight(10, '\x0020'));
-          StaticVariable.ProgressDetails.Add("\n");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
         }
+        StopProcessDueToFatalErrorOutputToLog();
       }
-      catch (Exception e)
-      {
-        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
-        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - capped");
-        StaticVariable.ProgressDetails.Add(e.Message);
-      }
-      try
-      {
-        var pulseQuery =
-        (from groups in StaticVariable.CustomerDetailsDataRecord
-         where groups.CustomerUsingGroupBands.ToUpper().Equals("TRUE") && groups.ChargingType.ToUpper().Equals("PULSE")
-         select groups).Distinct();
-        foreach (var pq in pulseQuery)
-        {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Charging Type: " + pq.ChargingType);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Band:".PadRight(15, '.') + '\x0020' + pq.CustomerGroupBand.PadRight(10, '\x0020') + " Band Description:".PadRight(20, '.') + '\x0020' + pq.CustomerGroupBandDescription);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Min Cost:".PadRight(15, '.') + '\x0020' + pq.CustomerMinCharge.PadRight(10, '\x0020') + " Connection Cost:".PadRight(20, '.') + '\x0020' + pq.CustomerConnectionCost);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Pulse Length:".PadRight(15, '.') + '\x0020' + pq.CustomerFirstInitialRate.PadRight(10, '\x0020') + " Pulse Unit:".PadRight(20, '.') + '\x0020' + pq.CustomerFirstSubseqRate);
-          StaticVariable.ProgressDetails.Add("\n");
-        }
-      }
-      catch (Exception e)
-      {
-        StaticVariable.ProgressDetails.Add("ErrorProcessing: WriteOutGroupBands()");
-        StaticVariable.ProgressDetails.Add("Error in WriteOutGroupBands() - pulse");
-        StaticVariable.ProgressDetails.Add(e.Message);
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteOutGroupBands() -- finish");
-    }
-    public static void WriteToErrorlogIfMinCostAnd4ThRateSamePrice()
-    {
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- started");
-      List<string> matches = new List<string>();
-      var query =
-        from peakAndMinCost in StaticVariable.CustomerDetailsDataRecord
-        where peakAndMinCost.CustomerFourthSubseqRate.Equals(peakAndMinCost.CustomerMinCharge)
-        select new { peakAndMinCost.StdPrefixName, peakAndMinCost.CustomerFourthSubseqRate, peakAndMinCost.CustomerMinCharge, peakAndMinCost.CustomerPrefixName };
-
-      foreach (var pk in query)
-      {
-        if (pk.CustomerMinCharge.Equals(pk.CustomerFourthSubseqRate) && Convert.ToDouble(pk.CustomerMinCharge) > 0.0)
-        {
-          ValidateData.CheckIfDouble(pk.CustomerMinCharge);
-          matches.Add(Constants.FiveSpacesPadding + pk.CustomerPrefixName);
-        }
-      }
-      if (matches.Any())
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing:DisplayMinCostV4thRateSamePrice()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "4th rate is the same price as Minimum Cost.");
-        foreach (var m in matches)
-        {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + m);
-        }
-      }
-      Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
-      StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "DisplayMinCostV4thRateSamePrice() -- finish");
+      Console.WriteLine("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- finished");
     }
   }
 }

@@ -1,34 +1,129 @@
 ﻿Main:
-	--> ProcessRequiredFiles.VerifyRequiredFiles(args);
-	    --> StaticVariable.DirectoryName = GetDirectoryName();
-		--> StaticVariable.XlsxFileName = GetFileName();
-		--> CreateFinalFolder();
-		--> StaticVariable.CountryCode = GetCountryCode();
-		--> StaticVariable.DatasetFolderToUse = GetDatasetsFolderToUse();
-		--> StaticVariable.HeaderFile = GetHeaderFile();
-		--> ReadHeaderFileIntoLists();
-		--> CheckTariffPlanList();
-		--> CheckTableLinksList();
-		--> CheckTimeSchemesList();
-		--> CheckTimeSchemeExceptionsList();
-		--> CheckSpellingList();
-		--> CheckSourceDestinationsBandList(); -- Further testing required. the band length needs to be rechecked when outputting TC2 ini files.
-												-- the bands in matrix need to be checked against the local, national & regional bands
-		--> CheckForStdIntAndBandsFile();
-		--> StaticVariable.NewFileName = CreateNewFileName();
-		--> StaticVariable.CategoryMatrixXlsx = CreateXlsxFileName(Constants.CategoryMatrixFile); 
-		--> CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsx);
-		--> StaticVariable.OutpuXlsxFile = CreateXlsxFileName(StaticVariable.NewFileName);
-		--> CreateOutputXlsxFile(StaticVariable.OutpuXlsxFile);
-		--> RearrangeDefaultEntries(); -- added the 'charging type' column to end.
-		--> CopyIniFilesToFinalFolder((Directory.GetFiles(StaticVariable.DatasetFolderToUse, Constants.IniExtensionSearch)), "Domestic");
-		--> CopyIniFilesToFinalFolder((Directory.GetFiles(StaticVariable.DatasetsFolder, Constants.IniExtensionSearch)), "International");
-		--> ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
-		--> ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International");
-		--> CombinePrefixesInDataRecord(StaticVariable.PrefixNumbers);
+	-->  ProcessRequiredFiles.GetRequiredData(args);
+			  GetArguments(args);
+              StaticVariable.DirectoryName = GetDirectoryName();
+              StaticVariable.XlsxFileName = GetInputXlsxFileName();      
+              StaticVariable.CountryCodeValue = GetCountryCode();
+              StaticVariable.DatasetFolderToUse = GetDatasetsFolderToUse();
+              StaticVariable.HeaderFile = GetHeaderFile();            
+              ReadHeaderFileIntoLists();
+              ValidateData.CheckTariffPlanList();
+              ValidateData.CheckTableLinksList();
+              ValidateData.CheckTimeSchemesList();
+              ValidateData.CheckTimeSchemeExceptionsList();
+              ValidateData.CheckSpellingList();
+              ValidateData.CheckSourceDestinationsBandList();
+              ValidateData.CheckForStdIntAndBandsFile();   
+              RearrangeDefaultEntries();
+              ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
+              ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International"); 
+              ValidateData.CheckForMoreThanTwoRegExFiles(); 
+              CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetFolderToUse);
+              CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder);     
 
+              CreateFinalFolder();
+              StaticVariable.CategoryMatrixXlsx = CreateXlsxFileName(Constants.CategoryMatrixFile); 
+              CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsx);     
+              StaticVariable.V6TwbOutputXlsxFile = CreateXlsxFileName(CreateNewFileName());
+              CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);
 
+	--> ErrorProcessing.CreateIntermediateLog();	
+	--> ProcessInputXlsxFile.ParseInputXlsxFile();
+			ReadXlsxFileIntoList(); = StaticVariable.InputXlsxFileDetails
+			MergeDefaultPricesListWithInputFileList(); = StaticVariable.InputXlsxFileDetails
+			AddToCustomerDetailsDataRecordList(StaticVariable.InputXlsxFileDetails); = StaticVariable.CustomerDetailsDataRecord
+			ValidateData.PreRegExMatchValidateCustomerDetailsDataRecord(); 
+				CheckPricesAreInCorrectFormat();
+				CheckTableNames();
+				CheckForDestinationTypes();      
+				CheckRoundingForIncorrectEntry();
+				CheckTimeSchemeForIncorrectEntry();
+				CheckIfMinCostAndRate4SubseqAreSame();
+				CheckGrouping();
+				CheckIntervalLengthsGreaterOrEqualToZero();
+				CheckUsingCustomerNames();
+				CheckMinimumIntervals();
+				CheckMinimumDigits();
+				CheckCutOffDuration();
+				CheckMultiLevelEnabled();
+				CheckAllSchemes();
+				CheckDialTime();
+				CheckMinimumTime();
+				CheckIntervalsAtInitialCostGreaterOrEqualToZero();
+				CheckDestinationTypesNames();      
 
+			StaticVariable.CustomerDetailsDataRecord.Clear(); =
+			MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails); = StaticVariable.CustomerDetailsDataRecord   
+			ValidateData.PostRegExMatchValidateCustomerDetailsDataRecord();
+				CheckForFreephone();
+				CheckIfFreephoneIsFree();
+				CheckForDuplicateBands();
+				CheckForNonUniqueGroupBands();            
+				CheckSourceDestinationBandsPresentInPrefixBands();
+				ErrorProcessing.WriteOutGroupBandsToErrorLog();
+				ErrorProcessing.WriteToErrorlogIfMinCostAnd4ThRateSamePrice();
+				CheckIfAllMatrixBandsUsed();
+				CheckForNonMatchingCustomerNames();
+				CheckChargingType();
+				CheckTablesForDefaultValue();
+				CheckForMissingDefaultEntries();
+				DestinationsAssignedMultipleBands();   
+
+	--> ValidateData.MatchPrefixNamesWithRegEx(StaticVariable.PrefixNumbersFromIniFiles);
+	--> ValidateData.MatchPrefixNamesToStandardNamesAndAddToPrefixesDataRecord(StaticVariable.PrefixesMatchedByRegEx, StaticVariable.PrefixNumbersFromIniFiles);
+	--> ValidateData.ValidatePrefixesData()
+			CheckTablesForDefaultValue();
+			CheckForMissingDefaultEntries();
+			DestinationsWithoutPrefixes();
+			CheckForDuplicatePrefixNumbers();
+			CheckForNonMatchingPrefixNames();
+
+	--> RearrangeCompletedFiles.CreateCategoryMatrix();
+	--> ErrorProcessing.DestinationsAssignedIncorrectTable();     
+	--> ErrorProcessing.WriteToIntermediateLog();      
+
+	--> RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
+			WriteToBandsWorkSheet(workbook);
+			WriteToTariffPlanSheet(workbook); 
+				DisplayHolidays();
+			WriteToTableLinksSheet(workbook);
+			WriteToPrefixBandsSheet(workbook);        
+			WriteToPrefixNumbersSheet(workbook, MatchPrefixesWithDestinations());
+			WriteToSourceDestinationBandsSheet(workbook);
+			WriteToTimeSchemesSheet(workbook);
+			WriteToTimeSchemesExceptionsSheet(workbook); 
+
+	--> RearrangeCompletedFiles.WriteOutV5Tc2Files();
+			CreateV5Tc2PricesFile();
+				MakeGeneralHeader(v5PricesIni);
+				AddDurationPrices(v5PricesIni);
+					GetDurationPrices();
+				AddCappedPrices(v5PricesIni);
+					GetCappedPrices();
+				AddPulsePrices(v5PricesIni);
+					 GetPulsePrices();
+				GetDurationMatrix(v5PricesIni);
+				GetCappedMatrix(v5PricesIni);
+				GetPulseMatrix(v5PricesIni);
+				WriteToV5Tc2PricesFile(v5PricesIni);
+
+			WritePrefixIniFiles(MatchPrefixesWithDestinations());
+
+	--> RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);      
+	--> ErrorProcessing.AddMainlandPricesToDependentCountries();
+	--> ErrorProcessing.FindMissingInternationalCountries();
+
+     
+	--> ErrorProcessing.TestWriteToPrefixNumbersSheet2(); ????
+      
+
+StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
+StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
+ErrorProcessing.OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);
+ErrorProcessing.OutputToLogs(StaticVariable.ConsoleOutput, StaticVariable.DirectoryName + @"\" + Constants.ConsoleErrorLog);
+ErrorProcessing.OutputConsoleLog();
+
+===================================================================
 
 to do 
 CheckForDestinationTypes(): V5: fixed number (8) of destination types, names are set, V6: no fixed number. Names can vary
@@ -39,3 +134,43 @@ CheckForDestinationTypes(): V5: fixed number (8) of destination types, names are
 	
 
 	check for duplicates in the prefix file
+
+
+
+	ProcessRequiredFiles - ReadPrefixesIntoList()
+	ValidateData - MatchPrefixesWithRegEx()
+	? ProcessRequiredFiles - CombinePrefixesInDataRecord() ? 
+	ValidateData - CheckForDuplicatePrefixNumbers()
+	RearrangeCompletedFiles - WriteToPrefixNumbersSheet()
+	RearrangeCompletedFiles - WritePrefixIniFiles()
+	ValidateData - AddPrefixesToPrefixNumbersRecord
+
+
+
+	var queryCustomerDetails =
+        (from dr in StaticVariable.CustomerDetailsDataRecord
+         select new { dr.StdPrefixName, dr.CustomerPrefixName, dr.StdBand, dr.CustomerUsingCustomerNames}).Distinct();
+
+	 foreach (var detail in queryCustomerDetails)
+      {        
+        try
+        {
+          string nameToUse = detail.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? detail.CustomerPrefixName : detail.StdPrefixName;
+          stdNames.Add(nameToUse.ToUpper());
+          errorNames.Add(nameToUse.ToUpper(), "Custname - " + detail.CustomerPrefixName + ",\t stdName - " + detail.StdPrefixName + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");          
+        }
+        catch (Exception e)
+        {
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message + " - " + detail.CustomerPrefixName);          
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'using customer name' is true, an entry like 'peru NGN PRS' will be assigned two different bands but the customer name will be added twice into the dictionary.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using standard prefixes: In the " + StaticVariable.XlsxFileName + " file split the entry 'peru NGN PRS' into two seperate entries - 'peru NGN' and 'peru PRS'.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using client supplied prefixes: In the regex, remove one of the regex matches.");
+          StaticVariable.ProgressDetails.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Existing dictionary entry : ");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + errorNames[detail.CustomerPrefixName.ToUpper()]);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Duplicate entry :" );
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Custname - " + detail.CustomerPrefixName + ",\t StdName - " + detail.StdPrefixName  + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");             
+          StopProcessDueToFatalErrorOutputToLog();
+        }        
+      }

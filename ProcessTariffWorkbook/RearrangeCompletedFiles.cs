@@ -6,15 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using SpreadsheetGear.Shapes;
 
 namespace ProcessTariffWorkbook
 {
   class RearrangeCompletedFiles
-  {
-    
+  {    
     public static void CreateCategoryMatrix()
   {
     Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- started");    
@@ -102,7 +99,7 @@ namespace ProcessTariffWorkbook
     }
     try
     {
-      SpreadsheetGear.IWorkbook workbook = SpreadsheetGear.Factory.GetWorkbook(StaticVariable.CategoryMatrixXlsx); 
+      SpreadsheetGear.IWorkbook workbook = SpreadsheetGear.Factory.GetWorkbook(StaticVariable.CategoryMatrixXlsxFile); 
       workbook.Worksheets["Sheet1"].Name = categoryMatrixTab; 
       foreach (string line in categoryMatrix)
       {
@@ -126,7 +123,7 @@ namespace ProcessTariffWorkbook
       ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
     }
     StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CreateCategoryMatrix() -- started");
-    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The CategoryMatrix has been written to final folder");
+    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The CategoryMatrix has been written to " + StaticVariable.FinalDirectory);
     Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- finished");
     StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCategoryMatrix() -- finished");
     }
@@ -642,10 +639,10 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- started");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CopySheetsToDropFolder() -- started");                            
-
+      const string v6TwbDropFolder = @"\op-utils\WorkingFolder\TariffTools";
       if (moveXlsxFileToOpUtilFolder)
       {        
-        string dropFolderFile = @"\" +Constants.V6TwbDropFolder + @"\" + Path.GetFileName(StaticVariable.V6TwbOutputXlsxFile);
+        string dropFolderFile = @"\" + v6TwbDropFolder + @"\" + Path.GetFileName(StaticVariable.V6TwbOutputXlsxFile);
         try
         {          
           if (File.Exists(dropFolderFile))
@@ -657,7 +654,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem deleting sheet files in TWB drop folder");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + de.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -669,7 +666,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Path too long. It must not exceed 248 chars");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ptl.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -677,7 +674,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is a zero-length string, has invalid chars or only white space");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ae.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -685,7 +682,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "sourceFileName or destFileName is in an invalid format");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + nse.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -693,7 +690,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Source file not found");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + fnf.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -701,7 +698,7 @@ namespace ProcessTariffWorkbook
         {
           StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::CopySheetsToDropFolder() -- started");
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problem moving sheet files to TWB drop folder");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + Constants.V6TwbDropFolder);
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "TWB Drop Folder is: " + v6TwbDropFolder);
           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
@@ -961,19 +958,15 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
-      List<string> prefixesMatched = new List<string>();
 
-      var query =
+        var query =
         from drm in StaticVariable.CustomerDetailsDataRecord
-        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.PrefixName.ToUpper()
-        select new { pn.TableName, pn.PrefixName, pn.PrefixNumber, drm.CustomerPrefixName, drm.CustomerUsingCustomerNames };
+        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.stdPrefixName.ToUpper()        
+        select new { pn.TableName, pn.PrefixName, pn.PrefixNumber, drm.CustomerPrefixName, drm.CustomerUsingCustomerNames, pn.stdPrefixName };
 
-      foreach (var entry in query)
-      {
-        string prefixName = entry.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? entry.CustomerPrefixName : entry.PrefixName;
-        prefixesMatched.Add(entry.TableName + "\t" + entry.PrefixNumber + "\t" + prefixName);
-      }
-      prefixesMatched = prefixesMatched.Distinct().ToList();
+        List<string> prefixesMatched = (from entry in query let prefixName = entry.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? entry.CustomerPrefixName : entry.stdPrefixName select entry.TableName + "\t" + entry.PrefixNumber + "\t" + prefixName).ToList();
+        prefixesMatched = prefixesMatched.Distinct().ToList();
+
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");      
       return prefixesMatched;
@@ -1197,7 +1190,7 @@ namespace ProcessTariffWorkbook
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
       //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
-      pricesini.Add(Constants.alwaysAddBandHardCoded);
+      pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + dr.CustomerTimeScheme);
       pricesini.Add("First Rate=" + GetTariffPlanValues("Rate1"));
       pricesini.Add("Second Rate=" + GetTariffPlanValues("Rate2"));
@@ -1229,7 +1222,7 @@ namespace ProcessTariffWorkbook
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
-      pricesini.Add(Constants.alwaysAddBandHardCoded);
+      pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
       pricesini.Add("First Rate=" + GetTariffPlanValues("Rate1"));
       pricesini.Add("Cap Time=" + details.CustomerSecondInitialRate);
@@ -1258,7 +1251,7 @@ namespace ProcessTariffWorkbook
       //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
-      pricesini.Add(Constants.alwaysAddBandHardCoded);
+      pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
       pricesini.Add("First Rate=" + GetTariffPlanValues("Rate1"));
       pricesini.Add("Second Rate=" + GetTariffPlanValues("Rate2"));

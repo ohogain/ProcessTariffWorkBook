@@ -15,18 +15,14 @@ namespace ProcessTariffWorkbook
   [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppress description for each element")]
   public class ProcessRequiredFiles
   {
-    #region variables
-        
-    #endregion
-    public static void GetRequiredData(string[] args)
+    public static void GetDatasetsData(string[] args)
     {
       GetArguments(args);
       StaticVariable.DirectoryName = GetDirectoryName();
-      StaticVariable.XlsxFileName = GetInputXlsxFileName();
-      CreateFinalFolder();
+      StaticVariable.XlsxFileName = GetInputXlsxFileName();      
       StaticVariable.CountryCodeValue = GetCountryCode();
       StaticVariable.DatasetFolderToUse = GetDatasetsFolderToUse();
-      StaticVariable.HeaderFile = GetHeaderFile();      
+      StaticVariable.HeaderFile = GetHeaderFile();            
       ReadHeaderFileIntoLists();
       ValidateData.CheckTariffPlanList();
       ValidateData.CheckTableLinksList();
@@ -35,27 +31,23 @@ namespace ProcessTariffWorkbook
       ValidateData.CheckSpellingList();
       ValidateData.CheckSourceDestinationsBandList();
       ValidateData.CheckForStdIntAndBandsFile();   
-         
-      StaticVariable.CategoryMatrixXlsx = CreateXlsxFileName(Constants.CategoryMatrixFile); 
-      CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsx);
-
-      StaticVariable.V6TwbOutputXlsx = CreateNewFileName();
-      StaticVariable.V6TwbOutputXlsxFile = CreateXlsxFileName(StaticVariable.V6TwbOutputXlsx);
-      CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);
-
-      RearrangeDefaultEntries();
-      ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
-      ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International");
-      CombinePrefixesInDataRecord(StaticVariable.PrefixNumbers);
+      RearrangeDefaultEntries();      
       ValidateData.CheckForMoreThanTwoRegExFiles();
-      CombineRegExFiles(StaticVariable.DatasetFolderToUse);
-      CombineRegExFiles(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty      
+      CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetFolderToUse);
+      CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty    
+
+      CreateFinalFolder();
+      StaticVariable.CategoryMatrixXlsxFile = CreateXlsxFileName(Constants.CategoryMatrixFile); 
+      CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsxFile);     
+      StaticVariable.V6TwbOutputXlsxFile = CreateXlsxFileName(CreateNewFileName());
+      CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);                         
     }                       
     public static void GetArguments(string[] args)
       {
         Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
         StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
         StaticVariable.ProgressDetails.Add("Process starting".PadRight(20, '.') + Environment.NewLine);
+        string toTwbFolder = string.Empty;
         try
         {
           if (args.Length.Equals(1))
@@ -65,8 +57,8 @@ namespace ProcessTariffWorkbook
           else if (args.Length.Equals(2))
           {
             StaticVariable.InputFile = args[0].Trim();
-            StaticVariable.ToTwbFolder = args[1].Trim();
-            if (StaticVariable.ToTwbFolder.ToUpper().Equals("TRUE"))
+            toTwbFolder = args[1].Trim();
+            if (toTwbFolder.ToUpper().Equals("TRUE"))
             {
                 StaticVariable.MoveOutputSpreadSheetToV6TwbFolder = true;
             }
@@ -182,11 +174,12 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetCountryCode() -- started");
+      const int xlsxFileNameSplitIntoTwoParts = 2;
       string code = String.Empty;
       try
       {
         string[] xlsxFileNameSplitOnUnderscore = StaticVariable.XlsxFileName.Split('_');        
-        if (xlsxFileNameSplitOnUnderscore.Length.Equals(Constants.XlsxFileNameSplitIntoTwoParts))
+        if (xlsxFileNameSplitOnUnderscore.Length.Equals(xlsxFileNameSplitIntoTwoParts))
         {
           if (ValidateData.CheckIfInteger(xlsxFileNameSplitOnUnderscore[0]))
           {
@@ -290,6 +283,7 @@ namespace ProcessTariffWorkbook
       List<string> headerNamesProcessed = new List<string>();
       int tariffPlanCount = 0;
       const int numberOfRequiredEntriesExcludingCarrierUnitPrice = 18;
+      const int numberOfHeadersInHeadersFile = 7;
       try
       {
         using (StreamReader oSr = new StreamReader(File.OpenRead(StaticVariable.HeaderFile), Encoding.Unicode))
@@ -455,7 +449,7 @@ namespace ProcessTariffWorkbook
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
-      if (!headerNamesProcessed.Count.Equals(Constants.NumberOfHeadersInHeadersFile))
+      if (!headerNamesProcessed.Count.Equals(numberOfHeadersInHeadersFile))
       {
         StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::ReadHeaderFileIntoLists()");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + StaticVariable.XlsxFileName + ". The missing Header is.");
@@ -471,7 +465,7 @@ namespace ProcessTariffWorkbook
               break;
             }
           }
-          if (!bFound && !headerNamesProcessed.Count.Equals(Constants.NumberOfHeadersInHeadersFile))
+          if (!bFound && !headerNamesProcessed.Count.Equals(numberOfHeadersInHeadersFile))
           {
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + tok);
           }
@@ -557,7 +551,7 @@ namespace ProcessTariffWorkbook
     private static void CreateOutputXlsxFile(string file)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- started");      
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- started");            
       try
       {
         File.Create(file);
@@ -583,6 +577,7 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()-- starting");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- started");
+      const int numberOfFieldsExcludingPrefixNameAndRates = 22;
       string prices = string.Empty;
       string timeScheme = string.Empty;
       string minimumTime = string.Empty;
@@ -786,7 +781,7 @@ namespace ProcessTariffWorkbook
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
-        if (fieldLineCount.Equals(Constants.NumberOfFieldsExcludingPrefixNameAndRates) && priceLineCount.Equals(oneEntry))
+        if (fieldLineCount.Equals(numberOfFieldsExcludingPrefixNameAndRates) && priceLineCount.Equals(oneEntry))
         {
           string line = ValidateData.CapitaliseWord(destination) + "\t" + prices + "\t" + minimumCost + "\t" + connectionCharge + "\t" + usingGroupBands.ToUpper() + "\t" +
             groupBand.ToUpper() + "\t" + ValidateData.CapitaliseWord(groupDescription) + "\t" + ValidateData.CapitaliseWord(prefixTable) + "\t" + ValidateData.CapitaliseWord(destinationType) + "\t" +
@@ -799,11 +794,11 @@ namespace ProcessTariffWorkbook
           fieldLineCount = 0;
         }
       }
-      if (!numberOfPricesInFile.Equals(numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates))
+      if (!numberOfPricesInFile.Equals(numberOfFieldsInFile / numberOfFieldsExcludingPrefixNameAndRates))
       {
         StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be an extra or missing field / prices entry in Default Entries.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + Constants.NumberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + numberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and the 8 prices are excluded from the fields. The fields required are:" + Environment.NewLine);
         DisplayAllHeadersFieldsUsed();
 
@@ -830,82 +825,15 @@ namespace ProcessTariffWorkbook
                           Constants.FiveSpacesPadding + "USING GROUP BANDS" + Environment.NewLine +
                           Constants.FiveSpacesPadding + "WHOLE INTERVAL CHARGING" + Environment.NewLine);*/
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Total Number of fields = " + numberOfFieldsInFile + " and Total Number of Prices = " + numberOfPricesInFile);
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + Constants.NumberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / Constants.NumberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + numberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / numberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "These figures should be equal.");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If number is different. There are either too many/few fields or too many/few prices.");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
-    }    
-    private static void CombinePrefixesInDataRecord(List<string> lst)
-    {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- started");
-      lst = lst.Distinct().ToList();
-      foreach (var tok in lst)
-      {
-        StaticVariable.PrefixNumbersRecord.Add(new PrefixNumbersDataRecord(tok));
-      }
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- finished");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombinePrefixesInDataRecord() -- finished");
-    }
-    private static void ReadPrefixesIntoList(string folder, string message)
-    {
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- started");
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- started");      
-      string[] folders = Directory.GetFiles(folder, Constants.IniExtensionSearch);      
-      string tableName = string.Empty;
-      string prefixName = string.Empty;
-      string prefixNumber = string.Empty;
-      foreach (string token in folders)
-      {
-        try
-        {
-          using (StreamReader oSr = new StreamReader(File.OpenRead(token), Encoding.Unicode))
-          {
-            while (!oSr.EndOfStream)
-            {
-              string line = oSr.ReadLine();
-              if (!string.IsNullOrEmpty(line) && !line.StartsWith(";"))
-              {
-                if (line.ToUpper().Contains("TABLE NAME="))
-                {
-                  string[] lines = line.Split('=');
-                  tableName = StaticVariable.CountryCodeValue + "_" + lines[1];
-                }
-                if (line.Contains(','))
-                {
-                  string[] lines = line.Split(',');
-                  prefixName = lines[0];
-                  prefixNumber = lines[1];
-                }
-                if (!string.IsNullOrEmpty(tableName) && !string.IsNullOrEmpty(prefixName))
-                {
-                  StaticVariable.PrefixNumbers.Add(ValidateData.CapitaliseWord(tableName) + "\t" + prefixNumber + "\t" + prefixName + "\tbandNotAssigned\t standardNameNotAssigned");
-                }
-              }
-            }
-            oSr.Close();
-            tableName = string.Empty;
-            prefixName = string.Empty;
-            prefixNumber = string.Empty;
-          }
-        }
-        catch (Exception e)
-        {
-          StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombinePrefixes()");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + message + ": Problem adding prefixes to PrefixNumbersDataRecord.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-          ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
-        }
-      }
-      StaticVariable.PrefixNumbers.Sort();
-      StaticVariable.PrefixNumbers = StaticVariable.PrefixNumbers.Distinct().ToList();
-      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
-      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "ReadPrefixesIntoList( " + message + " ) -- finished");
-    }       
-    private static void CombineRegExFiles(string sRegExPath)
+    }           
+    private static void CombineRegExFilesIntoCombinedRegexList(string sRegExPath)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");      

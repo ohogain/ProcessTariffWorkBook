@@ -51,6 +51,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DataRecord.cs" />
     <Compile Include="ErrorProcessing.cs" />
+    <Compile Include="Prefixes.cs" />
     <Compile Include="PrefixNumbersDataRecord.cs" />
     <Compile Include="ProcessInputXlsxFile.cs" />
     <Compile Include="ProcessRequiredFiles.cs" />

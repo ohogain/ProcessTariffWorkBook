@@ -1,5 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//---------
+// <copyright file="Program.cs" company="Soft-ex Ltd">
+//    Copyright (c) Soft-ex Ltd. All rights reserved.
+// </copyright>
+// <author>Tomas Ohogain</author> 
+//---------
+
+using System;
 using System.Windows.Forms;
 
 
@@ -11,19 +17,23 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("running....");
 
-      ProcessRequiredFiles.GetRequiredData(args);
-      ErrorProcessing.CreateIntermediateLog();
-      ErrorProcessing.AddRequiredDataDetailsToErrorLog();
-      ProcessInputXlsxFile.ParseInputXlsxFile();
-      RearrangeCompletedFiles.CreateCategoryMatrix();
-      ErrorProcessing.DestinationsAssignedIncorrectTable();
-      ErrorProcessing.DestinationsWithoutPrefixes();
-      ErrorProcessing.WriteToIntermediateLog();      
+      ProcessRequiredFiles.GetDatasetsData(args);          
+      ProcessInputXlsxFile.ParseInputXlsxFileIntoCustomerDetailsRecord();    
+      ValidateData.PreRegExMatchValidateCustomerDetailsRecord();
+      StaticVariable.CustomerDetailsDataRecord.Clear();
+      ProcessInputXlsxFile.MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails);            
+      Prefixes.ProcessPrefixesData();
+      Prefixes.ValidatePrefixesData();  
+      ValidateData.PostRegExMatchValidateCustomerDetailsRecord();
+      ValidateData.DisplayMissingDetails();     
+     
+      RearrangeCompletedFiles.CreateCategoryMatrix();          
       RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
-      RearrangeCompletedFiles.WriteOutV5Tc2Files();
-      RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);      
-      ErrorProcessing.AddMainlandPricesToDependentCountries();
-      ErrorProcessing.FindMissingInternationalCountries();
+      RearrangeCompletedFiles.WriteOutV5Tc2Files();                           
+      RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);           
+      ErrorProcessing.CreateAndWriteToRegExMatchedLog(); 
+
+      //ValidateData.TestMethod();      
 
       StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
       StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
