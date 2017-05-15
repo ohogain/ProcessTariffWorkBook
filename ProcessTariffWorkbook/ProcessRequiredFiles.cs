@@ -29,8 +29,7 @@ namespace ProcessTariffWorkbook
       ValidateData.CheckTimeSchemesList();
       ValidateData.CheckTimeSchemeExceptionsList();
       ValidateData.CheckSpellingList();
-      ValidateData.CheckSourceDestinationsBandList();
-      StaticVariable.ProgressDetails.Add(Environment.NewLine + "Header file check complete. ");
+      ValidateData.CheckSourceDestinationsBandList();      
       ValidateData.CheckForStdIntAndBandsFile();   
       //RearrangeDefaultEntries();      
       ValidateData.CheckForMoreThanTwoRegExFiles();
@@ -120,7 +119,8 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateFinalFolder() -- started");
-      StaticVariable.FinalDirectory = StaticVariable.DirectoryName + @"\" + StaticVariable.XlsxFileName.Substring(0, StaticVariable.XlsxFileName.IndexOf('.')) + "_Final";
+      //StaticVariable.FinalDirectory = StaticVariable.DirectoryName + @"\" + StaticVariable.XlsxFileName.Substring(0, StaticVariable.XlsxFileName.IndexOf('.')) +  " Final";
+      StaticVariable.FinalDirectory = StaticVariable.DirectoryName + @"\" + StaticVariable.TariffReferenceNumberValue + " " + StaticVariable.TariffPlanNameValue + " " + StaticVariable.VersionValue + " " + $"{DateTime.Now:MMM yyyy}" + " Final";
       if (Directory.Exists(StaticVariable.FinalDirectory))
       {
         try
@@ -408,7 +408,7 @@ namespace ProcessTariffWorkbook
                       }
                     }
                     StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::ReadHeaderFileIntoLists()");
-                    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There are " + defaultEntryCount + "default entries. Copy the required default entries into the XLSX sheet and comment out (using ';') the obsolete ones" );
+                    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There are " + defaultEntryCount + " default entries. Copy the required default entries into the XLSX sheet and comment out (using ';') the obsolete ones" );
                     headerNamesProcessed.Add("DEFAULTENTRIES");
                     break;
                   case "SOURCEDESTINATIONBANDS":

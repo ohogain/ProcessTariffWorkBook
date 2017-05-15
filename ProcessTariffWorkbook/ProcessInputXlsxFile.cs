@@ -26,8 +26,7 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
       StaticVariable.ConsoleOutput.Add("ProcessInputXlsxFile".PadRight(30, '.') + "ReadXLSXFileIntoList() -- started");
       StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
-      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Any line containing 'DefaultXX' will be ignored, as will all headers");
-      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'Capped' or 'Pulse' rates are not being used, delete the worksheet.");
+      StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Any line containing 'DefaultXX' will be ignored, as will all headers");      
       string[] worksheetsTypes = {Constants.Duration, Constants.Capped, Constants.Pulse};      
       List<string> workSheetsNotUsed = new List<string>();      
       List<string> discardedLines = new List<string>();
@@ -98,9 +97,13 @@ namespace ProcessTariffWorkbook
         StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");
         foreach (var entry in workSheetsNotUsed)
         {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry + " rates are not being used.");
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry + " rates are not being used. Delete this worksheet");
         }
       }
+      foreach (var entry in workSheetsUsed)
+        {
+          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + entry + " rates are being used. ");
+        }
       if (discardedLines.Any())
       {
         StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");        
