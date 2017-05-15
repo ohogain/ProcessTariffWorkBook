@@ -1,6 +1,6 @@
 ﻿Main:
 	-->  ProcessRequiredFiles.GetRequiredData(args);
-			  GetArguments(args);
+              GetArguments(args);
               StaticVariable.DirectoryName = GetDirectoryName();
               StaticVariable.XlsxFileName = GetInputXlsxFileName();      
               StaticVariable.CountryCodeValue = GetCountryCode();
@@ -14,88 +14,99 @@
               ValidateData.CheckSpellingList();
               ValidateData.CheckSourceDestinationsBandList();
               ValidateData.CheckForStdIntAndBandsFile();   
-              RearrangeDefaultEntries();
-              ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
-              ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International"); 
-              ValidateData.CheckForMoreThanTwoRegExFiles(); 
+              RearrangeDefaultEntries();      
+              ValidateData.CheckForMoreThanTwoRegExFiles();
               CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetFolderToUse);
-              CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder);     
-
+              CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty    
               CreateFinalFolder();
-              StaticVariable.CategoryMatrixXlsx = CreateXlsxFileName(Constants.CategoryMatrixFile); 
-              CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsx);     
+              StaticVariable.CategoryMatrixXlsxFile = CreateXlsxFileName(Constants.CategoryMatrixFile); 
+              CreateOutputXlsxFile(StaticVariable.CategoryMatrixXlsxFile);     
               StaticVariable.V6TwbOutputXlsxFile = CreateXlsxFileName(CreateNewFileName());
-              CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);
+              CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);         
+	
+	--> ProcessInputXlsxFile.ParseInputXlsxFileIntoCustomerDetailsRecord();
+            ReadXlsxFileIntoList(); = StaticVariable.InputXlsxFileDetails
+            MergeDefaultPricesListWithInputFileList(); = StaticVariable.InputXlsxFileDetails
+            AddToCustomerDetailsDataRecordList(StaticVariable.InputXlsxFileDetails); 
+             			
+	--> ValidateData.PreRegExMatchValidateCustomerDetailsRecord(); 
+			StaticVariable.CountryExceptions = CreateCountryExceptionsHashset();
+         CheckPricesAreInCorrectFormat();
+         CheckTableNames();
+         CheckForDestinationTypes();
+         CheckRoundingForIncorrectEntry();
+         CheckTimeSchemeForIncorrectEntry();
+         CheckIfMinCostAndRate4SubseqAreSame();
+         CheckGrouping();
+         CheckIntervalLengthsGreaterOrEqualToZero();
+         CheckUsingCustomerNames();
+         CheckMinimumIntervals();
+         CheckMinimumDigits();
+         CheckMaximumPrices();
+         CheckIfInitialIntervalSameAsSubsequentInterval();
+         CheckCutOffDuration();
+         CheckMultiLevelEnabled();
+         CheckAllSchemes();
+         CheckDialTime();
+         CheckMinimumTime();
+         CheckIntervalsAtInitialCostGreaterOrEqualToZero();
+         CheckDestinationTypesNames();   
 
-	--> ErrorProcessing.CreateIntermediateLog();	
-	--> ProcessInputXlsxFile.ParseInputXlsxFile();
-			ReadXlsxFileIntoList(); = StaticVariable.InputXlsxFileDetails
-			MergeDefaultPricesListWithInputFileList(); = StaticVariable.InputXlsxFileDetails
-			AddToCustomerDetailsDataRecordList(StaticVariable.InputXlsxFileDetails); = StaticVariable.CustomerDetailsDataRecord
-			ValidateData.PreRegExMatchValidateCustomerDetailsDataRecord(); 
-				CheckPricesAreInCorrectFormat();
-				CheckTableNames();
-				CheckForDestinationTypes();      
-				CheckRoundingForIncorrectEntry();
-				CheckTimeSchemeForIncorrectEntry();
-				CheckIfMinCostAndRate4SubseqAreSame();
-				CheckGrouping();
-				CheckIntervalLengthsGreaterOrEqualToZero();
-				CheckUsingCustomerNames();
-				CheckMinimumIntervals();
-				CheckMinimumDigits();
-				CheckCutOffDuration();
-				CheckMultiLevelEnabled();
-				CheckAllSchemes();
-				CheckDialTime();
-				CheckMinimumTime();
-				CheckIntervalsAtInitialCostGreaterOrEqualToZero();
-				CheckDestinationTypesNames();      
+	--> StaticVariable.CustomerDetailsDataRecord.Clear();
 
-			StaticVariable.CustomerDetailsDataRecord.Clear(); =
-			MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails); = StaticVariable.CustomerDetailsDataRecord   
-			ValidateData.PostRegExMatchValidateCustomerDetailsDataRecord();
-				CheckForFreephone();
-				CheckIfFreephoneIsFree();
-				CheckForDuplicateBands();
-				CheckForNonUniqueGroupBands();            
-				CheckSourceDestinationBandsPresentInPrefixBands();
-				ErrorProcessing.WriteOutGroupBandsToErrorLog();
-				ErrorProcessing.WriteToErrorlogIfMinCostAnd4ThRateSamePrice();
-				CheckIfAllMatrixBandsUsed();
-				CheckForNonMatchingCustomerNames();
-				CheckChargingType();
-				CheckTablesForDefaultValue();
-				CheckForMissingDefaultEntries();
-				DestinationsAssignedMultipleBands();   
+	--> ProcessInputXlsxFile.MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails); = StaticVariable.CustomerDetailsDataRecord     
+    
+    --> Prefixes.ProcessPrefixesData();
+            ReadPrefixesIntoList(StaticVariable.DatasetFolderToUse, "Domestic");
+            ReadPrefixesIntoList(StaticVariable.DatasetsFolder, "International"); 
+            MatchPrefixNamesWithRegEx(StaticVariable.PrefixNumbersFromIniFiles);
+               ValidateData.GetSourceAndDestinationNames();
+            MatchPrefixNamesAndAddToPrefixesDataRecord(StaticVariable.PrefixesMatchedByRegEx, StaticVariable.PrefixNumbersFromIniFiles); 
 
-	--> ValidateData.MatchPrefixNamesWithRegEx(StaticVariable.PrefixNumbersFromIniFiles);
-	--> ValidateData.MatchPrefixNamesToStandardNamesAndAddToPrefixesDataRecord(StaticVariable.PrefixesMatchedByRegEx, StaticVariable.PrefixNumbersFromIniFiles);
-	--> ValidateData.ValidatePrefixesData()
+	--> ValidateData.PostRegExMatchValidateCustomerDetailsRecord();
 			CheckTablesForDefaultValue();
-			CheckForMissingDefaultEntries();
-			DestinationsWithoutPrefixes();
-			CheckForDuplicatePrefixNumbers();
-			CheckForNonMatchingPrefixNames();
+            CheckForMissingDefaultEntries();
+            CheckForFreephone();
+            CheckIfFreephoneIsFree();
+            CheckForDuplicateBands();
+            CheckForNonUniqueGroupBands();
+            CheckSourceDestinationBandsPresentInPrefixBands();
+            CheckGroupBands();
+            CheckIfMinCostAnd4ThRateSamePrice();
+            CheckIfAllMatrixBandsUsed();            
+            CheckChargingType();
+            CheckDestinationsAssignedMultipleBands();      
 
-	--> RearrangeCompletedFiles.CreateCategoryMatrix();
-	--> ErrorProcessing.DestinationsAssignedIncorrectTable();     
-	--> ErrorProcessing.WriteToIntermediateLog();      
+    --> Prefixes.ValidatePrefixesData();
+            CheckForDestinationsWithoutPrefixes();
+               ValidateData.CheckForCountyExceptions(entry))
+               ValidateData.GetSourceAndDestinationNames();				
+            CheckForDuplicatePrefixNumbers();
+            CheckForNonMatchingPrefixNames();              
+              
+    --> ValidateData.DisplayMissingDetails();
+            CheckDestinationsAssignedIncorrectTable();              
+            CheckForNonMatchingCustomerNames();
+            AddMainlandPricesToDependentCountries();
+            FindMissingInternationalCountries();
 
-	--> RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
-			WriteToBandsWorkSheet(workbook);
-			WriteToTariffPlanSheet(workbook); 
-				DisplayHolidays();
-			WriteToTableLinksSheet(workbook);
-			WriteToPrefixBandsSheet(workbook);        
-			WriteToPrefixNumbersSheet(workbook, MatchPrefixesWithDestinations());
-			WriteToSourceDestinationBandsSheet(workbook);
-			WriteToTimeSchemesSheet(workbook);
-			WriteToTimeSchemesExceptionsSheet(workbook); 
+    --> RearrangeCompletedFiles.CreateCategoryMatrix();     
+         
+    --> RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
+            WriteToBandsWorkSheet(workbook);
+            WriteToTariffPlanSheet(workbook); 
+                DisplayHolidays();
+            WriteToTableLinksSheet(workbook);
+            WriteToPrefixBandsSheet(workbook);        
+            WriteToPrefixNumbersSheet(workbook, Prefixes.MatchPrefixesWithDestinations());
+				Prefixes.GetNationalDomesticPrefixes();
+            WriteToSourceDestinationBandsSheet(workbook);
+            WriteToTimeSchemesSheet(workbook);
+            WriteToTimeSchemesExceptionsSheet(workbook);  
 
-	--> RearrangeCompletedFiles.WriteOutV5Tc2Files();
-			CreateV5Tc2PricesFile();
-				MakeGeneralHeader(v5PricesIni);
+    --> RearrangeCompletedFiles.WriteOutV5Tc2Files();  
+            CreateV5Tc2PricesFile();      
+                MakeGeneralHeader(v5PricesIni);
 				AddDurationPrices(v5PricesIni);
 					GetDurationPrices();
 				AddCappedPrices(v5PricesIni);
@@ -106,71 +117,27 @@
 				GetCappedMatrix(v5PricesIni);
 				GetPulseMatrix(v5PricesIni);
 				WriteToV5Tc2PricesFile(v5PricesIni);
+            WritePrefixIniFiles(Prefixes.MatchPrefixesWithDestinations()); 
+				Prefixes.GetNationalDomesticPrefixes();                        
 
-			WritePrefixIniFiles(MatchPrefixesWithDestinations());
+    --> RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);      
+         
+    --> ErrorProcessing.CreateAndWriteToRegExMatchedLog();
 
-	--> RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);      
-	--> ErrorProcessing.AddMainlandPricesToDependentCountries();
-	--> ErrorProcessing.FindMissingInternationalCountries();
-
-     
-	--> ErrorProcessing.TestWriteToPrefixNumbersSheet2(); ????
-      
-
-StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
-StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
-ErrorProcessing.OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);
-ErrorProcessing.OutputToLogs(StaticVariable.ConsoleOutput, StaticVariable.DirectoryName + @"\" + Constants.ConsoleErrorLog);
-ErrorProcessing.OutputConsoleLog();
+    --> StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
+    --> StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
+    --> ErrorProcessing.OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);
+    --> ErrorProcessing.OutputToLogs(StaticVariable.ConsoleOutput, StaticVariable.DirectoryName + @"\" + Constants.ConsoleErrorLog);
+    --> ErrorProcessing.OutputConsoleLog();
 
 ===================================================================
 
-to do 
-CheckForDestinationTypes(): V5: fixed number (8) of destination types, names are set, V6: no fixed number. Names can vary
-   remove this check until a solutionis found
 
-"ValidateData::CheckForNonUniqueGroupBands()" - possible rewrite of this method using 'group into'"
-   No country code with tc2 prefixes.ini. It is added here "ReadPrefixesIntoList" for TWB. 
+
+1) RearrangeDefaultEntries():  This will become obsolete
+   need to add a check into duplication of line is default headers
+   this change - change the header to be one one line and you copy it into the spreadsheet, deleting / commenting out the ones not required?
+   e.g DQ	0.0400	0.0400	0.0400	0.0400	0.0400	0.0400	0.0000	0.0000	0.0210	TRUE	3	Band 3	44_International	International	exact	BT	false	60	60	0	1	1	1	TRUE	FALSE	0	0	0	duration	
+
+
 	
-
-	check for duplicates in the prefix file
-
-
-
-	ProcessRequiredFiles - ReadPrefixesIntoList()
-	ValidateData - MatchPrefixesWithRegEx()
-	? ProcessRequiredFiles - CombinePrefixesInDataRecord() ? 
-	ValidateData - CheckForDuplicatePrefixNumbers()
-	RearrangeCompletedFiles - WriteToPrefixNumbersSheet()
-	RearrangeCompletedFiles - WritePrefixIniFiles()
-	ValidateData - AddPrefixesToPrefixNumbersRecord
-
-
-
-	var queryCustomerDetails =
-        (from dr in StaticVariable.CustomerDetailsDataRecord
-         select new { dr.StdPrefixName, dr.CustomerPrefixName, dr.StdBand, dr.CustomerUsingCustomerNames}).Distinct();
-
-	 foreach (var detail in queryCustomerDetails)
-      {        
-        try
-        {
-          string nameToUse = detail.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? detail.CustomerPrefixName : detail.StdPrefixName;
-          stdNames.Add(nameToUse.ToUpper());
-          errorNames.Add(nameToUse.ToUpper(), "Custname - " + detail.CustomerPrefixName + ",\t stdName - " + detail.StdPrefixName + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");          
-        }
-        catch (Exception e)
-        {
-          StaticVariable.ProgressDetails.Add(Environment.NewLine + "ErrorProcessing::DestinationsWithoutPrefixes()");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Problems adding values to dictionary.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message + " - " + detail.CustomerPrefixName);          
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If 'using customer name' is true, an entry like 'peru NGN PRS' will be assigned two different bands but the customer name will be added twice into the dictionary.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using standard prefixes: In the " + StaticVariable.XlsxFileName + " file split the entry 'peru NGN PRS' into two seperate entries - 'peru NGN' and 'peru PRS'.");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Fix when using client supplied prefixes: In the regex, remove one of the regex matches.");
-          StaticVariable.ProgressDetails.Add(Environment.NewLine + Constants.FiveSpacesPadding + "Existing dictionary entry : ");
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + errorNames[detail.CustomerPrefixName.ToUpper()]);
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Duplicate entry :" );
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Custname - " + detail.CustomerPrefixName + ",\t StdName - " + detail.StdPrefixName  + ",\t band - " + detail.StdBand + ",\t UsingCustName - ");             
-          StopProcessDueToFatalErrorOutputToLog();
-        }        
-      }

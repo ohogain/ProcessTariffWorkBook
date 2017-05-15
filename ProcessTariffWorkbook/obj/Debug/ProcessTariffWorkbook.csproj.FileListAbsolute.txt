@@ -5,3 +5,5 @@ C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\Pr
 C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.exe
 C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.pdb
 C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\bin\Debug\SpreadsheetGear2012.dll
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.Properties.Resources.resources
+C:\Users\Tomas\Soft-ex\Tariffs\Tariff Creation Programs\ProcessTariffWorkbook\ProcessTariffWorkbook\obj\Debug\ProcessTariffWorkbook.csproj.GenerateResource.Cache

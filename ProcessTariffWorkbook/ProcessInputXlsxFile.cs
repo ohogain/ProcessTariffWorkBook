@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -80,7 +81,7 @@ namespace ProcessTariffWorkbook
             else if (!string.IsNullOrEmpty(sAdjustSb) && !DiscardHeaderLine(sAdjustSb))
             {
               ValidateData.CheckForCommasInLine(sAdjustSb);
-              StaticVariable.InputXlsxFileDetails.Add(sAdjustSb);
+              StaticVariable.InputXlsxFileDetails.Add(ValidateData.CapitaliseWord(sAdjustSb));              
             }
           }
         }
@@ -103,7 +104,7 @@ namespace ProcessTariffWorkbook
       if (discardedLines.Any())
       {
         StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessInputXlsxFile::ReadXLSXFileIntoList()");        
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Customer destinations discarded along with header lines.");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Customer destinations discarded.");
         discardedLines.Sort();
         foreach (var entry in discardedLines)
         {
@@ -134,8 +135,7 @@ namespace ProcessTariffWorkbook
       {
         try
         {                    
-          StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(undefinedStandardInfo + token));
-          
+          StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(undefinedStandardInfo + token));          
         }
         catch (Exception e)
         {
@@ -157,11 +157,10 @@ namespace ProcessTariffWorkbook
       const int destination = 0;
       int uniqueBandCounter = 100;
       Timer newTimer = new System.Timers.Timer(10000); // 2 sec interval
-      string regExAlphanumeric = @"[0-9|a-z|A-Z]"; //@"\w|\s"
+      string regExAlphanumeric = @"[0-9|a-z|A-Z]";
       string regExExtraSpaces = "\x0020{2,}";
       string regExNull = "\x0000";
-      string regExNoise = @"\(|\)|( -|- )|\,|'";
-      //string regEx_Noise = @"\,|'";
+      string regExNoise = @"\(|\)|( -|- )|\,|'";      
       Regex regExRemoveNull = new Regex(regExNull, RegexOptions.Multiline);
       Regex regExRemoveNoise = new Regex(regExNoise, RegexOptions.Compiled);
       Regex regExRemoveExtraSpaces = new Regex(regExExtraSpaces, RegexOptions.Compiled);
@@ -204,7 +203,7 @@ namespace ProcessTariffWorkbook
                 newTimer.AutoReset = true;
                 newTimer.Enabled = true;
                 found = true;
-
+                
                 StaticVariable.CustomerDetailsDataRecord.Add(new DataRecord(regExBand + "\t" + regexStandardName + "\t" + regExDescription + "\t" + tok));
                 // for debugging
                 //StaticVariable.ProgressDetails.Add("ParseInputFile::MatchInputXlsxFileWithRegEx()  -- Debugging only");

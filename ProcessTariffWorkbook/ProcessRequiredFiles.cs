@@ -30,11 +30,12 @@ namespace ProcessTariffWorkbook
       ValidateData.CheckTimeSchemeExceptionsList();
       ValidateData.CheckSpellingList();
       ValidateData.CheckSourceDestinationsBandList();
+      StaticVariable.ProgressDetails.Add(Environment.NewLine + "Header file check complete. ");
       ValidateData.CheckForStdIntAndBandsFile();   
-      RearrangeDefaultEntries();      
+      //RearrangeDefaultEntries();      
       ValidateData.CheckForMoreThanTwoRegExFiles();
       CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetFolderToUse);
-      CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder); //populates CombinedRegex list. needs more visiblilty    
+      CombineRegExFilesIntoCombinedRegexList(StaticVariable.DatasetsFolder);     
 
       CreateFinalFolder();
       StaticVariable.CategoryMatrixXlsxFile = CreateXlsxFileName(Constants.CategoryMatrixFile); 
@@ -43,40 +44,40 @@ namespace ProcessTariffWorkbook
       CreateOutputXlsxFile(StaticVariable.V6TwbOutputXlsxFile);                         
     }                       
     public static void GetArguments(string[] args)
+    {
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
+      StaticVariable.ProgressDetails.Add("Process starting".PadRight(20, '.') + Environment.NewLine);
+      string toTwbFolder = string.Empty;
+      try
       {
-        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
-        StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- started");
-        StaticVariable.ProgressDetails.Add("Process starting".PadRight(20, '.') + Environment.NewLine);
-        string toTwbFolder = string.Empty;
-        try
+        if (args.Length.Equals(1))
         {
-          if (args.Length.Equals(1))
-          {
-              StaticVariable.InputFile = args[0].Trim();
-          }
-          else if (args.Length.Equals(2))
-          {
             StaticVariable.InputFile = args[0].Trim();
-            toTwbFolder = args[1].Trim();
-            if (toTwbFolder.ToUpper().Equals("TRUE"))
-            {
-                StaticVariable.MoveOutputSpreadSheetToV6TwbFolder = true;
-            }
-          }
-
-          if (!File.Exists(StaticVariable.InputFile))
-          {
-            Console.WriteLine("The file " + StaticVariable.InputFile + " does not exist. Check the folder." + Environment.NewLine + "The file name must be in this format: countryCode_FileName.txt");
-            MessageBox.Show("The file " + StaticVariable.InputFile + " does not exist. Check the folder." + Environment.NewLine + "The file name must be in this format: countryCode_FileName.txt");
-            ErrorProcessing.StopProcessDueToFatalError();
-          }
         }
-        catch (System.Exception e)
+        else if (args.Length.Equals(2))
         {
-          Console.WriteLine("System Error: " + e.Message);
+          StaticVariable.InputFile = args[0].Trim();
+          toTwbFolder = args[1].Trim();
+          if (toTwbFolder.ToUpper().Equals("TRUE"))
+          {
+              StaticVariable.MoveOutputSpreadSheetToV6TwbFolder = true;
+          }
         }
-        Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
-        StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
+
+        if (!File.Exists(StaticVariable.InputFile))
+        {
+          Console.WriteLine("The file " + StaticVariable.InputFile + " does not exist. Check the folder." + Environment.NewLine + "The file name must be in this format: countryCode_FileName.txt");
+          MessageBox.Show("The file " + StaticVariable.InputFile + " does not exist. Check the folder." + Environment.NewLine + "The file name must be in this format: countryCode_FileName.txt");
+          ErrorProcessing.StopProcessDueToFatalError();
+        }
+      }
+      catch (System.Exception e)
+      {
+        Console.WriteLine("System Error: " + e.Message);
+      }
+      Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
+      StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "GetArguments() -- finished");
     }        
     public static string GetDirectoryName()
     {
@@ -397,14 +398,17 @@ namespace ProcessTariffWorkbook
                     headerNamesProcessed.Add("TIMESCHEMEEXCEPTIONS");
                     break;
                   case "DEFAULTENTRIES":
+                    int defaultEntryCount = 0;
                     while (!line.ToUpper().Equals("ENDTITLE"))
                     {
-                      line = oSr.ReadLine().Trim();
+                      line = oSr.ReadLine().Trim();                      
                       if (!string.IsNullOrEmpty(line) && !line.StartsWith(";") && !line.ToUpper().Equals("ENDTITLE"))
                       {
-                        StaticVariable.DefaultEntriesPrices.Add(line);
+                        defaultEntryCount++;
                       }
                     }
+                    StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::ReadHeaderFileIntoLists()");
+                    StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There are " + defaultEntryCount + "default entries. Copy the required default entries into the XLSX sheet and comment out (using ';') the obsolete ones" );
                     headerNamesProcessed.Add("DEFAULTENTRIES");
                     break;
                   case "SOURCEDESTINATIONBANDS":
@@ -573,35 +577,35 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "CreateOutputXlsxFile( " + Path.GetFileName(file) + " ) -- finished");
     }
-    private static void RearrangeDefaultEntries()
+    /*private static void RearrangeDefaultEntries() // not required now
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries()-- starting");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- started");
-      const int numberOfFieldsExcludingPrefixNameAndRates = 22;
-      string prices = string.Empty;
-      string timeScheme = string.Empty;
-      string minimumTime = string.Empty;
-      string dialTime = string.Empty;
-      string allSchemes = string.Empty;
-      string minimumDigits = string.Empty;
-      string minimumIntervals = string.Empty;
-      string intervalsAtInitialCost = string.Empty;
-      string wholeIntervalCharging = string.Empty;
-      string initialIntervalLength = string.Empty;
-      string subsequentIntervalLength = string.Empty;
+      const int numberOfFieldsExcludingDestinationAndPrices = 22;
       string destinationType = string.Empty;
-      string prefixTable = string.Empty;
-      string minimumCost = string.Empty;
-      string connectionCharge = string.Empty;      
-      string destination = string.Empty;      
-      string usingGroupBands = string.Empty;
-      string groupBand = string.Empty;
-      string groupDescription = string.Empty;
-      string usingCustomerNames = string.Empty;
-      string multiLevelEnabled = string.Empty;
+      string prices = string.Empty;
+      string allSchemes = string.Empty;
+      string chargingType = string.Empty;  
+      string connectionCharge = string.Empty;
       string cutOff1Cost = string.Empty;
       string cutOff2Duration = string.Empty;
-      string chargingType = string.Empty;       
+      string destination = string.Empty;
+      string dialTime = string.Empty;
+      string groupBand = string.Empty;
+      string groupDescription = string.Empty;
+      string initialIntervalLength = string.Empty;
+      string intervalsAtInitialCost = string.Empty;
+      string minimumCost = string.Empty;
+      string minimumDigits = string.Empty;
+      string minimumIntervals = string.Empty;
+      string minimumTime = string.Empty;
+      string multiLevelEnabled = string.Empty;
+      string prefixTable = string.Empty;
+      string subsequentIntervalLength = string.Empty;
+      string timeScheme = string.Empty;
+      string usingCustomerNames = string.Empty;
+      string usingGroupBands = string.Empty;
+      string wholeIntervalCharging = string.Empty;   
       const int entryValue = 1;
       const int oneEntry = 1;
       const int entryName = 0;
@@ -612,14 +616,13 @@ namespace ProcessTariffWorkbook
       int numberOfPricesInFile = 0;
       int numberOfFieldsInFile = 0;
 
-
       foreach (string tok in StaticVariable.DefaultEntriesPrices)
       {
         if (tok.Contains('='))
         {
           string[] lines = tok.Split('=');
           if (lines.Length.Equals(splitOnEqualsSign))
-          {
+          {            
             switch (lines[entryName].ToUpper())
             {
               case "TIME SCHEME":
@@ -733,7 +736,7 @@ namespace ProcessTariffWorkbook
                 numberOfFieldsInFile++;
                 break;
               default:
-                StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+                StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
                 StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect - " + tok + ". There may be an column not catered for.");
                 DisplayAllHeadersFieldsUsed();
                 ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
@@ -742,7 +745,7 @@ namespace ProcessTariffWorkbook
           }
           else
           {
-            StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The column entry is incorrect: " + tok + ". The name must be seperated by an '=' sign.");
             DisplayAllHeadersFieldsUsed();
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
@@ -769,70 +772,68 @@ namespace ProcessTariffWorkbook
             }
             else
             {
-              StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+              StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
               StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect: " + tok + ". There should be 8 prices and a destination after the (band), comma seperated");              
             }
           }
           catch (Exception e)
           {
-            StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+            StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The prices entry is incorrect." + tok);
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
             ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
           }
         }
-        if (fieldLineCount.Equals(numberOfFieldsExcludingPrefixNameAndRates) && priceLineCount.Equals(oneEntry))
+        else if(!tok.Contains(',') && !tok.Contains('='))
         {
-          string line = ValidateData.CapitaliseWord(destination) + "\t" + prices + "\t" + minimumCost + "\t" + connectionCharge + "\t" + usingGroupBands.ToUpper() + "\t" +
-            groupBand.ToUpper() + "\t" + ValidateData.CapitaliseWord(groupDescription) + "\t" + ValidateData.CapitaliseWord(prefixTable) + "\t" + ValidateData.CapitaliseWord(destinationType) + "\t" +
-            wholeIntervalCharging.ToUpper() + "\t" + ValidateData.CapitaliseWord(timeScheme) + "\t" + usingCustomerNames.ToUpper() + "\t" + initialIntervalLength + "\t" +
-            subsequentIntervalLength + "\t" + minimumIntervals + "\t" + intervalsAtInitialCost + "\t" + minimumTime + "\t" + dialTime + "\t" +
-            allSchemes.ToUpper() + "\t" + multiLevelEnabled.ToUpper() + "\t" + minimumDigits + "\t" + cutOff1Cost + "\t" + cutOff2Duration + "\t" + chargingType.ToUpper();
-
-          StaticVariable.DefaultEntries.Add(line);
-          priceLineCount = 0;
-          fieldLineCount = 0;
+           StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
+           StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "An entry is incorrect. A '=' or ',' is missing. See - " + tok);           
+           ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
         }
+        if( !fieldLineCount.Equals( numberOfFieldsExcludingDestinationAndPrices ) || !priceLineCount.Equals( oneEntry ) ) continue;
+        StaticVariable.DefaultEntries.Add(ValidateData.CapitaliseWord(destination) + "\t" + prices + "\t" + minimumCost + "\t" + connectionCharge + "\t" + usingGroupBands.ToUpper() + "\t" +
+                        groupBand.ToUpper() + "\t" + ValidateData.CapitaliseWord(groupDescription) + "\t" + ValidateData.CapitaliseWord(prefixTable) + "\t" + ValidateData.CapitaliseWord(destinationType) + "\t" +
+                        wholeIntervalCharging.ToUpper() + "\t" + ValidateData.CapitaliseWord(timeScheme) + "\t" + usingCustomerNames.ToUpper() + "\t" + initialIntervalLength + "\t" +
+                        subsequentIntervalLength + "\t" + minimumIntervals + "\t" + intervalsAtInitialCost + "\t" + minimumTime + "\t" + dialTime + "\t" +
+                        allSchemes.ToUpper() + "\t" + multiLevelEnabled.ToUpper() + "\t" + minimumDigits + "\t" + cutOff1Cost + "\t" + cutOff2Duration + "\t" + chargingType.ToUpper());        
+        priceLineCount = 0;
+        fieldLineCount = 0;
+        timeScheme = "TS";
+        minimumTime = "999";
+        dialTime = "998";
+        allSchemes = "AS";
+        minimumDigits = "997";
+        minimumIntervals = "996";
+        intervalsAtInitialCost = "995";
+        wholeIntervalCharging = "WIC";
+        initialIntervalLength = "994";
+        subsequentIntervalLength = "993";
+        destinationType = "DT";
+        prefixTable = "44_PT";
+        minimumCost = "992";
+        connectionCharge = "991";      
+        destination = "D";      
+        usingGroupBands = "TRUE";
+        groupBand = "GB";
+        groupDescription = "GD";
+        usingCustomerNames = "TRUE";
+        multiLevelEnabled = "990";
+        cutOff1Cost = "989";
+        cutOff2Duration = "988";
+        chargingType = "ct"; 
       }
-      if (!numberOfPricesInFile.Equals(numberOfFieldsInFile / numberOfFieldsExcludingPrefixNameAndRates))
+      if (!numberOfPricesInFile.Equals(numberOfFieldsInFile / numberOfFieldsExcludingDestinationAndPrices))
       {
-        StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::RearrangeDefaultEntries()");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ProcessRequiredFiles::RearrangeDefaultEntries()");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There may be an extra or missing field / prices entry in Default Entries.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + numberOfFieldsExcludingPrefixNameAndRates + " fields for every price section found");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "There should be " + numberOfFieldsExcludingDestinationAndPrices + " fields for every price section found");
         StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Prefix Name and the 8 prices are excluded from the fields. The fields required are:" + Environment.NewLine);
-        DisplayAllHeadersFieldsUsed();
-
-        /*StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "ALL SCHEMES" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "CHARGING TYPE" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "CONNECTION CHARGE" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "CUT OFF1 COST" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "CUT OFF2 DURATION" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "DESTINATION TYPE" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "DIAL TIME" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "GROUP BAND DESCRIPTION" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "GROUP BAND" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "INITIAL INTERVAL LENGTH" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "INTERVALS AT INITIAL COST" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "MINIMUM COST" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "MINIMUM DIGITS" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "MINIMUM INTERVALS" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "MINIMUM TIME" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "MULTI LEVEL ENABLED" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "PREFIX TABLE" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "SUBSEQUENT INTERVAL LENGTH" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "TIME SCHEME" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "USING CUSTOMERS NAMES" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "USING GROUP BANDS" + Environment.NewLine +
-                          Constants.FiveSpacesPadding + "WHOLE INTERVAL CHARGING" + Environment.NewLine);*/
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Total Number of fields = " + numberOfFieldsInFile + " and Total Number of Prices = " + numberOfPricesInFile);
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The total number of fields (" + numberOfFieldsInFile + ") / number of fields (" + numberOfFieldsExcludingPrefixNameAndRates + ") per price is " + (numberOfFieldsInFile / numberOfFieldsExcludingPrefixNameAndRates) + " for every " + numberOfPricesInFile + " prices found.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "These figures should be equal.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "If number is different. There are either too many/few fields or too many/few prices.");
+        DisplayAllHeadersFieldsUsed();                
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
       StaticVariable.ConsoleOutput.Add("ProcessRequiredFiles".PadRight(30, '.') + "RearrangeDefaultEntries() -- finished");
-    }           
+    }           */
     private static void CombineRegExFilesIntoCombinedRegexList(string sRegExPath)
     {
       Console.WriteLine("ProcessRequiredFiles".PadRight(30, '.') + "CombineRegExFiles() -- started");
@@ -862,7 +863,7 @@ namespace ProcessTariffWorkbook
             catch (Exception e)
             {
               StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombineRegExFiles()");
-              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + /*sFileName + */"RegEx files cannot be read");
+              StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "RegEx files cannot be read");
               StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
               ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
             }
@@ -872,7 +873,7 @@ namespace ProcessTariffWorkbook
       else
       {
         StaticVariable.ProgressDetails.Add("ProcessRequiredFiles::CombineRegExFiles()");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + /*sFileName + */"No RegEx files in RegEx Folder");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "No RegEx files in RegEx Folder");
         ErrorProcessing.StopProcessDueToFatalErrorOutputToLog();
       }
       StaticVariable.CombinedRegex = StaticVariable.CombinedRegex.Distinct().ToList();

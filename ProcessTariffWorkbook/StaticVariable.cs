@@ -9,6 +9,8 @@ namespace ProcessTariffWorkbook
   public static class StaticVariable
   {       
     public static bool MoveOutputSpreadSheetToV6TwbFolder = false;
+    public static HashSet<string> MissingCountryExceptions;
+    public static Dictionary<string, string> CountryExceptions;
     public static List<DataRecord> CustomerDetailsDataRecord = new List<DataRecord>();
     public static List<PrefixNumbersDataRecord> PrefixNumbersRecord = new List<PrefixNumbersDataRecord>();
     public static List<StandardInternationalBandsDataRecord> StandardInternationalBands = new List<StandardInternationalBandsDataRecord>();
@@ -50,8 +52,6 @@ namespace ProcessTariffWorkbook
     public static string TariffReferenceNumberValue = string.Empty;
     public static string V6TwbOutputXlsxFile = string.Empty;
     public static string VersionValue = string.Empty;
-    public static string XlsxFileName = string.Empty;
-
-     
+    public static string XlsxFileName = string.Empty;            
   }
 }

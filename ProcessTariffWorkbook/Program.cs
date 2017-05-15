@@ -21,20 +21,20 @@ namespace ProcessTariffWorkbook
       ProcessInputXlsxFile.ParseInputXlsxFileIntoCustomerDetailsRecord();    
       ValidateData.PreRegExMatchValidateCustomerDetailsRecord();
       StaticVariable.CustomerDetailsDataRecord.Clear();
-      ProcessInputXlsxFile.MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails);            
-      Prefixes.ProcessPrefixesData();
-      Prefixes.ValidatePrefixesData();  
-      ValidateData.PostRegExMatchValidateCustomerDetailsRecord();
+      ProcessInputXlsxFile.MatchInputXlsxFileWithRegEx(StaticVariable.InputXlsxFileDetails); 
+      Prefixes.ProcessPrefixesData();                         
+      ValidateData.PostRegExMatchValidateCustomerDetailsRecord();      
+      Prefixes.ValidatePrefixesData();
       ValidateData.DisplayMissingDetails();     
      
       RearrangeCompletedFiles.CreateCategoryMatrix();          
       RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
       RearrangeCompletedFiles.WriteOutV5Tc2Files();                           
       RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);           
-      ErrorProcessing.CreateAndWriteToRegExMatchedLog(); 
+      ErrorProcessing.CreateAndWriteToRegExMatchedLog();           
 
-      //ValidateData.TestMethod();      
 
+      //ValidateData.TestMethod();
       StaticVariable.ProgressDetails.Add(Environment.NewLine + "........finished");
       StaticVariable.ConsoleOutput.Add(Environment.NewLine + "........finished");
       ErrorProcessing.OutputToLogs(StaticVariable.ProgressDetails, StaticVariable.DirectoryName + @"\" + Constants.ProgressLog);

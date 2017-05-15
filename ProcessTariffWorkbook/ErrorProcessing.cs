@@ -141,18 +141,44 @@ namespace ProcessTariffWorkbook
       {
         using (StreamWriter oSw = new StreamWriter(File.OpenWrite(regExMatchedLogValue), Encoding.Unicode))
         {
-          oSw.WriteLine("Standard Band\tStandard Name\tCustomer Name\tGroup Band\tGroup Band Description\tTable Name\tDestination Type\tStandard Description\tTime Scheme\tRounding\tRates");
+          oSw.WriteLine(";Standard Band\tStandard Name\tCustomer Name\tGroup Band\tGroup Band Description\tTable Name\tDestination Type" +
+                        "\tStandard Description\tTime Scheme\tRounding\tRate1a\tRate1b\tRate2a\tRate2b\tRate3a\tRate3b\tRate4a\tRate4b\tMinCost" +
+                        "\tConnCost\t1stInterval\t2ndInterval\tMinimumIntervals\tIntervalsAtInitialCost\tMinimumTime\tMinDigits" +
+                        "\tUsingCustomerNames\tUsingGroupBands\tMultiLevelEnabled\tCutOff1Cost\tCutOff2Duration\tChargingType");
           foreach (var ad in allDetails)
           {
-            oSw.WriteLine(ad.StdBand.PadRight(4, ' ') + "\t" + ad.StdPrefixName.PadRight(40, ' ') + "\t" + ad.CustomerPrefixName.PadRight(40, ' ') + "\t" +
-                    ad.CustomerGroupBand.PadRight(4, ' ') + "\t" + ad.CustomerGroupBandDescription.PadRight(20, ' ') + "\t" + ad.CustomerTableName.PadRight(20, ' ') + "\t" +
-                    ad.CustomerDestinationType.PadRight(20, ' ') + "\t" + ad.StdPrefixDescription.PadRight(20, ' ') + "\t" + ad.CustomerTimeScheme + "\t" +
-                    ad.CustomerRounding + "\t" + ad.CustomerFirstInitialRate + "\t" + ad.CustomerFirstSubseqRate + "\t" + ad.CustomerSecondInitialRate + "\t" +
-                    ad.CustomerSecondSubseqRate + "\t" + ad.CustomerThirdInitialRate + "\t" + ad.CustomerThirdSubseqRate + "\t" + ad.CustomerFourthInitialRate + "\t" +
-                    ad.CustomerFourthSubseqRate + "\t" + ad.CustomerMinCharge + "\t" + ad.CustomerConnectionCost + "\t" + ad.CustomerInitialIntervalLength + "\t" +
-                    ad.CustomerSubsequentIntervalLength + "\t" + ad.CustomerMinimumIntervals + "\t" + ad.CustomerIntervalsAtInitialCost + "\t" +
-                    ad.CustomerMinimumTime + "\t" + ad.CustomerMinDigits + "\t" + ad.CustomerUsingCustomerNames + "\t" + ad.CustomerUsingGroupBands + "\t" +
-                    ad.CustomerMultiLevelEnabled + "\t" + ad.CustomerCutOff1Cost + "\t" + ad.CustomerCutOff2Duration + "\t" + ad.ChargingType);
+            oSw.WriteLine(ad.StdBand.PadRight(4, ' ') + "\t" +
+              ad.StdPrefixName.PadRight(40, ' ') + "\t" + 
+              ad.CustomerPrefixName.PadRight(40, ' ') + "\t" +
+              ad.CustomerGroupBand.PadRight(4, ' ') + "\t" + 
+              ad.CustomerGroupBandDescription.PadRight(20, ' ') + "\t" + 
+              ad.CustomerTableName.PadRight(20, ' ') + "\t" +
+              ad.CustomerDestinationType.PadRight(20, ' ') + "\t" + 
+              ad.StdPrefixDescription.PadRight(20, ' ') + "\t" + 
+              ad.CustomerTimeScheme + "\t" +
+              ad.CustomerRounding + "\t" + 
+              ad.CustomerFirstInitialRate + "\t" + 
+              ad.CustomerFirstSubseqRate + "\t" + 
+              ad.CustomerSecondInitialRate + "\t" +
+              ad.CustomerSecondSubseqRate + "\t" + 
+              ad.CustomerThirdInitialRate + "\t" + 
+              ad.CustomerThirdSubseqRate + "\t" + 
+              ad.CustomerFourthInitialRate + "\t" +
+              ad.CustomerFourthSubseqRate + "\t" + 
+              ad.CustomerMinCharge + "\t" + 
+              ad.CustomerConnectionCost + "\t" + 
+              ad.CustomerInitialIntervalLength + "\t" +
+              ad.CustomerSubsequentIntervalLength + "\t" + 
+              ad.CustomerMinimumIntervals + "\t" + 
+              ad.CustomerIntervalsAtInitialCost + "\t" +
+              ad.CustomerMinimumTime + "\t" + 
+              ad.CustomerMinDigits + "\t" + 
+              ad.CustomerUsingCustomerNames + "\t" + 
+              ad.CustomerUsingGroupBands + "\t" +
+              ad.CustomerMultiLevelEnabled + "\t" + 
+              ad.CustomerCutOff1Cost + "\t" + 
+              ad.CustomerCutOff2Duration + "\t" + 
+              ad.ChargingType);
           }
           oSw.Close();
         }
@@ -166,89 +192,6 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- finished");
       StaticVariable.ConsoleOutput.Add("ErrorProcessing".PadRight(30, '.') + "WriteToRegExMatchedLog() -- finished");
-    }     
-    public static void TestWriteToPrefixNumbersSheet2()
-    {
-      Console.WriteLine("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()");
-     // string sSheet = StaticVariable.FinalDirectory+ @"\" + StaticVariable.twb + sPrefixNumbersSheetCONST;      
-      string sName = string.Empty;
-      string sNumber = string.Empty;
-      string sTmpTable = string.Empty;
-      List<string> IncorrectTableList = new List<string>();
-      List<string> tmpMissingPrefixList = new List<string>();
-      List<string> tmpList = new List<string>();
-      bool bFound = false;
-            
-          foreach (DataRecord drm in StaticVariable.CustomerDetailsDataRecord)
-          {
-            bFound = false;
-            foreach (PrefixNumbersDataRecord pn in StaticVariable.PrefixNumbersRecord)
-            {
-              try
-              {
-                if (drm.StdPrefixName.ToUpper().Equals(pn.PrefixName.ToUpper()) || drm.CustomerPrefixName.ToUpper().Equals(pn.PrefixName.ToUpper()))
-                {
-                  bFound = true;
-                  sTmpTable = pn.TableName;
-                  sNumber = pn.PrefixNumber;
-                  sName = pn.stdPrefixName;
-                  if (drm.CustomerUsingCustomerNames.ToUpper().Equals("TRUE"))
-                  {
-                    tmpList.Add(pn.TableName + "\t" + pn.PrefixNumber + "\t" + ValidateData.CapitaliseWord(drm.CustomerPrefixName));
-                  }
-                  else
-                  {
-                    tmpList.Add(pn.TableName + "\t" + pn.PrefixNumber + "\t" + ValidateData.CapitaliseWord(drm.StdPrefixName));
-                  }
-                }
-              }
-              catch (Exception e)
-              {
-                StaticVariable.ProgressDetails.Add("RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
-                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + ": Problem with writing the prefix file");
-                StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
-                StopProcessDueToFatalErrorOutputToLog();
-              }
-            }
-            if (bFound)
-            {
-              if (!drm.CustomerTableName.ToUpper().Equals(sTmpTable.ToUpper())) // Now check the table names are the same.
-              {
-                IncorrectTableList.Add(sTmpTable + " : " + drm.CustomerPrefixName + " - " + sNumber);
-              }
-            }
-            else
-            {
-              tmpMissingPrefixList.Add(drm.CustomerTableName + " : Customer Name : " + drm.CustomerPrefixName.PadRight(41, ' ') + " --> Standard Name : " + drm.StdPrefixName);
-            }
-          }          
-     
-      if (tmpMissingPrefixList.Count > 0)
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "No Prefix Found:");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "The std  or customer prefix name (if 'using customer name' is: No / Yes) may not match the name in the appropriate prefix table or else the prefix may not exist in that table.");
-        tmpMissingPrefixList.Sort();
-        foreach (string error in tmpMissingPrefixList)
-        {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
-        }
-      }
-      if (IncorrectTableList.Count > 0)
-      {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeToSheetsAndLogs::WriteToPrefixNumbersSheet2()");
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "Destinations assigned a different table to the table where the prefix is.");
-        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Check the RegExMatchedList for incorrect regex matching.");
-        //StaticVariable.ProgressDetails.Add(@"StaticVariable.ProgressDetails.Add("Run the debug line:" + Enviroment.Newline + sRegExBand \t sRegexStandardName \t sRegExDescription \t + tok), in ParseInputFile::RegExMatchInputList");
-        IncorrectTableList.Sort();
-        foreach (string error in IncorrectTableList)
-        {
-          StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + error);
-        }
-        StopProcessDueToFatalErrorOutputToLog();
-      }
-      Console.WriteLine("RearrangeToSheetsAndLogs".PadRight(30, '.') + "WriteToPrefixNumbersSheet2()-- finished");
-    }
+    }         
   }
 }

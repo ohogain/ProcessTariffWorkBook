@@ -48,11 +48,16 @@ namespace ProcessTariffWorkbook
     public string CustomerCutOff1Cost { get; set; }
     public string CustomerCutOff2Duration { get; set; }
     public string ChargingType { get; set; }
+    private double d;
     #endregion
 
     public DataRecord()
     {
-    }    
+    }   
+    public DataRecord(double d)
+    {
+      this.d = d;
+    }   
     public DataRecord(string line)
     {      
       try

@@ -19,16 +19,16 @@ namespace ProcessTariffWorkbook
     public PrefixNumbersDataRecord()
     {
     }
-    public PrefixNumbersDataRecord(string sLine)
+    public PrefixNumbersDataRecord(string line)
     {
       try
       {
-        string[] ary = sLine.Split('\t');
+        string[] ary =line.Split('\t');
         TableName = ary[0];
         PrefixNumber = ary[1];
         PrefixName = ary[2];
         stdBand = ary[3];
-        stdPrefixName = ary[4];
+        stdPrefixName = ary[4];        
       }
       catch (IndexOutOfRangeException i)
       {

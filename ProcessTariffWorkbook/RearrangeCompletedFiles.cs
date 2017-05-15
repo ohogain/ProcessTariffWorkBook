@@ -138,7 +138,7 @@ namespace ProcessTariffWorkbook
         WriteToTariffPlanSheet(workbook); 
         WriteToTableLinksSheet(workbook);
         WriteToPrefixBandsSheet(workbook);        
-        WriteToPrefixNumbersSheet(workbook, MatchPrefixesWithDestinations());
+        WriteToPrefixNumbersSheet(workbook, Prefixes.MatchPrefixesWithDestinations());
         WriteToSourceDestinationBandsSheet(workbook);
         WriteToTimeSchemesSheet(workbook);
         WriteToTimeSchemesExceptionsSheet(workbook);        
@@ -195,12 +195,12 @@ namespace ProcessTariffWorkbook
             sb.Append(d.StdBand.ToUpper() + "\t");
             sb.Append(d.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? d.CustomerPrefixName + "\t" : d.StdPrefixName + "\t");
           }          
-          sb.Append(StaticVariable.Rate1Name + "\t" + d.CustomerFirstInitialRate + "\t" + d.CustomerFirstSubseqRate + "\t");
-          sb.Append(StaticVariable.Rate2Name + "\t" + d.CustomerSecondInitialRate + "\t" + d.CustomerSecondSubseqRate + "\t");
-          sb.Append(StaticVariable.Rate3Name + "\t" + d.CustomerThirdInitialRate + "\t" + d.CustomerThirdSubseqRate + "\t");
-          sb.Append(StaticVariable.Rate4Name + "\t" + d.CustomerFourthInitialRate + "\t" + d.CustomerFourthSubseqRate + "\t");
-          sb.Append(d.CustomerMinCharge + "\t");
-          sb.Append(d.CustomerConnectionCost + "\t");
+          sb.Append(StaticVariable.Rate1Name + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFirstInitialRate) + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFirstSubseqRate) + "\t");
+          sb.Append(StaticVariable.Rate2Name + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerSecondInitialRate) + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerSecondSubseqRate) + "\t");
+          sb.Append(StaticVariable.Rate3Name + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerThirdInitialRate) + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerThirdSubseqRate) + "\t");
+          sb.Append(StaticVariable.Rate4Name + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFourthInitialRate) + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFourthSubseqRate) + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerMinCharge) + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerConnectionCost) + "\t");
           sb.Append(ValidateData.AdjustRoundingValueForV6Twb(d.CustomerRounding) + "\t");
           sb.Append(ValidateData.CapitaliseWord(d.CustomerTimeScheme) + "\t");
           sb.Append(d.CustomerInitialIntervalLength + "\t");
@@ -252,11 +252,11 @@ namespace ProcessTariffWorkbook
           sb.Append(d.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? d.CustomerGroupBand.ToUpper() + "\t" : d.StdBand.ToUpper() + "\t");
           sb.Append(d.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? d.CustomerPrefixName + "\t" : d.StdPrefixName + "\t");
           sb.Append(Constants.Rate1 + "\tNULL\tNULL\t");
-          sb.Append(Constants.Rate2 + "\t" + d.CustomerFirstInitialRate + "\t" + d.CustomerFirstSubseqRate + "\t");
+          sb.Append(Constants.Rate2 + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFirstInitialRate) + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFirstSubseqRate) + "\t");
           sb.Append(Constants.Rate3 + "\t" + d.CustomerSecondInitialRate + "\tNULL\t");
           sb.Append(Constants.Rate4 + "\tNULL\tNULL\t");
-          sb.Append(d.CustomerMinCharge + "\t");
-          sb.Append(d.CustomerConnectionCost + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerMinCharge) + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerConnectionCost) + "\t");
           sb.Append(ValidateData.AdjustRoundingValueForV6Twb(d.CustomerRounding) + "\t");
           sb.Append(ValidateData.CapitaliseWord(d.CustomerTimeScheme) + "\t");
           sb.Append(d.CustomerInitialIntervalLength + "\t");
@@ -307,11 +307,11 @@ namespace ProcessTariffWorkbook
           sb.Append(d.CustomerUsingGroupBands.ToUpper().Equals("TRUE") ? d.CustomerGroupBand.ToUpper() + "\t" : d.StdBand.ToUpper() + "\t");
           sb.Append(d.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? d.CustomerPrefixName + "\t" : d.StdPrefixName + "\t");
           sb.Append(Constants.Rate1 + "\tNULL\tNULL\t");
-          sb.Append(Constants.Rate2 + "\t" + d.CustomerFirstInitialRate + "\t" + d.CustomerFirstSubseqRate + "\t");
+          sb.Append(Constants.Rate2 + "\t" + ValidateData.SetToFourDecimalPlaces(d.CustomerFirstInitialRate) + "\t" + d.CustomerFirstSubseqRate + "\t");
           sb.Append(Constants.Rate3 + "\tNULL\tNULL\t");
           sb.Append(Constants.Rate4 + "\tNULL\tNULL\t");
-          sb.Append(d.CustomerMinCharge + "\t");
-          sb.Append(d.CustomerConnectionCost + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerMinCharge) + "\t");
+          sb.Append(ValidateData.SetToFourDecimalPlaces(d.CustomerConnectionCost) + "\t");
           sb.Append(wholeIntervalChargingNotUsedInPulse + "\t");
           sb.Append(ValidateData.CapitaliseWord(d.CustomerTimeScheme) + "\t");
           sb.Append(intervalLengthsNotUsedInPulse + "\t");
@@ -372,7 +372,7 @@ namespace ProcessTariffWorkbook
         }
         else if (tariffPlanLine[0].ToUpper().Contains("RATE"))
         {
-          line = "Rate\t" + tariffPlanLine[1];  //Names must be Rate, not rate1, rate2, etc
+          line = "Rate\t" + tariffPlanLine[1];  
         }             
         else
         {
@@ -526,10 +526,10 @@ namespace ProcessTariffWorkbook
         }
         yAxis++;
       }
-      List<string> nw = GetNationalDomesticPrefixes();
+      List<string> nw = Prefixes.GetNationalDomesticPrefixes();
       foreach (var column in nw)
       {
-        listLine = column.Split('\t');// do not capitalise
+        listLine = column.Split('\t');
         for (int xAxis = 0; xAxis < listLine.Length; xAxis++)
         {
           workbook.Worksheets[sheetName].Cells.NumberFormat = "@";
@@ -595,7 +595,6 @@ namespace ProcessTariffWorkbook
         for (int xAxis = 0; xAxis < listLine.Length; xAxis++)
         {
           workbook.Worksheets[sheetName].Cells.NumberFormat = "@"; 
-                                                                   //workbook.Worksheets[sheetName].Cells.VerticalAlignment = SpreadsheetGear.VAlign.Center; // align center of cell
           workbook.Worksheets[sheetName].Cells.HorizontalAlignment = SpreadsheetGear.HAlign.Left; 
           workbook.Worksheets[sheetName].Cells[yAxis, xAxis].Value = listLine[xAxis];
         }
@@ -710,11 +709,8 @@ namespace ProcessTariffWorkbook
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- started");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- started");
-      CreateV5Tc2PricesFile();
-
-      // matrix must come after the duration, pulse & capped rates - change this.
-
-      WritePrefixIniFiles(MatchPrefixesWithDestinations());
+      CreateV5Tc2PricesFile();      
+      WritePrefixIniFiles(Prefixes.MatchPrefixesWithDestinations());
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- finished");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteOutV5Tc2Files() -- finished");
     }
@@ -746,11 +742,6 @@ namespace ProcessTariffWorkbook
       pricesIni.Add("Country=" + GetTariffPlanValues("COUNTRY"));
       pricesIni.Add("Country Code=" + GetTariffPlanValues("COUNTRY CODE"));
       pricesIni.Add("Carrier Unit Price=" + GetTariffPlanValues("CARRIER UNIT PRICE"));
-      pricesIni.Add(Environment.NewLine + "[Rates]");
-      pricesIni.Add(GetTariffPlanValues("RATE1"));
-      pricesIni.Add(GetTariffPlanValues("RATE2"));
-      pricesIni.Add(GetTariffPlanValues("RATE3"));
-      pricesIni.Add(GetTariffPlanValues("RATE4"));
       pricesIni.Add(Environment.NewLine + "[Destination Types]");
       pricesIni.Add("Local");
       pricesIni.Add("National");
@@ -758,7 +749,12 @@ namespace ProcessTariffWorkbook
       pricesIni.Add("International Mobile");
       pricesIni.Add("Mobile");
       pricesIni.Add("Services");
-      pricesIni.Add("Other");          
+      pricesIni.Add("Other");    
+      pricesIni.Add(Environment.NewLine + "[Rates]");
+      pricesIni.Add(GetTariffPlanValues("RATE1"));
+      pricesIni.Add(GetTariffPlanValues("RATE2"));
+      pricesIni.Add(GetTariffPlanValues("RATE3"));
+      pricesIni.Add(GetTariffPlanValues("RATE4"));            
       FillTimeSchemes(pricesIni);
       pricesIni.Add(Environment.NewLine + "[HOLIDAYS]");      
       FillHolidays(pricesIni);
@@ -769,9 +765,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MakeGeneralHeader() -- finished");
     }    
     private static string GetTariffPlanValues(string word)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- started");
+    {     
       string result = string.Empty;
       const int key = 0;
       const int value = 1;
@@ -783,9 +777,7 @@ namespace ProcessTariffWorkbook
           result = values[value];
           break;
         }
-      }
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- finished");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetTariffPlanValues() -- finished");
+      }      
       return result;
     }
     private static void FillTableLinksValues(List<string> tableLinks, List<string> defaultheader )
@@ -800,8 +792,8 @@ namespace ProcessTariffWorkbook
       foreach (var variable in tableLinks)
       {
         string[] line = variable.Split('\t');
-        string[] tableMinusCountryCode = line[startTable].Split('_');
-        defaultheader.Add(tableMinusCountryCode[tableName] + ", " + line[destinationTable].Substring(line[destinationTable].IndexOf("_", StringComparison.Ordinal) + 1) + ", " + line[prefix] + ", " + line[destinationTable] + ", " + ConvertPassPrefixValue(line[passPrefix]));       
+        string[] tableMinusCountryCode = line[destinationTable].Split('_');
+        defaultheader.Add(line[startTable] + ", " + tableMinusCountryCode[tableName] + ", " + line[prefix] + ", " + line[destinationTable] + ", " + ConvertPassPrefixValue(line[passPrefix]));       
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- finished");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTableLinksValues() -- finished");
@@ -859,8 +851,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "FillTimeSchemes() -- finished");
     }    
     private static string AdjustRoundingValueForPricesIni(string value)
-    {
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AdjustRoundingValueForPricesIni() -- started");
+    {      
       string result = string.Empty;
 
       if (value.ToLower().Equals("yes") || value.ToLower().Equals("y") || value.ToLower().Equals("1") || value.ToLower().Equals("roundup") || value.ToLower().Equals("round up"))
@@ -870,8 +861,7 @@ namespace ProcessTariffWorkbook
       else if (value.ToLower().Equals("no") || value.ToLower().Equals("n") || value.ToLower().Equals("3") || value.ToLower().Equals("exact") || value.ToLower().Equals("noround") || value.ToLower().Equals("no round"))
       {
         result = "3";
-      }
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "AdjustRoundingValueForPricesIni() -- finished");
+      }      
       return result;
     }
     private static void WriteToV5Tc2PricesFile(List<string> pricesini)
@@ -934,12 +924,10 @@ namespace ProcessTariffWorkbook
           }
 
           if (StaticVariable.NationalTableSpellingValue.ToUpper().Equals(currentPrefixTable.ToUpper()))
-          {
-            List<string> nationalPrefixes = GetNationalDomesticPrefixes();          
-            foreach (var np in nationalPrefixes)
-            {
-              string[] arr = np.Split('\t');
-              currentPrefixes.Add(arr[prefixName] + "," + arr[prefix]);          
+          {           
+            foreach (var np in Prefixes.GetNationalDomesticPrefixes())
+            {              
+              currentPrefixes.Add(np);       
             }                        
           }          
           currentPrefixes = currentPrefixes.Distinct().ToList();
@@ -953,38 +941,7 @@ namespace ProcessTariffWorkbook
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- finished");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WritePrefixIniFiles() -- finished");
-    }
-    private static List<string> MatchPrefixesWithDestinations()
-    {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- started");
-
-        var query =
-        from drm in StaticVariable.CustomerDetailsDataRecord
-        join pn in StaticVariable.PrefixNumbersRecord on drm.StdPrefixName.ToUpper() equals pn.stdPrefixName.ToUpper()        
-        select new { pn.TableName, pn.PrefixName, pn.PrefixNumber, drm.CustomerPrefixName, drm.CustomerUsingCustomerNames, pn.stdPrefixName };
-
-        List<string> prefixesMatched = (from entry in query let prefixName = entry.CustomerUsingCustomerNames.ToUpper().Equals("TRUE") ? entry.CustomerPrefixName : entry.stdPrefixName select entry.TableName + "\t" + entry.PrefixNumber + "\t" + prefixName).ToList();
-        prefixesMatched = prefixesMatched.Distinct().ToList();
-
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "MatchPrefixesWithDestinations() -- finished");      
-      return prefixesMatched;
-    }
-    private static List<string> GetNationalDomesticPrefixes()
-    {
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- started");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- started");
-      var nationalTableResult =
-        from pndr in StaticVariable.PrefixNumbersRecord
-        where pndr.TableName.ToUpper().Equals(StaticVariable.NationalTableSpellingValue.ToUpper()) && !pndr.PrefixNumber.ToUpper().Equals("?") //exclude national,?     
-        select pndr;
-
-      var nationalPrefixes = nationalTableResult.Select(column => column.TableName + "\t" + column.PrefixNumber + "\t" + column.PrefixName).ToList();
-      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
-      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
-      return nationalPrefixes;
-    }
+    }    
     private static void AddDurationPrices(List<string> pricesini)
     {
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "AddDurationPrices() -- started");
@@ -993,7 +950,7 @@ namespace ProcessTariffWorkbook
 
       var queryDuration =
         from db in StaticVariable.CustomerDetailsDataRecord
-        where db.ChargingType.ToUpper().Equals("DURATION") 
+        where db.ChargingType.ToUpper().Equals("DURATION")
         orderby db.CustomerUsingGroupBands, db.CustomerGroupBand, db.StdPrefixName
         select db;      
         
@@ -1099,7 +1056,7 @@ namespace ProcessTariffWorkbook
             string[] sourceBands = matrix.Split('\t');
             if (sourceBands[bandColumn].ToUpper().Equals(item.ToUpper()))
             {              
-              priceIni.Add("(" + item + ")" + sourceBands[sourceColumn] + "," + sourceBands[destinationColumn] + "," + GetDurationPrices(result));
+              priceIni.Add("(" + item + ")" + ValidateData.CapitaliseWord(sourceBands[sourceColumn]) + "," + ValidateData.CapitaliseWord(sourceBands[destinationColumn]) + "," + GetDurationPrices(result));
             }           
           }
         }
@@ -1138,7 +1095,7 @@ namespace ProcessTariffWorkbook
             string[] sourceBands = matrix.Split('\t');
             if (sourceBands[bandColumn].ToUpper().Equals(item.ToUpper()))
             {
-              priceIni.Add("(" + item + ")" + sourceBands[sourceColumn] + "," + sourceBands[destinationColumn] + "," + GetCappedPrices(result));
+              priceIni.Add("(" + item + ")" + ValidateData.CapitaliseWord(sourceBands[sourceColumn]) + "," + ValidateData.CapitaliseWord(sourceBands[destinationColumn]) + "," + GetCappedPrices(result));
             }
           }
         }
@@ -1177,7 +1134,7 @@ namespace ProcessTariffWorkbook
             string[] sourceBands = matrix.Split('\t');
             if (sourceBands[bandColumn].ToUpper().Equals(item.ToUpper()))
             {
-              priceIni.Add("(" + item + ")" + sourceBands[sourceColumn] + "," + sourceBands[destinationColumn] + "," + GetPulsePrices(result));
+              priceIni.Add("(" + item + ")" + ValidateData.CapitaliseWord(sourceBands[sourceColumn]) + "," + ValidateData.CapitaliseWord(sourceBands[destinationColumn]) + "," + GetPulsePrices(result));
             }
           }
         }
@@ -1186,9 +1143,7 @@ namespace ProcessTariffWorkbook
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulseMatrix() -- finished");
     }
     private static void CreateDurationHeader(List<string> pricesini, DataRecord dr, string headerName)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- started");
+    {      
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + dr.CustomerTimeScheme);
@@ -1213,14 +1168,10 @@ namespace ProcessTariffWorkbook
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpellingValue : dr.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName);
       pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerMinCharge));
-      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerConnectionCost + Environment.NewLine));
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- finished");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateDurationHeader() -- finished");
+      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(dr.CustomerConnectionCost + Environment.NewLine));  
     }
     private static void CreateCappedHeader(List<string> pricesini, DataRecord details, string headerName)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
+    {     
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
@@ -1242,14 +1193,10 @@ namespace ProcessTariffWorkbook
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpellingValue : details.CustomerTableName;
       pricesini.Add("Prefix Table=" + tableName);
       pricesini.Add("Minimum Cost=" + ValidateData.SetToFourDecimalPlaces(details.CustomerMinCharge));
-      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost + Environment.NewLine));
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
+      pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost + Environment.NewLine));   
     }
     private static void CreatePulseHeader(List<string> pricesini, DataRecord details, string headerName)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- started");
+    {           
       pricesini.Add(Environment.NewLine + "[" + headerName + "]");
       pricesini.Add(Constants.AlwaysAddBandHardCoded);
       pricesini.Add("Time Scheme=" + details.CustomerTimeScheme);
@@ -1268,39 +1215,24 @@ namespace ProcessTariffWorkbook
       pricesini.Add("Connection Charge=" + ValidateData.SetToFourDecimalPlaces(details.CustomerConnectionCost));
       pricesini.Add("Destination Type=" + details.CustomerDestinationType);
       string tableName = headerName.ToUpper().Contains("MATRIX") ? StaticVariable.NationalTableSpellingValue : details.CustomerTableName;
-      pricesini.Add("Prefix Table=" + tableName + Environment.NewLine);
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "CreateCappedHeader() -- finished");
+      pricesini.Add("Prefix Table=" + tableName + Environment.NewLine);      
     }
     private static string GetDurationPrices(DataRecord result)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- started");
+    {     
       string rate1 = result.CustomerFirstInitialRate.Equals(result.CustomerFirstSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate) + ")";
       string rate2 = result.CustomerSecondInitialRate.Equals(result.CustomerSecondSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerSecondSubseqRate) + ")";
       string rate3 = result.CustomerThirdInitialRate.Equals(result.CustomerThirdSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerThirdSubseqRate) + ")";
-      string rate4 = result.CustomerFourthInitialRate.Equals(result.CustomerFourthSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthSubseqRate) + ")";
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- finished");
-      return rate1 + "," + rate2 + "," + rate3 + "," + rate4;
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetDurationPrices() -- finished");
-      
+      string rate4 = result.CustomerFourthInitialRate.Equals(result.CustomerFourthSubseqRate) ? ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) : "(" + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFourthSubseqRate) + ")";      
+      return rate1 + "," + rate2 + "," + rate3 + "," + rate4;            
     }
     private static string GetCappedPrices(DataRecord result)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- finished");
-      return ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate);
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetCappedPrices() -- finished");
-      
+    {     
+      return ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + ValidateData.SetToFourDecimalPlaces(result.CustomerFirstSubseqRate);            
     }
     private static string GetPulsePrices(DataRecord result)
-    {
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- started");
-      //StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- started");
+    {      
       const string pulseZeroRate = "1,0";
-      return result.CustomerFirstInitialRate + "," + result.CustomerFirstSubseqRate + "," + pulseZeroRate + "," + pulseZeroRate + "," + pulseZeroRate;
-      //Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "GetPulsePrices() -- finished");
+      return ValidateData.SetToFourDecimalPlaces(result.CustomerFirstInitialRate) + "," + result.CustomerFirstSubseqRate + "," + pulseZeroRate + "," + pulseZeroRate + "," + pulseZeroRate;      
     }
     private static List<string> DisplayHolidays(string[] tariffPlanLine)
     {
