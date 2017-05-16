@@ -503,6 +503,7 @@ namespace ProcessTariffWorkbook
       int yAxis = 0;      
       const string prefixNumbersHeader = "Table Name\tPrefix Number\tPrefix Name";
       const string sheetName = "PrefixNumbers";
+      const int tableName = 0;
       workbook.Worksheets.Add();
       workbook.Worksheets["Sheet5"].Name = sheetName;
       string[] listLine = prefixNumbersHeader.Split('\t');
@@ -525,18 +526,20 @@ namespace ProcessTariffWorkbook
           workbook.Worksheets[sheetName].Cells[yAxis, xAxis].Value = listLine[xAxis];
         }
         yAxis++;
-      }
-      List<string> nw = Prefixes.GetNationalDomesticPrefixes();
-      foreach (var column in nw)
+      }      
+      foreach (var column in StaticVariable.PrefixNumbersFromIniFiles)
       {
         listLine = column.Split('\t');
-        for (int xAxis = 0; xAxis < listLine.Length; xAxis++)
+        if(listLine[tableName].ToUpper().Equals(StaticVariable.NationalTableSpellingValue.ToUpper()))
         {
-          workbook.Worksheets[sheetName].Cells.NumberFormat = "@";
-          workbook.Worksheets[sheetName].Cells.HorizontalAlignment = SpreadsheetGear.HAlign.Left;
-          workbook.Worksheets[sheetName].Cells[yAxis, xAxis].Value = listLine[xAxis];
-        }
-        yAxis++;
+          for (int xAxis = 0; xAxis < listLine.Length; xAxis++)
+          {
+            workbook.Worksheets[sheetName].Cells.NumberFormat = "@";
+            workbook.Worksheets[sheetName].Cells.HorizontalAlignment = SpreadsheetGear.HAlign.Left;
+            workbook.Worksheets[sheetName].Cells[yAxis, xAxis].Value = listLine[xAxis];
+          }
+          yAxis++;
+        }        
       }
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- finished");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteToPrefixNumbersSheet2() -- finished");
@@ -1257,6 +1260,32 @@ namespace ProcessTariffWorkbook
       Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- finish");
       StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "DisplayHolidays() -- finish");
       return holidaysListed;
+    }
+    public static void WriteInputXLSXFileDetailsToFinalFolder()
+    {
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteInputXLSXFileDetailsToFinalFolder() -- started");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteInputXLSXFileDetailsToFinalFolder() -- started");
+      string path = StaticVariable.FinalDirectory + @"\" + StaticVariable.XlsxFileName + "_copy.txt";
+      try
+      {
+        using (StreamWriter oSW = new StreamWriter(File.OpenWrite(path), Encoding.Unicode))
+        {
+          foreach (var line in StaticVariable.InputXlsxFileDetails)
+          {
+            oSW.WriteLine(line);
+          }
+          oSW.Close();
+        }
+      }
+      catch(Exception e)
+      {
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "RearrangeCompletedFiles::WriteInputXLSXFileDetailsToFinalFolder()");          
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Error in writing copy of XLSX line to final folder." );
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + e.Message);
+      }
+      
+      Console.WriteLine("RearrangeCompletedFiles".PadRight(30, '.') + "WriteInputXLSXFileDetailsToFinalFolder() -- finish");
+      StaticVariable.ConsoleOutput.Add("RearrangeCompletedFiles".PadRight(30, '.') + "WriteInputXLSXFileDetailsToFinalFolder() -- finish");
     }
   }
 }

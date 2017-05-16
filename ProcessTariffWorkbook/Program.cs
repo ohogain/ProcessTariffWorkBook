@@ -30,7 +30,8 @@ namespace ProcessTariffWorkbook
       RearrangeCompletedFiles.CreateCategoryMatrix();          
       RearrangeCompletedFiles.WriteToV6TwbXlsxFile();
       RearrangeCompletedFiles.WriteOutV5Tc2Files();                           
-      RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);           
+      RearrangeCompletedFiles.CopyOutputXlsxFileToV6OpUtilFolder(StaticVariable.MoveOutputSpreadSheetToV6TwbFolder);
+      RearrangeCompletedFiles.WriteInputXLSXFileDetailsToFinalFolder();         
       ErrorProcessing.CreateAndWriteToRegExMatchedLog();           
 
 

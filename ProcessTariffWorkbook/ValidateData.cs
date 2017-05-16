@@ -474,8 +474,7 @@ namespace ProcessTariffWorkbook
     private static void CheckIfMinCostAndRate4SubseqAreSame()
     {
       Console.WriteLine("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");
-      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");
-      //List<string> pricesTheSame = new List<string>();
+      StaticVariable.ConsoleOutput.Add("ValidateData".PadRight(30, '.') + "MinCostAndRate4SubseqAreSame() -- started");      
 
       var query =
         from DataRecord drm in StaticVariable.CustomerDetailsDataRecord
@@ -491,7 +490,8 @@ namespace ProcessTariffWorkbook
      
       if (query.Any())
       {
-        StaticVariable.ProgressDetails.Add(Environment.NewLine + "Minimum Cost is the same price as the 4th Rate Subsequent price. Check it out.");
+        StaticVariable.ProgressDetails.Add(Environment.NewLine + "ValidateData::MinCostAndRate4SubseqAreSame()");
+        StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + "Minimum Cost is the same price as the 4th Rate Subsequent price. This is not normally correct. Recheck.");
         foreach (var name in query)
         {
             StaticVariable.ProgressDetails.Add(Constants.FiveSpacesPadding + name.CustomerPrefixName + ": Price = " + name.CustomerMinCharge );

@@ -504,7 +504,8 @@ namespace ProcessTariffWorkbook
         {
             nationalPrefixes.Add(nationalOnly[prefixName] + "," + nationalOnly[prefix]);
         }
-      } 
+      }
+      nationalPrefixes.Distinct();
       nationalPrefixes.Sort();
       Console.WriteLine("Prefixes".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
       StaticVariable.ConsoleOutput.Add("Prefixes".PadRight(30, '.') + "GetNationalPrefixes() -- finished");
